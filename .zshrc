@@ -22,3 +22,5 @@ alias nv="nvim"
 
 alias ll="ls -l"
 alias la="ls -al"
+alias tmi='tmux new-session -s $(basename "$PWD") \; rename-window nvim \; new-window \; rename-window -t 2 term'
+
