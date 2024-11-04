@@ -711,7 +711,9 @@ require('lazy').setup({
         'markdown_inline',
         'query',
         'vim',
+        'terraform',
         'vimdoc',
+        'json',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
