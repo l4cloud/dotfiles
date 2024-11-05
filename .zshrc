@@ -1,10 +1,12 @@
 export ZSH="$HOME/.oh-my-zsh"
 eval "$(starship init zsh)"
-
+export EDITOR=nvim
+export VISUAL="$EDITOR"
 export PATH=$PATH:/usr/local/go/bin
 ZSH_THEME="robbyrussell"
 
 DISABLE_LS_COLORS="true"
+
 
 # CASE_SENSITIVE="true"
 # HYPHEN_INSENSITIVE="true"
