@@ -5,6 +5,16 @@ export VISUAL="$EDITOR"
 export PATH=$PATH:/usr/local/go/bin
 ZSH_THEME="robbyrussell"
 
+precmd() {
+  if [ ! -z "$BUFFER" ]; then
+    precmd() {
+      precmd() {
+        echo
+      }
+    }
+  fi
+}
+
 DISABLE_LS_COLORS="true"
 
 
