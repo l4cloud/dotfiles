@@ -33,9 +33,17 @@ alias tmcf="nvim ~/.tmux.conf"
 # Programs
 alias nv="nvim"
 
-alias ll="ls -l"
-alias la="ls -al"
+if command -v lsd >/dev/null 2>&1; then
+  alias ll="lsd -l"
+  alias ls="lsd"
+  alias la="lsd -al"
+else
+  alias ll="ls -l"
+  alias la="ls -al"
+fi
+
 alias tmi='tmux new-session -s $(basename "$PWD") \; rename-window nvim \; new-window \; rename-window -t 2 term'
+alias tx="tmux"
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
