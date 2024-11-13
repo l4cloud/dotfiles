@@ -53,3 +53,5 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
+
+alias yh='cd ~ && y'
