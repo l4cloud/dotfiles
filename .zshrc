@@ -42,8 +42,13 @@ else
   alias la="ls -al"
 fi
 
-alias tmi='tmux new-session -s $(basename "$PWD") \; rename-window nvim \; new-window \; rename-window -t 2 term'
 alias tx="tmux"
+
+function ti() {
+  tx new-session -d -s $(basename "$PWD") -n nvim 'nvim'
+  tx new-window -t $(basename "$PWD"):2 -n shell
+  tx attach-session -t $(basename "$PWD")
+}
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
