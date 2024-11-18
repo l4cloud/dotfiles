@@ -55,3 +55,8 @@ function y() {
 }
 
 alias yh='cd ~ && y'
+
+if [ -d "/mnt/c/" ]; then
+  alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe"
+else
+fi
