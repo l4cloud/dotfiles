@@ -17,6 +17,18 @@ return {
     },
     config = function()
       require('telescope').setup {
+        defaults = {
+          vimgrep_arguments = {
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden',
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -37,6 +49,10 @@ return {
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
       vim.keymap.set('n', '<c-f>', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
+
+      vim.keymap.set('n', '<leader>oo', function()
+        builtin.find_files { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } }
+      end, {})
 
       vim.keymap.set('n', '<leader>sc', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
