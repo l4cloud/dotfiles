@@ -57,6 +57,6 @@ function y() {
 alias yh='cd ~ && y'
 
 if [ -d "/mnt/c/" ]; then
-  alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe"
+  alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe --new-tab --url about:newtab"
 else
 fi
