@@ -46,8 +46,20 @@ alias tx="tmux"
 
 function ti() {
   tx new-session -d -s $(basename "$PWD") -n nvim 'nvim'
-  tx new-window -t $(basename "$PWD"):2 -n shell
+  tx new-window -t $(basename "$PWD"):2 -n zsh
   tx attach-session -t $(basename "$PWD")
+}
+
+function ty() {
+  local dir=$(find ~/ -type d \( -path '*/.*' -prune \) -o -type d -print | grep -v '/\.' | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
+  if [ -n "$dir" ]; then
+    cd -- "$dir" || return
+    tmux new-session -d -s $(basename "$dir") -n nvim 'nvim'
+    tmux new-window -t $(basename "$dir"):2 -n zsh
+    tmux attach-session -t $(basename "$dir")
+  else
+    echo "No directory selected."
+  fi
 }
 
 function y() {
