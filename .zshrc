@@ -26,9 +26,10 @@ plugins=(git)
 
 # - Alias' - 
 # Config
-alias zscf="nvim ~/.zshrc"
-alias nvcf="nvim ~/.config/nvim/init.lua"
-alias tmcf="nvim ~/.tmux.conf"
+alias conf-zsh="nvim ~/.zshrc"
+alias conf-tmux="nvim ~/.tmux.conf"
+alias zshr="source ~/.zshrc"
+
 
 # Programs
 alias nv="nvim"
@@ -75,5 +76,6 @@ alias yh='cd ~ && y'
 
 if [ -d "/mnt/c/" ]; then
   alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe --new-tab --url about:newtab"
+  alias ex="explorer.exe ."
 else
 fi
