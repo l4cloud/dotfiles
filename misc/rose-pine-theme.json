@@ -1,0 +1,23 @@
+ {
+		"name": "rose-pine",
+		"tab": 
+		{
+				"background": "#191724FF",
+				"iconStyle": "default",
+				"showCloseButton": "always",
+				"unfocusedBackground": null
+		},
+		"tabRow": 
+		{
+				"background": "#26233AFF",
+				"unfocusedBackground": "#908CAAFF"
+		},
+		"window": 
+		{
+				"applicationTheme": "dark",
+				"experimental.rainbowFrame": false,
+				"frame": null,
+				"unfocusedFrame": null,
+				"useMica": false
+		}        
+}

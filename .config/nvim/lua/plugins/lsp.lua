@@ -130,7 +130,7 @@ return {
       local servers = {
         -- clangd = {},
         --gopls = {},
-        -- pyright = {},
+        pylsp = {},
         terraformls = {},
         tflint = {},
         jdtls = {},
