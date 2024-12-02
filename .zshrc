@@ -52,12 +52,22 @@ function ti() {
 }
 
 function ty() {
-  local dir=$(find ~/ -type d \( -path '*/.*' -prune \) -o -type d -print | grep -v '/\.' | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
+  if [ -d "$1" ]; then
+    search="${1}"
+    echo "Searching directory: ${search}"
+  else
+    echo "Searching home"
+    search="./"
+  fi
+
+  local dir=$(find "${search//\//}/" -type d -name ".git" -exec dirname {} \; | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
   if [ -n "$dir" ]; then
+    tmp=$(basename "${dir//./}")
+    echo "Creating Session: ${tmp}"
     cd -- "$dir" || return
-    tmux new-session -d -s $(basename "$dir") -n nvim 'nvim'
-    tmux new-window -t $(basename "$dir"):2 -n zsh
-    tmux attach-session -t $(basename "$dir")
+    tmux new-session -d -s $tmp -n nvim 'nvim'
+    tmux new-window -t $tmp:2 -n zsh
+    tmux attach-session -t $tmp
   else
     echo "No directory selected."
   fi
