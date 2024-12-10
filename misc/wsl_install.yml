@@ -22,6 +22,7 @@
           - curl
           - build-essential
           - fzf
+          - lsd
         state: present
         update_cache: yes
 

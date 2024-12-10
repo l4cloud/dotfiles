@@ -40,9 +40,9 @@ return {
       pcall(require('telescope').load_extension, 'ui-select')
 
       local builtin = require 'telescope.builtin'
+      local themes = require 'telescope.themes'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>o', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>p', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sr', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -51,7 +51,15 @@ return {
       vim.keymap.set('n', '<c-f>', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
 
       vim.keymap.set('n', '<leader>oo', function()
-        builtin.find_files { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } }
+        builtin.find_files(themes.get_ivy { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } })
+      end, {})
+
+      vim.keymap.set('n', '<leader>o', function()
+        builtin.find_files(themes.get_ivy {})
+      end, {})
+
+      vim.keymap.set('n', '<leader>/', function()
+        builtin.current_buffer_fuzzy_find(themes.get_dropdown {})
       end, {})
 
       vim.keymap.set('n', '<leader>sc', function()
