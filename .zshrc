@@ -19,8 +19,8 @@ DISABLE_LS_COLORS="true"
 
 plugins=(git)
 
-if [ -e "~/.aliases.zsh" ]; then
-  source "~/.aliases.zsh"
+if [ -e ~/.aliases.zsh ]; then
+  source ~/.aliases.zsh
 fi
 
 function ti() {
@@ -40,6 +40,28 @@ function ty() {
   fi
 
   local dir=$(find ${search} -type d -name ".git" -exec dirname {} \; | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
+  if [ -n "$dir" ]; then
+    tmp=$(basename "${dir//./}")
+    echo "Creating Session: ${tmp}"
+    cd -- "$dir" || return
+    tmux new-session -d -s $tmp -n nvim 'nvim'
+    tmux new-window -t $tmp:2 -n zsh
+    tmux attach-session -t $tmp
+  else
+    echo "No directory selected."
+  fi
+}
+
+function tt() {
+  if [ -d "$1" ]; then
+    search="$(echo $1 | sed 's/\/$//')/"
+    echo "Searching directory: ${search}"
+  else
+    echo "Searching home"
+    search=$HOME
+  fi
+
+  local dir=$(find ${search} -type d  -exec dirname {} \; | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
   if [ -n "$dir" ]; then
     tmp=$(basename "${dir//./}")
     echo "Creating Session: ${tmp}"
