@@ -151,6 +151,7 @@ return {
           },
         },
         jinja_lsp = {},
+        eslint = {},
       }
       require('mason').setup()
       local ensure_installed = vim.tbl_keys(servers or {})

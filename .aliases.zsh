@@ -1,4 +1,3 @@
-echo "Sourcing Aliases ..."
 alias conf-zsh="nvim ~/.zshrc"
 alias conf-tmux="nvim ~/.tmux.conf"
 alias zshr="source ~/.zshrc"
@@ -16,6 +15,7 @@ alias lt="ls --tree"
 alias tx="tmux"
 alias txa="tmux a"
 alias yh='cd ~ && y'
+alias lg="lazygit"
 
 if [ -d "/mnt/c/" ]; then
   alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe --new-tab --url about:newtab"
