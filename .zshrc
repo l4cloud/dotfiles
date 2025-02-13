@@ -17,7 +17,7 @@ precmd() {
 
 DISABLE_LS_COLORS="true"
 
-plugins=(git)
+plugins=(git vi-mode)
 
 if [ -e ~/.aliases.zsh ]; then
   source ~/.aliases.zsh
@@ -82,6 +82,8 @@ function y() {
   fi
   rm -f -- "$tmp"
 }
+
+bindkey '^R' history-incremental-search-backward
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

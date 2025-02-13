@@ -48,18 +48,17 @@ return {
       vim.keymap.set('n', '<leader>sr', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
+      vim.keymap.set('n', '<leader>o', builtin.find_files, { desc = '[/] Fuzzily search in current buffer' })
+      vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
       vim.keymap.set('n', '<c-f>', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
+      vim.keymap.set('n', '<leader>.', builtin.treesitter, { desc = '[/] Searches all treesitter definitions' })
 
       vim.keymap.set('n', '<leader>oo', function()
-        builtin.find_files(themes.get_ivy { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } })
+        builtin.find_files { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } }
       end, {})
 
       vim.keymap.set('n', '<leader>o', function()
-        builtin.find_files(themes.get_ivy {})
-      end, {})
-
-      vim.keymap.set('n', '<leader>/', function()
-        builtin.current_buffer_fuzzy_find(themes.get_dropdown {})
+        builtin.find_files {}
       end, {})
 
       vim.keymap.set('n', '<leader>sc', function()
