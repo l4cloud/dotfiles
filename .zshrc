@@ -1,5 +1,4 @@
 export ZSH="$HOME/.oh-my-zsh"
-eval "$(starship init zsh)"
 export EDITOR=nvim
 export VISUAL="$EDITOR"
 export PATH=$PATH:/usr/local/go/bin
@@ -17,7 +16,7 @@ precmd() {
 
 DISABLE_LS_COLORS="true"
 
-plugins=(git vi-mode)
+plugins=(git vi-mode zsh-syntax-highlighting zsh-autosuggestions)
 
 if [ -e ~/.aliases.zsh ]; then
   source ~/.aliases.zsh
@@ -88,3 +87,7 @@ bindkey '^R' history-incremental-search-backward
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+eval "$(starship init zsh)"
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
