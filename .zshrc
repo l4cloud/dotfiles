@@ -83,6 +83,22 @@ function y() {
   rm -f -- "$tmp"
 }
 
+function yt() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+      if [ -n "$cwd" ]; then
+        tmp=$(basename "${cwd//./}")
+        echo "Creating Session: ${tmp}"
+        cd -- "$cwd" || return
+        tmux new-session -d -s $tmp -n nvim 'nvim'
+        tmux new-window -t $tmp:2 -n zsh
+        tmux attach-session -t $tmp
+      fi
+  fi
+  rm -f -- "$tmp"
+}
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
