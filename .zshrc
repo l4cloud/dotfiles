@@ -17,7 +17,7 @@ precmd() {
 
 DISABLE_LS_COLORS="true"
 
-plugins=(git)
+plugins=(vi-mode git)
 
 if [ -e ~/.aliases.zsh ]; then
   source ~/.aliases.zsh
@@ -105,5 +105,3 @@ export NVM_DIR="$HOME/.nvm"
 
 eval "$(starship init zsh)"
 set -o vi
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
