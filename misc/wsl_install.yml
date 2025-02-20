@@ -23,6 +23,8 @@
           - build-essential
           - fzf
           - lsd
+          - terraform
+          - python3
         state: present
         update_cache: yes
 
@@ -53,3 +55,4 @@
     - name: Post install
       debug:
         msg: "Run 'curl -sS https://starship.rs/install.sh | sh' to install starship prompt and remember to stow your dotfiles" 
+    

@@ -2,7 +2,7 @@ return {
   'nvim-lualine/lualine.nvim',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   config = function()
-    local theme = require 'lualine.themes.palenight'
+    local theme = require 'lualine.themes.gruvbox_light'
     theme.normal.c.bg = nil
 
     require('lualine').setup {

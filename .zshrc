@@ -11,7 +11,7 @@ if [ -e ~/.aliases.zsh ]; then
 fi
 
 if [ -e ~/.func.zsh ]; then
-  source ~/.aliases.zsh
+  source ~/.func.zsh
 fi
 
 
