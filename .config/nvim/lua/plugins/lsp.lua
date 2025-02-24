@@ -129,7 +129,7 @@ return {
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        --gopls = {},
+        gopls = {},
         pylsp = {},
         terraformls = {},
         tflint = {},
@@ -152,6 +152,7 @@ return {
         },
         jinja_lsp = {},
         eslint = {},
+        html = {},
       }
       require('mason').setup()
       local ensure_installed = vim.tbl_keys(servers or {})

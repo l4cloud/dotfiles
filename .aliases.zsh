@@ -16,6 +16,8 @@ alias tx="tmux"
 alias txa="tmux a"
 alias yh='cd ~ && y'
 alias lg="lazygit"
+bindkey '^k' .history-incremental-search-forward
+bindkey '^j' .history-incremental-search-backward
 
 if [ -d "/mnt/c/" ]; then
   alias ff="/mnt/c/Program\ Files/Mozilla\ Firefox/firefox.exe --new-tab --url about:newtab"
