@@ -17,6 +17,18 @@ if [ ! -f /usr/local/bin/starship ]; then
   curl -sS https://starship.rs/install.sh | sh
 fi
 
+#!/bin/bash
+
+# Check if fzf is installed
+if ! command -v fzf &> /dev/null; then
+    echo "fzf not found, installing..."
+    # Install fzf
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    ~/.fzf/install --all
+else
+    echo "fzf is already installed"
+fi
+
 
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
@@ -51,3 +63,5 @@ fi
 
 eval "$(fzf --zsh)"
 eval "$(starship init zsh)"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
