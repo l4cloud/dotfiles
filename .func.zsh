@@ -14,7 +14,7 @@ function ty() {
     search=$HOME
   fi
 
-  local dir=$(find ${search} -type d -name ".git" -exec dirname {} \; | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
+  local dir=$(find ${search} -type d -name ".git" -exec dirname {} \; | fzf --height 60% --layout reverse --border --no-hscroll --exact)
   if [ -n "$dir" ]; then
     tmp=$(basename "${dir//./}")
     echo "Creating Session: ${tmp}"

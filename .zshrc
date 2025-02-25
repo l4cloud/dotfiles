@@ -25,8 +25,6 @@ if ! command -v fzf &> /dev/null; then
     # Install fzf
     git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install --all
-else
-    echo "fzf is already installed"
 fi
 
 
