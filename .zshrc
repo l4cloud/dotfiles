@@ -17,6 +17,7 @@ if [ ! -f /usr/local/bin/starship ]; then
   curl -sS https://starship.rs/install.sh | sh
 fi
 
+
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
