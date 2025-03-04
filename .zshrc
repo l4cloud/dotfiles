@@ -20,13 +20,12 @@ fi
 #!/bin/bash
 
 # Check if fzf is installed
-if ! command -v fzf &> /dev/null; then
-    echo "fzf not found, installing..."
-    # Install fzf
+if [ ! -f /home/lu/.fzf/bin/fzf ]; then
     git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install --all
 fi
 
+FZF_BASE=/home/lu/.fzf/bin/fzf
 
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
@@ -59,7 +58,6 @@ if [ -e ~/.func.zsh ]; then
   source ~/.func.zsh
 fi
 
-eval "$(fzf --zsh)"
 eval "$(starship init zsh)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

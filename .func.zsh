@@ -2,6 +2,7 @@ function ti() {
   dir=$(basename "$PWD")
   tx new-session -d -s ${dir// /_} -n nvim 'nvim'
   tx new-window -t ${dir// /_}:2 -n zsh
+  tx new-window -t ${dir// /_}:2 -n zsh
   tx attach-session -t ${dir// /_}
 }
 
