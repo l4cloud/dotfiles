@@ -12,9 +12,8 @@ vim.opt.updatetime = 250
 vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.api.nvim_set_hl(0, 'CursorLine', {})
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-vim.opt.cursorline = true
+vim.opt.cursorline = false
 vim.opt.scrolloff = 15
 vim.opt.showmode = false
 vim.opt.tabstop = 2
