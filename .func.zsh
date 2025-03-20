@@ -1,9 +1,10 @@
 function ti() {
   dir=$(basename "$PWD")
-  tx new-session -d -s ${dir// /_} -n nvim 'nvim'
-  tx new-window -t ${dir// /_}:2 -n zsh
-  tx new-window -t ${dir// /_}:2 -n zsh
-  tx attach-session -t ${dir// /_}
+  workspace=${dir//.}
+  tx new-session -d -s $workspace -n nvim 'nvim'
+  tx new-window -t $workspace:2 -n zsh
+  tx new-window -t $workspace:3 -n zsh
+  tx attach-session -t $workspace
 }
 
 function ty() {
@@ -17,34 +18,14 @@ function ty() {
 
   local dir=$(find ${search} -type d -name ".git" -exec dirname {} \; | fzf --height 60% --layout reverse --border --no-hscroll --exact)
   if [ -n "$dir" ]; then
-    tmp=$(basename "${dir//./}")
-    echo "Creating Session: ${tmp}"
-    cd -- "$dir" || return
-    tmux new-session -d -s $tmp -n nvim 'nvim'
-    tmux new-window -t $tmp:2 -n zsh
-    tmux attach-session -t $tmp
-  else
-    echo "No directory selected."
-  fi
-}
-
-function tt() {
-  if [ -d "$1" ]; then
-    search="$(echo $1 | sed 's/\/$//')/"
-    echo "Searching directory: ${search}"
-  else
-    echo "Searching home"
-    search=$HOME
-  fi
-
-  local dir=$(find ${search} -type d  -exec dirname {} \; | fzf --height 50% --margin 1%,10% --layout reverse --border --no-hscroll --exact)
-  if [ -n "$dir" ]; then
-    tmp=$(basename "${dir//./}")
-    echo "Creating Session: ${tmp}"
-    cd -- "$dir" || return
-    tmux new-session -d -s $tmp -n nvim 'nvim'
-    tmux new-window -t $tmp:2 -n zsh
-    tmux attach-session -t $tmp
+    tmp=$(basename $dir)
+    workspace=${tmp//.}
+    echo "Creating Session: ${workspace}"
+    cd -- $dir || return
+    tmux new-session -d -s $workspace -n nvim 'nvim'
+    tmux new-window -t $workspace:2 -n zsh
+    tmux new-window -t $workspace:3 -n zsh
+    tmux attach-session -t $workspace
   else
     echo "No directory selected."
   fi
