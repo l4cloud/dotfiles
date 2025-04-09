@@ -16,6 +16,8 @@ alias tx="tmux"
 alias txa="tmux a"
 alias yh='cd ~ && y'
 alias lg="lazygit"
+alias aws-login="saml2aws.exe login --profile=saml --force"
+alias k9="aws-login && k9s.exe"
 bindkey '^k' .history-incremental-search-forward
 bindkey '^j' .history-incremental-search-backward
 
