@@ -5,6 +5,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 export EDITOR=nvim
 export VISUAL="$EDITOR"
 export PATH=$PATH:/usr/local/go/bin
+export GOPATH="$HOME/.go"
 DISABLE_LS_COLORS="true"
 
 # Download Zinit, if it's not there yet
@@ -68,3 +69,10 @@ eval "$(starship init zsh)"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+zstyle ':completion:*' menu select
+
+# Created by `pipx` on 2025-04-23 19:40:00
+export PATH="$PATH:/home/lu/.local/bin"
