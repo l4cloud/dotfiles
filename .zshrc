@@ -1,37 +1,37 @@
-# Set the directory we want to store zinit and plugins
+# Set Zinit home
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 # Environment
 export EDITOR=nvim
 export VISUAL="$EDITOR"
-export PATH=$PATH:/usr/local/go/bin
+export PATH="$PATH:/usr/local/go/bin:/home/lu/.local/bin"
 export GOPATH="$HOME/.go"
 DISABLE_LS_COLORS="true"
 
-# Download Zinit, if it's not there yet
+# Install Zinit if missing
 if [ ! -d "$ZINIT_HOME" ]; then
    mkdir -p "$(dirname $ZINIT_HOME)"
    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
+# Install starship if missing
 if [ ! -f /usr/local/bin/starship ]; then 
   curl -sS https://starship.rs/install.sh | sh
 fi
 
-#!/bin/bash
-
-# Check if fzf is installed
-if [ ! -f /home/lu/.fzf/bin/fzf ]; then
+# Install fzf if missing
+if [ ! -f "$HOME/.fzf/bin/fzf" ]; then
     git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install --all
 fi
 
-FZF_BASE=/home/lu/.fzf/bin/fzf
+# Always source fzf key bindings & completion
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Source/Load zinit
+# Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# Add in zsh plugins
+# Plugins
 zinit ice depth=1
 zinit light jeffreytse/zsh-vi-mode
 
@@ -39,40 +39,30 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 
-autoload -Uz compinit && compinit
+# Completion (only run once, at the right place)
+autoload -Uz compinit
+compinit
 
+# Zsh history settings
 HISTSIZE=5000
-HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
+HISTFILE=~/.zsh_history
 HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
+setopt appendhistory sharehistory
+setopt hist_ignore_space hist_ignore_all_dups hist_save_no_dups hist_ignore_dups hist_find_no_dups
 
-# Aliases and functions
-if [ -e ~/.aliases.zsh ]; then
-  source ~/.aliases.zsh
-fi
+# Aliases & functions
+[ -e ~/.aliases.zsh ] && source ~/.aliases.zsh
+[ -e ~/.func.zsh ] && source ~/.func.zsh
 
-if [ -e ~/.func.zsh ]; then
-  source ~/.func.zsh
-fi
-
+# Starship prompt
 eval "$(starship init zsh)"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
+# NVM
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-fpath+=~/.zfunc; autoload -Uz compinit; compinit
-
+# Completion menu style
 zstyle ':completion:*' menu select
 
-# Created by `pipx` on 2025-04-23 19:40:00
-export PATH="$PATH:/home/lu/.local/bin"

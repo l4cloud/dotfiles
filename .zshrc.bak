@@ -3,7 +3,7 @@ export EDITOR=nvim
 export VISUAL="$EDITOR"
 export PATH=$PATH:/usr/local/go/bin
 DISABLE_LS_COLORS="true"
-plugins=(vi-mode git)
+plugins=(vi-mode git fzf)
 
 # Aliases and functions
 if [ -e ~/.aliases.zsh ]; then

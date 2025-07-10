@@ -6,6 +6,6 @@ return {
       terminal = true, -- Let the theme manage terminal colors
       overrides = {}, -- Customize specific highlight groups if needed
     }
-    vim.cmd 'colorscheme ayu-mirage' -- Apply the mirage variant
+    vim.cmd 'colorscheme ayu-dark' -- Apply the mirage variant
   end,
 }

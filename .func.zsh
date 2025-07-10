@@ -16,7 +16,12 @@ function ty() {
     search=$HOME
   fi
 
-  local dir=$(find ${search} -type d -name ".git" -exec dirname {} \; | fzf --height 60% --layout reverse --border --no-hscroll --exact)
+  local git_dirs=$(find "${search}" -type d -name ".git" -exec dirname {} \; -print)
+  if [ -z "$git_dirs" ]; then
+    echo "No git repositories found."
+    return
+  fi
+  local dir=$(echo "$git_dirs" | fzf --height 60% --layout reverse --border --no-hscroll --exact)
   if [ -n "$dir" ]; then
     tmp=$(basename $dir)
     workspace=${tmp//.}
