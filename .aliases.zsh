@@ -1,8 +1,4 @@
-alias conf-zsh="nvim ~/.zshrc"
-alias conf-tmux="nvim ~/.tmux.conf"
-alias zshr="source ~/.zshrc"
-
-alias nv="nvim"
+alias vim="nvim"
 alias test="echo $HOME"
 
 if command -v lsd >/dev/null 2>&1; then
