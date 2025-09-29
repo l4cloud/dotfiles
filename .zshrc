@@ -66,3 +66,6 @@ export NVM_DIR="$HOME/.nvm"
 # Completion menu style
 zstyle ':completion:*' menu select
 
+
+# opencode
+export PATH=/home/lu/.opencode/bin:$PATH
