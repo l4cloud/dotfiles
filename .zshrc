@@ -6,6 +6,8 @@ export EDITOR=nvim
 export VISUAL="$EDITOR"
 export PATH="$PATH:/usr/local/go/bin:/home/lu/.local/bin"
 export GOPATH="$HOME/.go"
+export PATH=$PATH:$GOPATH/bin
+
 DISABLE_LS_COLORS="true"
 
 # Install Zinit if missing

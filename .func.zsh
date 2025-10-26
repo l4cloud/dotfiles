@@ -2,7 +2,7 @@ function ti() {
   dir=$(basename "$PWD")
   workspace=${dir//.}
   tx new-session -d -s $workspace -n nvim 'nvim'
-  tx new-window -t $workspace:2 -n ai 'gemini'
+  tx new-window -t $workspace:2 -n shell 
   tx new-window -t $workspace:3 -n shell
   tx attach-session -t $workspace
 }
