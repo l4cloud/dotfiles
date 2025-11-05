@@ -48,7 +48,7 @@ gaps:
 
   # Gap between windows and the screen edge.
   outer_gap:
-    top: '45px'
+    top: '60px'
     right: '20px'
     bottom: '20px'
     left: '20px'
@@ -70,7 +70,7 @@ window_effects:
     # Change the corner style of the window's frame.
     # ** Exclusive to Windows 11 due to API limitations.
     corner_style:
-      enabled: false
+      enabled: true
       # Allowed values: 'square', 'rounded', 'small_rounded'.
       style: 'square'
 
@@ -258,6 +258,9 @@ keybindings:
   # Terminal and Git Bash respectively.
   - commands: ['shell-exec wt --startingDirectory ~ wsl']
     bindings: ['alt+enter']
+
+  - commands: ['shell-exec firefox']
+    bindings: ['alt+b']
 
   # Focus the next/previous active workspace defined in `workspaces` config.
   - commands: ['focus --next-active-workspace']
