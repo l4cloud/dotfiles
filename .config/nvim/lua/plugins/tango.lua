@@ -1,0 +1,55 @@
+-- Custom Tango Dark colorscheme configuration
+-- This runs as part of lazy.nvim setup but doesn't require an external plugin
+
+return {
+  -- {
+  --   -- Use a dummy plugin that exists to attach our custom colorscheme to
+  --   "folke/lazy.nvim", -- Using lazy.nvim itself as the plugin since it's always available
+  --   name = "tango-dark-custom",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     -- Set up Tango Dark colorscheme
+  --     vim.cmd('colorscheme habamax') -- Use habamax as base (dark theme)
+  --     
+  --     -- Apply Tango Dark colors
+  --     local tango_colors = {
+  --       bg = '#2e3436',        -- Tango dark gray
+  --       fg = '#eeeeec',        -- Tango light gray
+  --       red = '#cc0000',       -- Tango red
+  --       green = '#4e9a06',     -- Tango green  
+  --       yellow = '#edd400',    -- Tango yellow
+  --       blue = '#3465a4',      -- Tango blue
+  --       purple = '#75507b',    -- Tango purple
+  --       cyan = '#06989a',      -- Tango cyan
+  --       orange = '#f57900',    -- Tango orange
+  --       gray = '#888a85',      -- Tango gray
+  --       light_gray = '#babdb6' -- Tango light gray
+  --     }
+  --     
+  --     -- Apply custom highlight groups for Tango Dark
+  --     vim.api.nvim_set_hl(0, 'Normal', { fg = tango_colors.fg, bg = tango_colors.bg })
+  --     vim.api.nvim_set_hl(0, 'Comment', { fg = tango_colors.gray, italic = true })
+  --     vim.api.nvim_set_hl(0, 'String', { fg = tango_colors.green })
+  --     vim.api.nvim_set_hl(0, 'Number', { fg = tango_colors.cyan })
+  --     vim.api.nvim_set_hl(0, 'Boolean', { fg = tango_colors.cyan })
+  --     vim.api.nvim_set_hl(0, 'Keyword', { fg = tango_colors.yellow })
+  --     vim.api.nvim_set_hl(0, 'Function', { fg = tango_colors.blue })
+  --     vim.api.nvim_set_hl(0, 'Type', { fg = tango_colors.purple })
+  --     vim.api.nvim_set_hl(0, 'Identifier', { fg = tango_colors.fg })
+  --     vim.api.nvim_set_hl(0, 'Constant', { fg = tango_colors.red })
+  --     vim.api.nvim_set_hl(0, 'PreProc', { fg = tango_colors.orange })
+  --     vim.api.nvim_set_hl(0, 'Special', { fg = tango_colors.cyan })
+  --     
+  --     -- UI elements
+  --     vim.api.nvim_set_hl(0, 'StatusLine', { fg = tango_colors.fg, bg = '#393f41' })
+  --     vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = tango_colors.light_gray, bg = '#393f41' })
+  --     vim.api.nvim_set_hl(0, 'VertSplit', { fg = '#4e5456' })
+  --     vim.api.nvim_set_hl(0, 'LineNr', { fg = tango_colors.gray })
+  --     vim.api.nvim_set_hl(0, 'CursorLineNr', { fg = tango_colors.yellow, bold = true })
+  --     vim.api.nvim_set_hl(0, 'Visual', { bg = '#4e5456' })
+  --     vim.api.nvim_set_hl(0, 'Search', { fg = tango_colors.bg, bg = tango_colors.yellow })
+  --     vim.api.nvim_set_hl(0, 'IncSearch', { fg = tango_colors.bg, bg = tango_colors.orange })
+  --   end,
+  -- },
+}
