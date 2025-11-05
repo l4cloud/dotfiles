@@ -4,6 +4,12 @@ function ti() {
   tx new-session -d -s $workspace -n nvim 'nvim'
   tx new-window -t $workspace:2 -n shell 
   tx new-window -t $workspace:3 -n shell
+  
+  # Check if current directory is a git repository
+  if [ -d ".git" ] || git rev-parse --git-dir > /dev/null 2>&1; then
+    tx new-window -t $workspace:4 -n lazygit 'lazygit'
+  fi
+  
   tx attach-session -t $workspace
 }
 
