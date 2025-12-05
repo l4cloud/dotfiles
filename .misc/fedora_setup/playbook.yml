@@ -91,7 +91,7 @@
 
     - name: Install opencode
       ansible.builtin.shell: >
-        curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+        curl -fsSL https://opencode.ai/install | bash
       args:
         creates: "{{ ansible_user_dir }}/.opencode/bin/opencode"
       when: not opencode_stat.stat.exists
