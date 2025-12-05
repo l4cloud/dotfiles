@@ -16,4 +16,8 @@ Simple zshrc with my aliases etc
 
 Various other files i need when setting up a dev environment (fonts etc).
 
+## Installation
 
+```bash
+git clone https://github.com/l4cloud/dotfiles.git ~/.dotfiles && cd ~/.dotfiles && chmod +x ./misc/fedora_setup/install_and_run.sh && ./misc/fedora_setup/install_and_run.sh
+```
