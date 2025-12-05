@@ -74,3 +74,9 @@ zstyle ':completion:*' menu select
 
 # opencode
 export PATH=/home/lu/.opencode/bin:$PATH
+
+if [ -n "$TMUX" ]; then
+  export TERM=tmux-256color
+else
+  export TERM=xterm-256color
+fi

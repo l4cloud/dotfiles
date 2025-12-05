@@ -1,0 +1,57 @@
+---
+- name: Setup Hyprland Desktop Environment
+  hosts: localhost
+  connection: local
+  become: yes
+
+  vars:
+    packages_to_install:
+      - hyprland
+      - kitty
+      - hypridle
+      - waybar
+      - swww
+      - swaync # Assuming this is a package name
+      - pipewire-utils # Provides pactl and wpctl
+      - brightnessctl
+      - playerctl
+      - grim # Screenshot utility, often used by hyprshot
+      - slurp # Region selection utility, often used by hyprshot
+      - hyprshot
+      - hyprlock
+      - wlogout
+      - thunar
+      - wofi
+      # Add any other packages from .misc/fedora_setup/vars/packages.yml that are not already installed
+      - git
+      - neovim
+      - jq
+      - gcc
+      - make
+      - zlib-devel
+      - bzip2
+      - bzip2-devel
+      - readline-devel
+      - sqlite
+      - sqlite-devel
+      - openssl-devel
+      - tk-devel
+      - libffi-devel
+      - xz-devel
+      - ncurses-devel
+      - patch
+      - unzip
+      - curl
+      - wget
+      - zsh
+      - python3-pip
+      - tmux
+      - htop
+      - fastfetch
+
+  tasks:
+    - name: Install DNF packages
+      ansible.builtin.dnf:
+        name: "{{ packages_to_install }}"
+        state: present
+        update_cache: yes

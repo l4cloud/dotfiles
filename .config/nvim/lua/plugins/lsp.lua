@@ -150,7 +150,6 @@ return {
             },
           },
         },
-        jinja_lsp = {},
         eslint = {},
         html = {},
         emmet_ls = {},
