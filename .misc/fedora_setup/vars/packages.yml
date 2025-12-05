@@ -1,0 +1,27 @@
+packages:
+  - git
+  - neovim
+  - jq
+  - gcc
+  - make
+  - zlib-devel
+  - bzip2
+  - bzip2-devel
+  - readline-devel
+  - sqlite
+  - sqlite-devel
+  - openssl-devel
+  - tk-devel
+  - libffi-devel
+  - xz-devel
+  - ncurses-devel
+  - patch
+  - unzip
+  - curl
+  - wget
+  - stow
+  - zsh
+  - python3-pip
+  - tmux
+  - htop
+  - fastfetch

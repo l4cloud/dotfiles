@@ -1,0 +1,116 @@
+---
+- name: Setup Fedora Development Environment
+  hosts: localhost
+  connection: local
+
+  vars_files:
+    - vars/packages.yml
+
+  tasks:
+    - name: Update all system packages
+      become: yes
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+      tags:
+        - system
+
+    - name: Install development packages
+      become: yes
+      dnf:
+        name: "{{ packages }}"
+        state: present
+      tags:
+        - packages
+
+    - name: Ensure dnf-plugins-core is installed
+      become: yes
+      ansible.builtin.dnf:
+        name: dnf-plugins-core
+        state: present
+      tags:
+        - lazygit
+
+    - name: Enable atim/lazygit Copr repository
+      become: yes
+      ansible.builtin.command: dnf copr enable -y atim/lazygit
+      args:
+        creates: /etc/yum.repos.d/_copr_atim-lazygit.repo
+      tags:
+        - lazygit
+
+    - name: Install lazygit
+      become: yes
+      ansible.builtin.dnf:
+        name: lazygit
+        state: present
+      tags:
+        - lazygit
+
+
+
+    - name: Check if pyenv is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.pyenv"
+      register: pyenv_stat
+      become: no
+
+    - name: Install pyenv
+      ansible.builtin.git:
+        repo: 'https://github.com/pyenv/pyenv.git'
+        dest: "{{ ansible_user_dir }}/.pyenv"
+      when: not pyenv_stat.stat.exists
+      become: no
+      tags:
+        - pyenv
+
+    - name: Check if nvm is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.nvm"
+      register: nvm_stat
+      become: no
+
+    - name: Install nvm
+      ansible.builtin.shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.nvm"
+      when: not nvm_stat.stat.exists
+      become: no
+      tags:
+        - nvm
+
+
+
+    - name: Check if opencode is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.opencode/bin/opencode"
+      register: opencode_stat
+      become: no
+
+    - name: Install opencode
+      ansible.builtin.shell: >
+        curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.opencode/bin/opencode"
+      when: not opencode_stat.stat.exists
+      become: no
+      tags:
+        - opencode
+
+    - name: Stow dotfiles
+      become: no
+      ansible.builtin.command:
+        cmd: "stow -v -R -t {{ ansible_user_dir }} ."
+        chdir: "{{ ansible_user_dir }}/.dotfiles"
+      tags:
+        - stow
+
+    - name: Set Zsh as default shell
+      become: yes
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        shell: /bin/zsh
+      tags:
+        - zsh

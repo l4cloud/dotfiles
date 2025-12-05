@@ -25,6 +25,11 @@ if [ ! -f "$HOME/.fzf/bin/fzf" ]; then
     ~/.fzf/install --all
 fi
 
+# Install tpm if missing
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
 # Always source fzf key bindings & completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
