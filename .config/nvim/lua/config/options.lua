@@ -22,6 +22,7 @@ vim.opt.expandtab = true
 vim.bo.softtabstop = 2
 vim.opt.cmdheight = 0
 vim.opt.relativenumber = true
+vim.opt.termguicolors = true
 
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'

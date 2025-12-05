@@ -2,13 +2,9 @@ return {
   'nvim-lualine/lualine.nvim',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   config = function()
-    local theme = require 'lualine.themes.ayu_dark'
-    theme.normal.c.bg = '#000000'
-
     require('lualine').setup {
       options = {
         icons_enabled = true,
-        theme = theme,
         component_separators = { left = '', right = '' },
         section_separators = { left = '', right = '' },
         disabled_filetypes = {
@@ -46,5 +42,18 @@ return {
       inactive_winbar = {},
       extensions = {},
     }
+
+    vim.cmd("highlight Lualine_a guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_b guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_c guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_x guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_y guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_z guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_a guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_b guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_c guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_x guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_y guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight Lualine_inactive_z guibg=NONE ctermbg=NONE")
   end,
 }
