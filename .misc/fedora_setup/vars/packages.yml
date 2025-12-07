@@ -25,3 +25,4 @@ packages:
   - tmux
   - htop
   - fastfetch
+  - golang

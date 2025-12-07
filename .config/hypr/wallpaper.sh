@@ -6,6 +6,9 @@ menu() {
 }
 main() {
     choice=$(menu | wofi -c ~/.config/wofi/wallpaper -s ~/.config/wofi/style-wallpaper.css --show dmenu --prompt "Select Wallpaper:" -n)
+    if [ -z "$choice" ]; then
+        exit 0
+    fi
     selected_wallpaper=$(echo "$choice" | sed 's/^img://')
     swww img "$selected_wallpaper" --transition-type any --transition-fps 60 --transition-duration .5
     wal -i "$selected_wallpaper" -n
@@ -18,8 +21,7 @@ main() {
     sed -i "s/^gradient_color_1 = .*/gradient_color_1 = '$color1'/" $cava_config
     sed -i "s/^gradient_color_2 = .*/gradient_color_2 = '$color2'/" $cava_config
     pkill -USR2 cava 2>/dev/null
-    pkill -USR2 waybar
-    source ~/.cache/wal/colors.sh && cp -r $wallpaper ~/Wallpapers/pywallpaper.jpg 
+    source ~/.cache/wal/colors.sh  
 }
 main
 

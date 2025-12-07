@@ -2,7 +2,7 @@
 
 * {
     font-size:15px;
-    font-family: "CodeNewRoman Nerd Font Propo";
+    font-family: "JetBrainsMono Nerd Font";
 }
 window#waybar{
     all:unset;
@@ -95,7 +95,7 @@ tooltip {
 
 }
 #network{
-    padding: 0px 5px;
+    padding: 0px 10px;
     transition: all .3s ease;
     color:@color7;
 
@@ -164,4 +164,5 @@ tooltip {
 #tray menu separator {
     padding: 0px 5px;
     transition: all .3s ease; 
+    color: transparent;
 }
