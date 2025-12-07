@@ -10,6 +10,7 @@ main() {
     swww img "$selected_wallpaper" --transition-type any --transition-fps 60 --transition-duration .5
     wal -i "$selected_wallpaper" -n
     swaync-client --reload-css
+    pkill -USR2 waybar
     cat ~/.cache/wal/colors-kitty.conf > ~/.config/kitty/current-theme.conf
     color1=$(awk 'match($0, /color2=\47(.*)\47/,a) { print a[1] }' ~/.cache/wal/colors.sh)
     color2=$(awk 'match($0, /color3=\47(.*)\47/,a) { print a[1] }' ~/.cache/wal/colors.sh)
@@ -17,6 +18,7 @@ main() {
     sed -i "s/^gradient_color_1 = .*/gradient_color_1 = '$color1'/" $cava_config
     sed -i "s/^gradient_color_2 = .*/gradient_color_2 = '$color2'/" $cava_config
     pkill -USR2 cava 2>/dev/null
+    pkill -USR2 waybar
     source ~/.cache/wal/colors.sh && cp -r $wallpaper ~/Wallpapers/pywallpaper.jpg 
 }
 main
