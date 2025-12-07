@@ -1,7 +1,7 @@
 @import url('../../.cache/wal/colors-waybar.css');
 * {
     font-size:15px;
-    font-family: "CodeNewRoman Nerd Font Propo";
+    font-family: "Hack Nerd Font Regular" !important;
 }
 window#waybar{
     all:unset;

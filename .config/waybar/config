@@ -81,12 +81,27 @@
         },
         "custom/pacman": {
             "format": "󰅢 {}",
-            "interval": 30,   
+            "interval": 30,
             "exec": "checkupdates | wc -l",
             "exec-if": "exit 0",
             "on-click": "kitty sh -c 'dnf update; echo Done - Press enter to exit; read'; pkill -SIGRTMIN+8 waybar",
             "signal": 8,
             "tooltip": false,
+        },
+        "pulseaudio": {
+            "format": "{volume}% {icon}",
+            "format-bluetooth": "{volume}% {icon}",
+            "format-muted": "󰝟",
+            "format-icons": {
+                "headphone": "",
+                "hands-free": "󰋎",
+                "headset": "󰋎",
+                "phone": "",
+                "portable": "",
+                "car": "",
+                "default": ["", "", ""]
+            },
+            "on-click": "pavucontrol"
         },
         "custom/expand": {
             "format": "",

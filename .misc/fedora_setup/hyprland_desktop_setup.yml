@@ -55,3 +55,22 @@
         name: "{{ packages_to_install }}"
         state: present
         update_cache: yes
+
+    - name: Download Hack Nerd Font
+      ansible.builtin.get_url:
+        url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hack.zip
+        dest: /tmp/Hack.zip
+
+    - name: Unzip Hack Nerd Font
+      ansible.builtin.unarchive:
+        src: /tmp/Hack.zip
+        dest: /usr/share/fonts
+        remote_src: yes
+
+    - name: Update font cache
+      ansible.builtin.command: fc-cache -fv
+
+    - name: Verify Hack Nerd Font is installed
+      ansible.builtin.shell: fc-list | grep -i "hack nerd"
+      register: font_check
+      failed_when: font_check.rc != 0

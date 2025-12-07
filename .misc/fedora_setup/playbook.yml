@@ -99,13 +99,24 @@
       tags:
         - opencode
 
-    - name: Stow dotfiles
+
+
+    - name: Install getnf Nerd Font installer
       become: no
-      ansible.builtin.command:
-        cmd: "stow -v -R -t {{ ansible_user_dir }} ."
-        chdir: "{{ ansible_user_dir }}/.dotfiles"
+      ansible.builtin.shell: >
+        curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.local/bin/getnf"
       tags:
-        - stow
+        - fonts
+
+
+
+    - name: Update font cache
+      become: no
+      ansible.builtin.command: fc-cache -fv
+      tags:
+        - fonts
 
     - name: Set Zsh as default shell
       become: yes
