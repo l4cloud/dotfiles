@@ -11,18 +11,17 @@
       - hypridle
       - waybar
       - swww
-      - swaync # Assuming this is a package name
-      - pipewire-utils # Provides pactl and wpctl
+      - swaync
+      - pipewire-utils
       - brightnessctl
       - playerctl
-      - grim # Screenshot utility, often used by hyprshot
-      - slurp # Region selection utility, often used by hyprshot
+      - grim
+      - slurp
       - hyprshot
       - hyprlock
       - wlogout
       - thunar
       - wofi
-      # Add any other packages from .misc/fedora_setup/vars/packages.yml that are not already installed
       - git
       - neovim
       - jq
@@ -50,11 +49,23 @@
       - fastfetch
 
   tasks:
+    - name: Enable RPMFusion free repository
+      ansible.builtin.command: dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+      args:
+        creates: /etc/yum.repos.d/rpmfusion-free.repo
+
     - name: Install DNF packages
       ansible.builtin.dnf:
         name: "{{ packages_to_install }}"
         state: present
         update_cache: yes
+
+    - name: Install pulsemixer
+      become: no
+      ansible.builtin.pip:
+        name: pulsemixer
+        state: present
+        executable: pip3
 
     - name: Download Hack Nerd Font
       ansible.builtin.get_url:
