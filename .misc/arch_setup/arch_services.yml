@@ -5,6 +5,12 @@
 
   vars_files:
     - vars/packages.yml
+  
+  vars:
+    aur_builder_user: aur_builder
+    yay_build_dir: "/tmp/yay-{{ ansible_date_time.epoch }}"
+    max_retries: 3
+    retry_delay: 10
 
   tasks:
     - name: Update all system packages
@@ -15,6 +21,14 @@
       tags:
         - system
 
+    - name: Install git early (required for ansible.builtin.git module)
+      become: yes
+      pacman:
+        name: git
+        state: present
+      tags:
+        - git
+
     - name: Install development packages
       become: yes
       pacman:
@@ -23,93 +37,171 @@
       tags:
         - packages
 
+    # === ROBUST YAY INSTALLATION ===
+    
     - name: Install AUR helper (yay) dependencies
       become: yes
-      ansible.builtin.pacman:
+      pacman:
         name:
           - base-devel
           - git
         state: present
+        update_cache: yes
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
       tags:
         - aur
 
-    - name: Check if yay is installed
-      ansible.builtin.stat:
+    - name: Create dedicated AUR builder user
+      become: yes
+      user:
+        name: "{{ aur_builder_user }}"
+        create_home: yes
+        group: wheel
+        shell: /bin/bash
+        state: present
+      tags:
+        - aur
+
+    - name: Configure sudo for AUR builder (pacman only)
+      become: yes
+      lineinfile:
+        path: "/etc/sudoers.d/11-install-{{ aur_builder_user }}"
+        line: "{{ aur_builder_user }} ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+        create: yes
+        mode: '0644'
+        validate: 'visudo -cf %s'
+      tags:
+        - aur
+
+    - name: Check if yay is already installed
+      stat:
         path: /usr/bin/yay
       register: yay_check
       become: no
 
-    - name: Remove existing yay build directory
-      ansible.builtin.file:
-        path: /tmp/yay
+    - name: Verify network connectivity to AUR
+      uri:
+        url: https://aur.archlinux.org
+        method: GET
+        timeout: 30
+      register: aur_connectivity
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
+      when: not yay_check.stat.exists
+
+    - name: Remove existing build directory
+      file:
+        path: "{{ yay_build_dir }}"
         state: absent
       when: not yay_check.stat.exists
       become: no
 
-    - name: Clone yay repository
-      ansible.builtin.git:
+    - name: Clone yay repository with validation
+      git:
         repo: 'https://aur.archlinux.org/yay.git'
-        dest: /tmp/yay
+        dest: "{{ yay_build_dir }}"
         force: yes
-      when: not yay_check.stat.exists
+        verify_commit: no
       become: no
+      become_user: "{{ aur_builder_user }}"
+      when: not yay_check.stat.exists
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
+      tags:
+        - aur
 
-    - name: Change ownership of yay directory to current user
-      ansible.builtin.file:
-        path: /tmp/yay
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_id }}"
+    - name: Verify repository integrity
+      stat:
+        path: "{{ yay_build_dir }}/PKGBUILD"
+      register: pkgbuild_exists
+      when: not yay_check.stat.exists
+
+    - name: Fail if PKGBUILD missing
+      fail:
+        msg: "PKGBUILD not found in cloned repository"
+      when: not yay_check.stat.exists and not pkgbuild_exists.stat.exists
+
+    - name: Set proper ownership of build directory
+      file:
+        path: "{{ yay_build_dir }}"
+        owner: "{{ aur_builder_user }}"
+        group: "{{ aur_builder_user }}"
         recurse: yes
-      when: not yay_check.stat.exists
       become: yes
-
-    - name: Build yay package
-      ansible.builtin.shell: |
-        cd /tmp/yay
-        makepkg -sf --noconfirm --needed
       when: not yay_check.stat.exists
+
+    - name: Build yay package with comprehensive error handling
+      shell: |
+        cd {{ yay_build_dir }}
+        # Clean any previous build artifacts
+        rm -f *.pkg.tar.zst *.pkg.tar.xz
+        # Build with verbose output and proper flags
+        makepkg -sf --noconfirm --needed --noprogressbar
       become: no
+      become_user: "{{ aur_builder_user }}"
+      when: not yay_check.stat.exists
+      register: build_result
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
+      until: build_result is succeeded
       tags:
         - aur
 
     - name: Find built yay package
-      ansible.builtin.find:
-        paths: /tmp/yay
-        patterns: "yay-*.pkg.tar.zst"
-      register: yay_package
-      when: not yay_check.stat.exists
+      find:
+        paths: "{{ yay_build_dir }}"
+        patterns: 
+          - "yay-*.pkg.tar.zst"
+          - "yay-*.pkg.tar.xz"
+      register: yay_packages
+      when: not yay_check.stat.exists and build_result is succeeded
 
-    - name: Install yay package
+    - name: Fail if no package built
+      fail:
+        msg: "No yay package found after build"
+      when: not yay_check.stat.exists and yay_packages.files|length == 0
+
+    - name: Install yay package using pacman -U
+      command: "pacman -U --noconfirm {{ yay_packages.files[0].path }}"
       become: yes
-      ansible.builtin.pacman:
-        name: "{{ yay_package.files[0].path }}"
-        state: present
-      when: not yay_check.stat.exists and yay_package.files|length > 0
+      when: not yay_check.stat.exists and yay_packages.files|length > 0
       tags:
         - aur
 
-    - name: Clean up yay build directory
-      ansible.builtin.file:
-        path: /tmp/yay
+    - name: Clean up build directory
+      file:
+        path: "{{ yay_build_dir }}"
         state: absent
       when: not yay_check.stat.exists
       become: no
 
     - name: Verify yay installation
-      ansible.builtin.command: /usr/bin/yay --version
-      register: yay_verify
-      when: not yay_check.stat.exists
+      command: yay --version
+      register: yay_version_check
       become: no
       changed_when: false
+      failed_when: yay_version_check.rc != 0
 
-    - name: Debug yay installation
-      ansible.builtin.debug:
-        msg: "Yay version: {{ yay_verify.stdout }}"
-      when: not yay_check.stat.exists and yay_verify is succeeded
+    - name: Display yay installation result
+      debug:
+        msg: "YAY installed successfully. Version: {{ yay_version_check.stdout }}"
+
+    - name: Test yay functionality
+      command: yay -Ps
+      register: yay_test
+      become: no
+      become_user: "{{ aur_builder_user }}"
+      changed_when: false
+
+    # === AUR PACKAGE INSTALLATIONS ===
 
     - name: Install lazygit via AUR
-      ansible.builtin.shell: /usr/bin/yay -S --noconfirm lazygit
+      shell: yay -S --noconfirm lazygit
       become: no
+      become_user: "{{ aur_builder_user }}"
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
       tags:
         - lazygit
 
