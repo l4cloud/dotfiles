@@ -15,14 +15,6 @@
       tags:
         - system
 
-    - name: Install git early (required for ansible.builtin.git module)
-      become: yes
-      pacman:
-        name: git
-        state: present
-      tags:
-        - git
-
     - name: Install development packages
       become: yes
       pacman:
@@ -33,19 +25,13 @@
 
     - name: Install AUR helper (yay) dependencies
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         name:
           - base-devel
           - git
         state: present
       tags:
         - aur
-
-    - name: Check if yay is installed
-      ansible.builtin.command: which yay
-      register: yay_check
-      ignore_errors: true
-      become: no
 
     - name: Clone yay repository
       ansible.builtin.git:
@@ -54,12 +40,21 @@
       when: yay_check.rc != 0
       become: no
 
-    - name: Build and install yay
+    - name: Build yay package
       ansible.builtin.shell: |
         cd /tmp/yay
-        makepkg -si --noconfirm
+        makepkg -s --noconfirm
       when: yay_check.rc != 0
       become: no
+      tags:
+        - aur
+
+    - name: Install yay package
+      become: yes
+      ansible.builtin.shell: |
+        cd /tmp/yay
+        pacman -U --noconfirm yay-*.pkg.tar.zst
+      when: yay_check.rc != 0
       tags:
         - aur
 
@@ -71,7 +66,7 @@
 
     - name: Install Yazi and recommended dependencies
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         name:
           - yazi
           - p7zip # 7zip
