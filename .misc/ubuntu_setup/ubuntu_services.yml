@@ -1,5 +1,5 @@
 ---
-- name: Setup Ubuntu Development Environment
+- name: Setup Ubuntu 22.04 Development Environment
   hosts: localhost
   connection: local
 
@@ -12,6 +12,8 @@
       ansible.builtin.apt:
         update_cache: yes
         upgrade: dist
+        autoremove: yes
+        autoclean: yes
       tags:
         - system
 
@@ -20,10 +22,12 @@
       ansible.builtin.apt:
         name: "{{ packages }}"
         state: present
+        update_cache: yes
       tags:
         - packages
 
-    - name: Install required packages for Docker (Ubuntu)
+    # Docker installation - using official Docker repository for Ubuntu 22.04
+    - name: Install required packages for Docker
       become: yes
       ansible.builtin.apt:
         name:
@@ -31,29 +35,32 @@
           - ca-certificates
           - curl
           - gnupg
+          - lsb-release
         state: present
         update_cache: yes
       tags:
         - docker
 
-    - name: Add Docker GPG key (Ubuntu)
+    - name: Add Docker GPG key
       become: yes
-      ansible.builtin.apt_key:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+        dest: /usr/share/keyrings/docker-archive-keyring.asc
+        mode: '0644'
       tags:
         - docker
 
-    - name: Add Docker APT repository (Ubuntu)
+    - name: Add Docker APT repository
       become: yes
       ansible.builtin.apt_repository:
-        repo: "deb [arch={{ 'amd64' if 'x86_64' == ansible_architecture else ansible_architecture }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         filename: docker
+        update_cache: yes
       tags:
         - docker
 
-    - name: Install Docker packages (Ubuntu)
+    - name: Install Docker packages
       become: yes
       ansible.builtin.apt:
         name:
@@ -67,7 +74,7 @@
       tags:
         - docker
 
-    - name: Start and enable Docker service (Ubuntu)
+    - name: Start and enable Docker service
       become: yes
       ansible.builtin.systemd:
         name: docker
@@ -76,7 +83,7 @@
       tags:
         - docker
 
-    - name: Add current user to docker group (Ubuntu)
+    - name: Add current user to docker group
       become: yes
       ansible.builtin.user:
         name: "{{ ansible_user_id }}"
@@ -85,45 +92,78 @@
       tags:
         - docker
 
-    - name: Install lazygit
-      become: yes
-      ansible.builtin.apt:
-        name: lazygit
-        state: present
+    # Lazygit installation - using GitHub releases for Ubuntu 22.04
+    - name: Check if lazygit is already installed
+      ansible.builtin.command: which lazygit
+      register: lazygit_check
+      ignore_errors: yes
+      changed_when: false
       tags:
         - lazygit
 
-    - name: Install Rustup (for Yazi manual build)
+    - name: Get latest lazygit release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+        method: GET
+        return_content: yes
+      register: lazygit_release
+      when: lazygit_check.rc != 0
+      tags:
+        - lazygit
+
+    - name: Download and install lazygit
+      become: yes
+      ansible.builtin.unarchive:
+        src: "{{ lazygit_release.json.assets | selectattr('name', 'search', 'Linux_x86_64.tar.gz') | list | first | json_query('browser_download_url') }}"
+        dest: /usr/local/bin
+        remote_src: yes
+        creates: /usr/local/bin/lazygit
+        owner: root
+        group: root
+        mode: '0755'
+      when: lazygit_check.rc != 0
+      tags:
+        - lazygit
+
+    # Yazi installation - improved approach for Ubuntu 22.04
+    - name: Check if yazi is already installed
+      ansible.builtin.command: which yazi
+      register: yazi_check
+      ignore_errors: yes
+      changed_when: false
+      tags:
+        - yazi
+
+    - name: Install Rustup (for Yazi)
       ansible.builtin.shell: >
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       args:
-        creates: "{{ ansible_user_dir }}/.rustup"
-      when: not ansible_env.HOME + '/.rustup' is file
+        creates: "{{ ansible_user_dir }}/.cargo/bin/cargo"
+      when: yazi_check.rc != 0
       become: no
       tags:
         - yazi
 
-    - name: Clone Yazi repository
-      ansible.builtin.git:
-        repo: 'https://github.com/sxyazi/yazi.git'
-        dest: "{{ ansible_user_dir }}/yazi_build"
-      become: no
-      tags:
-        - yazi
-
-    - name: Build Yazi
-      ansible.builtin.command: cargo build --release --locked
+    - name: Install Yazi via cargo
+      ansible.builtin.shell: >
+        source {{ ansible_user_dir }}/.cargo/env && cargo install --locked yazi-fm yazi-cli
       args:
-        chdir: "{{ ansible_user_dir }}/yazi_build"
+        creates: "{{ ansible_user_dir }}/.cargo/bin/yazi"
+      when: yazi_check.rc != 0
       become: no
       tags:
         - yazi
 
-    - name: Move Yazi binaries to /usr/local/bin
+    - name: Create symlink for yazi in /usr/local/bin
       become: yes
-      ansible.builtin.command: mv {{ ansible_user_dir }}/yazi_build/target/release/yazi {{ ansible_user_dir }}/yazi_build/target/release/ya /usr/local/bin/
-      args:
-        creates: /usr/local/bin/yazi
+      ansible.builtin.file:
+        src: "{{ ansible_user_dir }}/.cargo/bin/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        state: link
+      loop:
+        - yazi
+        - ya
+      when: yazi_check.rc != 0
       tags:
         - yazi
 
@@ -132,27 +172,41 @@
       ansible.builtin.apt:
         name:
           - ffmpeg
-          - p7zip-full # 7zip
+          - p7zip-full
           - jq
-          - poppler-utils # poppler
-          - fd-find # fd
+          - poppler-utils
+          - fd-find
           - ripgrep
           - fzf
           - zoxide
           - imagemagick
-          - xclip # for clipboard support
-          - build-essential # for cargo build
+          - xclip
         state: present
       tags:
         - yazi
 
-
-
+    # Pyenv installation
     - name: Check if pyenv is installed
       stat:
         path: "{{ ansible_user_dir }}/.pyenv"
       register: pyenv_stat
       become: no
+
+    - name: Install pyenv dependencies
+      become: yes
+      ansible.builtin.apt:
+        name:
+          - libbz2-dev
+          - libreadline-dev
+          - libsqlite3-dev
+          - libssl-dev
+          - libffi-dev
+          - liblzma-dev
+          - python3-dev
+        state: present
+      when: not pyenv_stat.stat.exists
+      tags:
+        - pyenv
 
     - name: Install pyenv
       ansible.builtin.git:
@@ -163,6 +217,7 @@
       tags:
         - pyenv
 
+    # NVM installation
     - name: Check if nvm is installed
       stat:
         path: "{{ ansible_user_dir }}/.nvm"
@@ -179,8 +234,7 @@
       tags:
         - nvm
 
-
-
+    # OpenCode installation
     - name: Check if opencode is installed
       stat:
         path: "{{ ansible_user_dir }}/.opencode/bin/opencode"
@@ -197,8 +251,7 @@
       tags:
         - opencode
 
-
-
+    # Font installation
     - name: Install getnf Nerd Font installer
       become: no
       ansible.builtin.shell: >
@@ -208,14 +261,13 @@
       tags:
         - fonts
 
-
-
     - name: Update font cache
       become: no
       ansible.builtin.command: fc-cache -fv
       tags:
         - fonts
 
+    # Shell configuration
     - name: Set Zsh as default shell
       become: yes
       ansible.builtin.user:
@@ -223,3 +275,36 @@
         shell: /bin/zsh
       tags:
         - zsh
+
+    # Additional Ubuntu 22.04 specific configurations
+    - name: Install snap packages
+      become: yes
+      ansible.builtin.snap:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - code
+        - discord
+      ignore_errors: yes
+      tags:
+        - snap
+        - optional
+
+    - name: Enable firewall (ufw)
+      become: yes
+      ansible.builtin.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+      tags:
+        - security
+        - firewall
+
+    - name: Allow SSH through firewall
+      become: yes
+      ansible.builtin.ufw:
+        rule: allow
+        name: OpenSSH
+      tags:
+        - security
+        - firewall
