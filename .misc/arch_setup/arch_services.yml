@@ -34,17 +34,16 @@
         - aur
 
     - name: Check if yay is installed
-      ansible.builtin.command: which yay
+      ansible.builtin.stat:
+        path: /usr/bin/yay
       register: yay_check
-      ignore_errors: true
       become: no
-      changed_when: false
 
     - name: Remove existing yay build directory
       ansible.builtin.file:
         path: /tmp/yay
         state: absent
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
       become: no
 
     - name: Clone yay repository
@@ -52,7 +51,7 @@
         repo: 'https://aur.archlinux.org/yay.git'
         dest: /tmp/yay
         force: yes
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
       become: no
 
     - name: Change ownership of yay directory to current user
@@ -61,14 +60,14 @@
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_id }}"
         recurse: yes
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
       become: yes
 
     - name: Build yay package
       ansible.builtin.shell: |
         cd /tmp/yay
         makepkg -sf --noconfirm --needed
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
       become: no
       tags:
         - aur
@@ -78,14 +77,14 @@
         paths: /tmp/yay
         patterns: "yay-*.pkg.tar.zst"
       register: yay_package
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
 
     - name: Install yay package
       become: yes
       ansible.builtin.pacman:
         name: "{{ yay_package.files[0].path }}"
         state: present
-      when: yay_check.rc != 0 and yay_package.files|length > 0
+      when: not yay_check.stat.exists and yay_package.files|length > 0
       tags:
         - aur
 
@@ -93,11 +92,23 @@
       ansible.builtin.file:
         path: /tmp/yay
         state: absent
-      when: yay_check.rc != 0
+      when: not yay_check.stat.exists
       become: no
 
+    - name: Verify yay installation
+      ansible.builtin.command: /usr/bin/yay --version
+      register: yay_verify
+      when: not yay_check.stat.exists
+      become: no
+      changed_when: false
+
+    - name: Debug yay installation
+      ansible.builtin.debug:
+        msg: "Yay version: {{ yay_verify.stdout }}"
+      when: not yay_check.stat.exists and yay_verify is succeeded
+
     - name: Install lazygit via AUR
-      ansible.builtin.shell: yay -S --noconfirm lazygit
+      ansible.builtin.shell: /usr/bin/yay -S --noconfirm lazygit
       become: no
       tags:
         - lazygit
