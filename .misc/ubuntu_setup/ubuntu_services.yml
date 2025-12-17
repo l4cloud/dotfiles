@@ -1,0 +1,225 @@
+---
+- name: Setup Ubuntu Development Environment
+  hosts: localhost
+  connection: local
+
+  vars_files:
+    - vars/packages.yml
+
+  tasks:
+    - name: Update all system packages
+      become: yes
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+      tags:
+        - system
+
+    - name: Install development packages
+      become: yes
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+      tags:
+        - packages
+
+    - name: Install required packages for Docker (Ubuntu)
+      become: yes
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+      tags:
+        - docker
+
+    - name: Add Docker GPG key (Ubuntu)
+      become: yes
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      tags:
+        - docker
+
+    - name: Add Docker APT repository (Ubuntu)
+      become: yes
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ 'amd64' if 'x86_64' == ansible_architecture else ansible_architecture }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+      tags:
+        - docker
+
+    - name: Install Docker packages (Ubuntu)
+      become: yes
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      tags:
+        - docker
+
+    - name: Start and enable Docker service (Ubuntu)
+      become: yes
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+      tags:
+        - docker
+
+    - name: Add current user to docker group (Ubuntu)
+      become: yes
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+      tags:
+        - docker
+
+    - name: Install lazygit
+      become: yes
+      ansible.builtin.apt:
+        name: lazygit
+        state: present
+      tags:
+        - lazygit
+
+    - name: Install Rustup (for Yazi manual build)
+      ansible.builtin.shell: >
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        creates: "{{ ansible_user_dir }}/.rustup"
+      when: not ansible_env.HOME + '/.rustup' is file
+      become: no
+      tags:
+        - yazi
+
+    - name: Clone Yazi repository
+      ansible.builtin.git:
+        repo: 'https://github.com/sxyazi/yazi.git'
+        dest: "{{ ansible_user_dir }}/yazi_build"
+      become: no
+      tags:
+        - yazi
+
+    - name: Build Yazi
+      ansible.builtin.command: cargo build --release --locked
+      args:
+        chdir: "{{ ansible_user_dir }}/yazi_build"
+      become: no
+      tags:
+        - yazi
+
+    - name: Move Yazi binaries to /usr/local/bin
+      become: yes
+      ansible.builtin.command: mv {{ ansible_user_dir }}/yazi_build/target/release/yazi {{ ansible_user_dir }}/yazi_build/target/release/ya /usr/local/bin/
+      args:
+        creates: /usr/local/bin/yazi
+      tags:
+        - yazi
+
+    - name: Install Yazi recommended dependencies
+      become: yes
+      ansible.builtin.apt:
+        name:
+          - ffmpeg
+          - p7zip-full # 7zip
+          - jq
+          - poppler-utils # poppler
+          - fd-find # fd
+          - ripgrep
+          - fzf
+          - zoxide
+          - imagemagick
+          - xclip # for clipboard support
+          - build-essential # for cargo build
+        state: present
+      tags:
+        - yazi
+
+
+
+    - name: Check if pyenv is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.pyenv"
+      register: pyenv_stat
+      become: no
+
+    - name: Install pyenv
+      ansible.builtin.git:
+        repo: 'https://github.com/pyenv/pyenv.git'
+        dest: "{{ ansible_user_dir }}/.pyenv"
+      when: not pyenv_stat.stat.exists
+      become: no
+      tags:
+        - pyenv
+
+    - name: Check if nvm is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.nvm"
+      register: nvm_stat
+      become: no
+
+    - name: Install nvm
+      ansible.builtin.shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.nvm"
+      when: not nvm_stat.stat.exists
+      become: no
+      tags:
+        - nvm
+
+
+
+    - name: Check if opencode is installed
+      stat:
+        path: "{{ ansible_user_dir }}/.opencode/bin/opencode"
+      register: opencode_stat
+      become: no
+
+    - name: Install opencode
+      ansible.builtin.shell: >
+        curl -fsSL https://opencode.ai/install | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.opencode/bin/opencode"
+      when: not opencode_stat.stat.exists
+      become: no
+      tags:
+        - opencode
+
+
+
+    - name: Install getnf Nerd Font installer
+      become: no
+      ansible.builtin.shell: >
+        curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh | bash
+      args:
+        creates: "{{ ansible_user_dir }}/.local/bin/getnf"
+      tags:
+        - fonts
+
+
+
+    - name: Update font cache
+      become: no
+      ansible.builtin.command: fc-cache -fv
+      tags:
+        - fonts
+
+    - name: Set Zsh as default shell
+      become: yes
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        shell: /bin/zsh
+      tags:
+        - zsh

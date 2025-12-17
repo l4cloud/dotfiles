@@ -1,0 +1,27 @@
+packages:
+  - git
+  - neovim
+  - jq
+  - gcc
+  - make
+  - zlib
+  - bzip2
+  - readline
+  - sqlite
+  - openssl
+  - tk
+  - libffi
+  - xz
+  - ncurses
+  - patch
+  - unzip
+  - curl
+  - wget
+  - stow
+  - zsh
+  - python-pip
+  - tmux
+  - htop
+  - fastfetch
+  - go
+  - docker

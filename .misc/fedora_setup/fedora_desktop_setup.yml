@@ -48,6 +48,7 @@
       - htop
       - fastfetch
 
+
   tasks:
     - name: Enable RPMFusion free repository
       ansible.builtin.command: dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
@@ -60,6 +61,19 @@
         state: present
         update_cache: yes
 
+    - name: Install flatpak
+      ansible.builtin.dnf:
+        name: flatpak
+        state: present
+
+    - name: Add flathub repository
+      ansible.builtin.command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      args:
+        creates: /var/lib/flatpak/repo/flathub.flatpakrepo
+
+    - name: Install Obsidian via flatpak
+      ansible.builtin.command: flatpak install -y flathub md.obsidian.Obsidian
+
     - name: Install pulsemixer
       become: no
       ansible.builtin.pip:
@@ -67,21 +81,32 @@
         state: present
         executable: pip3
 
+    - name: Check if Hack Nerd Font is already installed
+      ansible.builtin.shell: fc-list | grep -i "hack nerd"
+      register: font_check
+      ignore_errors: true
+
     - name: Download Hack Nerd Font
       ansible.builtin.get_url:
         url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hack.zip
         dest: /tmp/Hack.zip
+        timeout: 30
+        retries: 3
+        delay: 10
+      when: font_check.rc != 0
 
     - name: Unzip Hack Nerd Font
       ansible.builtin.unarchive:
         src: /tmp/Hack.zip
         dest: /usr/share/fonts
         remote_src: yes
+      when: font_check.rc != 0
 
     - name: Update font cache
       ansible.builtin.command: fc-cache -fv
+      when: font_check.rc != 0
 
     - name: Verify Hack Nerd Font is installed
       ansible.builtin.shell: fc-list | grep -i "hack nerd"
-      register: font_check
-      failed_when: font_check.rc != 0
+      register: final_font_check
+      failed_when: final_font_check.rc != 0

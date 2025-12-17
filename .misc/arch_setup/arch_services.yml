@@ -1,5 +1,5 @@
 ---
-- name: Setup Fedora Development Environment
+- name: Setup Arch Linux Development Environment
   hosts: localhost
   connection: local
 
@@ -9,46 +9,75 @@
   tasks:
     - name: Update all system packages
       become: yes
-      dnf:
-        name: "*"
-        state: latest
+      pacman:
         update_cache: yes
+        upgrade: yes
       tags:
         - system
 
     - name: Install development packages
       become: yes
-      dnf:
+      pacman:
         name: "{{ packages }}"
         state: present
       tags:
         - packages
 
-    - name: Ensure dnf-plugins-core is installed
+    - name: Install AUR helper (yay) dependencies
       become: yes
-      ansible.builtin.dnf:
-        name: dnf-plugins-core
+      ansible.builtin.pacman:
+        name:
+          - base-devel
+          - git
         state: present
       tags:
-        - lazygit
+        - aur
 
-    - name: Enable atim/lazygit Copr repository
-      become: yes
-      ansible.builtin.command: dnf copr enable -y atim/lazygit
-      args:
-        creates: /etc/yum.repos.d/_copr_atim-lazygit.repo
+    - name: Check if yay is installed
+      ansible.builtin.command: which yay
+      register: yay_check
+      ignore_errors: true
+      become: no
+
+    - name: Clone yay repository
+      ansible.builtin.git:
+        repo: 'https://aur.archlinux.org/yay.git'
+        dest: /tmp/yay
+      when: yay_check.rc != 0
+      become: no
+
+    - name: Build and install yay
+      ansible.builtin.shell: |
+        cd /tmp/yay
+        makepkg -si --noconfirm
+      when: yay_check.rc != 0
+      become: no
+      tags:
+        - aur
+
+    - name: Install lazygit via AUR
+      ansible.builtin.shell: yay -S --noconfirm lazygit
+      become: no
       tags:
         - lazygit
 
-    - name: Install lazygit
+    - name: Install Yazi and recommended dependencies
       become: yes
-      ansible.builtin.dnf:
-        name: lazygit
+      ansible.builtin.pacman:
+        name:
+          - yazi
+          - p7zip # 7zip
+          - jq
+          - poppler
+          - fd # fd
+          - ripgrep
+          - fzf
+          - zoxide
+          - imagemagick
+          - xclip # for clipboard support
         state: present
       tags:
-        - lazygit
-
-
+        - yazi
 
     - name: Check if pyenv is installed
       stat:
@@ -81,8 +110,6 @@
       tags:
         - nvm
 
-
-
     - name: Check if opencode is installed
       stat:
         path: "{{ ansible_user_dir }}/.opencode/bin/opencode"
@@ -99,8 +126,6 @@
       tags:
         - opencode
 
-
-
     - name: Install getnf Nerd Font installer
       become: no
       ansible.builtin.shell: >
@@ -109,8 +134,6 @@
         creates: "{{ ansible_user_dir }}/.local/bin/getnf"
       tags:
         - fonts
-
-
 
     - name: Update font cache
       become: no

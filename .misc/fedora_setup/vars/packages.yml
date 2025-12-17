@@ -26,3 +26,4 @@ packages:
   - htop
   - fastfetch
   - golang
+  - docker

@@ -7,4 +7,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('n', '<leader><leader>', '<C-^>', { desc = 'Move focus to the upper window' })
+-- Obsidian keymaps
+vim.keymap.set('n', '<leader>on', '<cmd>ObsidianNew<CR>', { desc = 'Create new Obsidian note' })
+vim.keymap.set('n', '<leader>ol', '<cmd>ObsidianLink<CR>', { desc = 'Link to existing Obsidian note' })
+vim.keymap.set('n', '<leader>os', '<cmd>ObsidianQuickSwitch<CR>', { desc = 'Quick switch to Obsidian note' })
+vim.keymap.set('n', '<leader>ob', '<cmd>ObsidianBacklinks<CR>', { desc = 'Show backlinks' })
 -- vim.keymap.set('v', '<C-b>', 'gc', { noremap = true, silent = true })
