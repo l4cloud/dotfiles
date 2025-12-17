@@ -38,31 +38,63 @@
       register: yay_check
       ignore_errors: true
       become: no
+      changed_when: false
+
+    - name: Remove existing yay build directory
+      ansible.builtin.file:
+        path: /tmp/yay
+        state: absent
+      when: yay_check.rc != 0
+      become: no
 
     - name: Clone yay repository
       ansible.builtin.git:
         repo: 'https://aur.archlinux.org/yay.git'
         dest: /tmp/yay
+        force: yes
       when: yay_check.rc != 0
       become: no
+
+    - name: Change ownership of yay directory to current user
+      ansible.builtin.file:
+        path: /tmp/yay
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
+        recurse: yes
+      when: yay_check.rc != 0
+      become: yes
 
     - name: Build yay package
       ansible.builtin.shell: |
         cd /tmp/yay
-        makepkg -s --noconfirm
+        makepkg -sf --noconfirm --needed
       when: yay_check.rc != 0
       become: no
       tags:
         - aur
 
+    - name: Find built yay package
+      ansible.builtin.find:
+        paths: /tmp/yay
+        patterns: "yay-*.pkg.tar.zst"
+      register: yay_package
+      when: yay_check.rc != 0
+
     - name: Install yay package
       become: yes
-      ansible.builtin.shell: |
-        cd /tmp/yay
-        pacman -U --noconfirm yay-*.pkg.tar.zst
-      when: yay_check.rc != 0
+      ansible.builtin.pacman:
+        name: "{{ yay_package.files[0].path }}"
+        state: present
+      when: yay_check.rc != 0 and yay_package.files|length > 0
       tags:
         - aur
+
+    - name: Clean up yay build directory
+      ansible.builtin.file:
+        path: /tmp/yay
+        state: absent
+      when: yay_check.rc != 0
+      become: no
 
     - name: Install lazygit via AUR
       ansible.builtin.shell: yay -S --noconfirm lazygit
