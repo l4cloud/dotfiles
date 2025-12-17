@@ -33,6 +33,12 @@
       tags:
         - aur
 
+    - name: Check if yay is installed
+      ansible.builtin.command: which yay
+      register: yay_check
+      ignore_errors: true
+      become: no
+
     - name: Clone yay repository
       ansible.builtin.git:
         repo: 'https://aur.archlinux.org/yay.git'
