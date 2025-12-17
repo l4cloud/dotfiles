@@ -15,6 +15,14 @@
       tags:
         - system
 
+    - name: Install git early (required for ansible.builtin.git module)
+      become: yes
+      pacman:
+        name: git
+        state: present
+      tags:
+        - git
+
     - name: Install development packages
       become: yes
       pacman:
@@ -25,7 +33,7 @@
 
     - name: Install AUR helper (yay) dependencies
       become: yes
-      ansible.builtin.pacman:
+      pacman:
         name:
           - base-devel
           - git
@@ -63,7 +71,7 @@
 
     - name: Install Yazi and recommended dependencies
       become: yes
-      ansible.builtin.pacman:
+      pacman:
         name:
           - yazi
           - p7zip # 7zip
