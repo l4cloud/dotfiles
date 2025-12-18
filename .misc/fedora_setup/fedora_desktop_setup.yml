@@ -47,6 +47,7 @@
       - tmux
       - htop
       - fastfetch
+      - stow
 
 
   tasks:
@@ -110,3 +111,35 @@
       ansible.builtin.shell: fc-list | grep -i "hack nerd"
       register: final_font_check
       failed_when: final_font_check.rc != 0
+
+    - name: Check if dotfiles directory exists
+      become: no
+      ansible.builtin.stat:
+        path: ~/.dotfiles
+      register: dotfiles_check
+
+    - name: Clone dotfiles repository
+      become: no
+      ansible.builtin.git:
+        repo: https://github.com/YOUR_USERNAME/dotfiles.git
+        dest: ~/.dotfiles
+        clone: yes
+      when: not dotfiles_check.stat.exists
+      # Note: Replace YOUR_USERNAME/dotfiles.git with your actual dotfiles repository URL
+      # Or comment out this task if you're already in your dotfiles directory
+
+    - name: Stow dotfiles configuration
+      become: no
+      ansible.builtin.shell: |
+        cd ~/.dotfiles
+        stow .
+      args:
+        creates: ~/.zshrc
+
+    - name: Stow wallpapers
+      become: no
+      ansible.builtin.shell: |
+        cd ~/.dotfiles
+        stow wallpapers
+      args:
+        creates: ~/Wallpapers
