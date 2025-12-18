@@ -160,3 +160,31 @@
         shell: /bin/zsh
       tags:
         - zsh
+
+    - name: Install stow for dotfiles management
+      become: yes
+      dnf:
+        name: stow
+        state: present
+      tags:
+        - dotfiles
+        - stow
+
+    - name: Remove existing symlinks to avoid conflicts (restow)
+      become: no
+      ansible.builtin.command: stow -D .
+      args:
+        chdir: "{{ ansible_user_dir }}/.dotfiles"
+      ignore_errors: yes
+      tags:
+        - dotfiles
+        - stow
+
+    - name: Stow dotfiles
+      become: no
+      ansible.builtin.command: stow .
+      args:
+        chdir: "{{ ansible_user_dir }}/.dotfiles"
+      tags:
+        - dotfiles
+        - stow
