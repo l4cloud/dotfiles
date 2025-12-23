@@ -1,0 +1,34 @@
+packages:
+  - git
+  - neovim
+  - jq
+  - gcc
+  - make
+  - zlib1g-dev     # zlib-devel equivalent
+  - libbz2-dev     # bzip2-devel equivalent
+  - libreadline-dev # readline-devel equivalent
+  - sqlite3        # sqlite equivalent
+  - libsqlite3-dev # sqlite-devel equivalent
+  - libssl-dev     # openssl-devel equivalent
+  - tk-dev         # tk-devel equivalent
+  - libffi-dev     # libffi-devel equivalent
+  - liblzma-dev    # xz-devel equivalent
+  - libncurses5-dev # ncurses-devel equivalent
+  - libncursesw5-dev
+  - patch
+  - unzip
+  - curl
+  - wget
+  - stow
+  - zsh
+  - python3-pip
+  - tmux
+  - htop
+  - fastfetch
+  - golang-go      # golang equivalent
+  - build-essential # Additional for Ubuntu (includes essential build tools)
+  - software-properties-common # For adding PPAs
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - lsb-release
