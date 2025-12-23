@@ -6,7 +6,7 @@
 # Uses stow to manage dotfile configs
 ##############################################################################
 
-set -e
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -29,7 +29,7 @@ fi
 
 # Check for NVIDIA GPU
 NVIDIA_DETECTED=0
-if lspci | grep -i nvidia >/dev/null 2>&1; then
+if command -v lspci >/dev/null 2>&1 && lspci | grep -i nvidia >/dev/null 2>&1; then
     NVIDIA_DETECTED=1
     log_info "NVIDIA GPU detected"
 fi
@@ -64,15 +64,20 @@ log_info "SDDM display manager enabled"
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
-if ! fc-list | grep -q "Hack Nerd"; then
+if ! command -v fc-list >/dev/null 2>&1 || ! fc-list 2>/dev/null | grep -q "Hack Nerd"; then
     mkdir -p /tmp/font-install
     cd /tmp/font-install
-    wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hack.zip
-    sudo unzip -q Hack.zip -d /usr/share/fonts
-    sudo fc-cache -fv
+    if wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hack.zip; then
+        sudo unzip -q Hack.zip -d /usr/share/fonts
+        if command -v fc-cache >/dev/null 2>&1; then
+            sudo fc-cache -fv >/dev/null 2>&1 || true
+        fi
+        log_info "Hack Nerd Font installed"
+    else
+        log_warn "Failed to download Hack Nerd Font"
+    fi
     cd /
     rm -rf /tmp/font-install
-    log_info "Hack Nerd Font installed"
 else
     log_info "Hack Nerd Font already installed"
 fi
@@ -102,8 +107,16 @@ log_info "Hyprland environment variables configured"
 
 # Setup pipewire
 log_step "Setting up Pipewire audio..."
-systemctl --user enable pipewire pipewire-pulse wireplumber 2>/dev/null || true
-systemctl --user start pipewire pipewire-pulse wireplumber 2>/dev/null || true
+if ! systemctl --user enable pipewire pipewire-pulse wireplumber 2>/dev/null; then
+    log_warn "Failed to enable Pipewire services"
+else
+    log_info "Pipewire services enabled"
+fi
+if ! systemctl --user start pipewire pipewire-pulse wireplumber 2>/dev/null; then
+    log_warn "Failed to start Pipewire services"
+else
+    log_info "Pipewire services started"
+fi
 log_info "Pipewire configured"
 
 # Install pulsemixer for audio control
@@ -115,7 +128,7 @@ if [ "$NVIDIA_DETECTED" = "1" ]; then
     log_step "Configuring NVIDIA drivers for Hyprland..."
     
     # Detect GPU generation to recommend driver
-    if lspci | grep -i "NVIDIA.*RTX\|GeForce" >/dev/null; then
+    if command -v lspci >/dev/null 2>&1 && lspci | grep -i "NVIDIA.*RTX\|GeForce" >/dev/null; then
         GPU_GEN=$(lspci | grep -i nvidia | head -1)
         log_info "Detected GPU: $GPU_GEN"
         
@@ -127,10 +140,14 @@ if [ "$NVIDIA_DETECTED" = "1" ]; then
     
     # Install NVIDIA drivers and utils
     log_step "Installing NVIDIA driver packages..."
-    sudo pacman -S --noconfirm \
+    if ! sudo pacman -S --noconfirm \
         nvidia \
         nvidia-utils \
-        nvidia-settings 2>/dev/null || log_warn "NVIDIA drivers installation attempted"
+        nvidia-settings 2>/dev/null; then
+        log_warn "NVIDIA drivers installation had issues - you may need to install manually"
+    else
+        log_info "NVIDIA drivers installed"
+    fi
     
     # Configure NVIDIA for Hyprland
     log_step "Configuring NVIDIA for Hyprland..."
@@ -157,7 +174,11 @@ EOF
     
     # Regenerate initramfs
     log_step "Regenerating initramfs with NVIDIA modules..."
-    sudo mkinitcpio -P 2>/dev/null || log_warn "mkinitcpio regeneration had issues"
+    if ! sudo mkinitcpio -P 2>/dev/null; then
+        log_warn "mkinitcpio regeneration had issues - you may need to run: sudo mkinitcpio -P"
+    else
+        log_info "Initramfs regenerated successfully"
+    fi
     
     log_info "NVIDIA configuration complete - reboot required for changes to take effect"
 fi
@@ -168,7 +189,11 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 # Install Obsidian via flatpak
 log_step "Installing Obsidian via Flatpak..."
-flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null || log_warn "Obsidian installation skipped"
+if ! flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null; then
+    log_warn "Obsidian installation skipped"
+else
+    log_info "Obsidian installed"
+fi
 
 # Use stow to install dotfiles (configs)
 log_step "Installing dotfile configs using stow..."
@@ -196,26 +221,48 @@ cd - > /dev/null
 # Install language version managers
 log_step "Installing pyenv..."
 if [ ! -d ~/.pyenv ]; then
-    git clone https://github.com/pyenv/pyenv.git ~/.pyenv 2>/dev/null || true
-    log_info "pyenv installed"
+    if git clone https://github.com/pyenv/pyenv.git ~/.pyenv 2>/dev/null; then
+        log_info "pyenv installed"
+    else
+        log_warn "pyenv installation failed"
+    fi
+else
+    log_info "pyenv already installed"
 fi
 
 log_step "Installing nvm..."
 if [ ! -d ~/.nvm ]; then
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh 2>/dev/null | bash || log_warn "nvm installation skipped"
-    log_info "nvm installed"
+    if curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh 2>/dev/null | bash; then
+        log_info "nvm installed"
+    else
+        log_warn "nvm installation skipped"
+    fi
+else
+    log_info "nvm already installed"
 fi
 
 # Install opencode
 log_step "Installing opencode..."
 if [ ! -f ~/.opencode/bin/opencode ]; then
-    curl -fsSL https://opencode.ai/install 2>/dev/null | bash || log_warn "opencode installation skipped"
+    if curl -fsSL https://opencode.ai/install 2>/dev/null | bash; then
+        log_info "opencode installed"
+    else
+        log_warn "opencode installation skipped"
+    fi
+else
+    log_info "opencode already installed"
 fi
 
 # Install getnf for fonts
 log_step "Installing getnf font installer..."
 if [ ! -f ~/.local/bin/getnf ]; then
-    curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh 2>/dev/null | bash || log_warn "getnf installation skipped"
+    if curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh 2>/dev/null | bash; then
+        log_info "getnf installed"
+    else
+        log_warn "getnf installation skipped"
+    fi
+else
+    log_info "getnf already installed"
 fi
 
 # Final verification
