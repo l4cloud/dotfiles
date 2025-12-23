@@ -27,3 +27,6 @@ packages:
   - fastfetch
   - golang
   - docker
+  - gamescope
+  - steam
+  - gamemode

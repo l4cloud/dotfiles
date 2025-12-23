@@ -1,0 +1,15 @@
+[Unit]
+Description=Notification Sound Service
+After=graphical-session.target
+Requires=dbus.service
+
+[Service]
+Type=simple
+ExecStart=%h/.config/swaync/notification-sound.sh
+Restart=on-failure
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=PULSE_SERVER=unix:%t/pulse/native
+
+[Install]
+WantedBy=default.target

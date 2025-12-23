@@ -48,6 +48,9 @@
       - htop
       - fastfetch
       - stow
+      - gamescope
+      - steam
+      - gamemode
 
 
   tasks:
@@ -55,6 +58,11 @@
       ansible.builtin.command: dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
       args:
         creates: /etc/yum.repos.d/rpmfusion-free.repo
+
+    - name: Enable RPMFusion non-free repository
+      ansible.builtin.command: dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+      args:
+        creates: /etc/yum.repos.d/rpmfusion-nonfree.repo
 
     - name: Install DNF packages
       ansible.builtin.dnf:
@@ -74,6 +82,9 @@
 
     - name: Install Obsidian via flatpak
       ansible.builtin.command: flatpak install -y flathub md.obsidian.Obsidian
+
+    - name: Install Zen via flatpak
+      ansible.builtin.command: flatpak install -y flathub app.zen_browser.zen
 
     - name: Install pulsemixer
       become: no
@@ -111,6 +122,34 @@
       ansible.builtin.shell: fc-list | grep -i "hack nerd"
       register: final_font_check
       failed_when: final_font_check.rc != 0
+
+    - name: Enable Steam Play for all titles (Proton)
+      become: no
+      ansible.builtin.lineinfile:
+        path: ~/.steam/steam/config/config.vdf
+        line: '			"ToolMapping"		"proton_*"'
+        create: yes
+      ignore_errors: true
+
+    - name: Create gamescope desktop entry for Steam Big Picture
+      ansible.builtin.copy:
+        dest: /usr/share/applications/steam-bigpicture-gamescope.desktop
+        content: |
+          [Desktop Entry]
+          Name=Steam Big Picture (Gamescope)
+          Comment=Launch Steam Big Picture mode with gamescope for optimal performance
+          Exec=gamescope -W 1920 -H 1080 -r 60 -- steam -gamepadui
+          Icon=steam
+          Terminal=false
+          Type=Application
+          Categories=Game;
+        mode: '0644'
+
+    - name: Install gaming helper script
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/gaming-helper.sh"
+        dest: /usr/local/bin/gaming-helper
+        mode: '0755'
 
     - name: Check if dotfiles directory exists
       become: no
