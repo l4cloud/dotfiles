@@ -132,9 +132,24 @@ journalctl --user -u wireplumber -n 20
 
 ### AUR Helper Installation Failed
 
-The scripts gracefully handle AUR helper failures. You can:
-1. Continue with pacman packages only
-2. Install yay manually later: `git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si`
+The scripts gracefully handle AUR helper failures. If yay installation fails:
+1. The setup continues with pacman packages only (no AUR packages)
+2. You'll see a WARNING message in the output
+3. You can install yay manually later if needed
+
+To install yay manually:
+
+```bash
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si --noconfirm
+```
+
+Common yay installation issues:
+- **gcc/make not installed**: Run `sudo pacman -S base-devel` first
+- **No internet**: Ensure network connectivity
+- **Permission denied**: Check sudo configuration
+- **Existing build directory**: The script cleans this automatically
 
 ### Internet Connectivity Issues
 

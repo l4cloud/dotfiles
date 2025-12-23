@@ -47,6 +47,11 @@
       ignore_errors: true
       changed_when: false
 
+    - name: Display yay check result
+      ansible.builtin.debug:
+        msg: "yay is already installed at {{ yay_check.stdout }}"
+      when: yay_check.rc == 0
+
     - name: Remove existing yay build directory
       ansible.builtin.file:
         path: /tmp/yay
@@ -63,19 +68,29 @@
       ignore_errors: true
       register: yay_clone
 
+    - name: Display yay clone result
+      ansible.builtin.debug:
+        msg: "yay clone failed: {{ yay_clone.stderr | default('No error message') }}"
+      when: yay_check.rc != 0 and yay_clone.failed
+
     - name: Build and install yay
       ansible.builtin.shell: |
         cd /tmp/yay
         makepkg -si --noconfirm
-      when: yay_check.rc != 0 and yay_clone.failed == false
+      when: yay_check.rc != 0 and not yay_clone.failed
       become: no
       ignore_errors: true
       register: yay_build
 
+    - name: Display yay build result
+      ansible.builtin.debug:
+        msg: "yay build failed: {{ yay_build.stderr | default('No error message') }}"
+      when: yay_check.rc != 0 and yay_build.failed
+
     - name: Warn if yay installation failed
       ansible.builtin.debug:
         msg: "WARNING: yay installation failed. Some AUR packages may not be available. Continuing with pacman packages only."
-      when: yay_clone.failed == true or yay_build.failed == true
+      when: yay_check.rc != 0 and (yay_clone.failed or yay_build.failed)
 
     - name: Clean up yay build directory
       ansible.builtin.file:
@@ -88,6 +103,14 @@
       become: no
       when: yay_check.rc == 0
       ignore_errors: true
+      register: lazygit_install
+      tags:
+        - lazygit
+
+    - name: Display lazygit installation result
+      ansible.builtin.debug:
+        msg: "lazygit installation via AUR failed, will continue without it"
+      when: lazygit_install.failed
       tags:
         - lazygit
 
