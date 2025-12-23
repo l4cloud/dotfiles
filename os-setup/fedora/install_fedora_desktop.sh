@@ -55,6 +55,16 @@ sudo dnf install -y \
     sqlite-devel openssl-devel tk-devel libffi-devel xz-devel ncurses-devel \
     patch unzip curl wget zsh python3-pip tmux htop fastfetch stow
 
+# Install and setup greeter (SDDM) for login manager
+log_step "Installing SDDM (greeter) for display manager..."
+sudo dnf install -y sddm sddm-kcm
+
+# Enable SDDM login manager
+log_step "Configuring SDDM as display manager..."
+sudo systemctl set-default graphical.target
+sudo systemctl enable sddm
+log_info "SDDM display manager enabled"
+
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
 if ! fc-list | grep -q "Hack Nerd"; then
@@ -69,6 +79,29 @@ if ! fc-list | grep -q "Hack Nerd"; then
 else
     log_info "Hack Nerd Font already installed"
 fi
+
+# Setup Hyprland improvements
+log_step "Configuring Hyprland optimizations..."
+
+# Create/ensure XDG desktop portal config for Hyprland
+mkdir -p "$HOME/.config/xdg-desktop-portal"
+if [ ! -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ]; then
+    tee "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" > /dev/null <<EOF
+[General]
+backends=hyprland;gtk
+EOF
+    log_info "XDG desktop portal configured"
+fi
+
+# Ensure XDG Session Type environment variable is set for Hyprland
+if ! grep -q "XDG_SESSION_TYPE=wayland" ~/.bashrc 2>/dev/null; then
+    echo "export XDG_SESSION_TYPE=wayland" >> ~/.bashrc
+fi
+if ! grep -q "XDG_SESSION_TYPE=wayland" ~/.zshrc 2>/dev/null; then
+    echo "export XDG_SESSION_TYPE=wayland" >> ~/.zshrc
+fi
+
+log_info "Hyprland environment variables configured"
 
 # Setup pipewire
 log_step "Setting up Pipewire audio..."
@@ -111,13 +144,14 @@ fi
 # Change to dotfiles directory and run stow
 cd "$DOTFILES_DIR"
 
-# Remove any existing symlinks to avoid conflicts
-log_info "Removing existing symlinks..."
-stow -D . 2>/dev/null || true
-
-# Install all symlinks from dotfiles
-log_info "Creating symlinks for all dotfile configs..."
-stow . 2>/dev/null || log_warn "Some stow operations may have had issues"
+# Stow configuration directories (.config, wallpapers, etc.)
+# Remove any existing symlinks first to avoid conflicts
+log_info "Installing dotfile configs (.config, wallpapers, etc.)..."
+for package in .config wallpapers nvim starship.toml; do
+    if [ -e "$package" ]; then
+        stow -R "$package" 2>/dev/null || log_warn "stow $package had minor issues (this is often OK)"
+    fi
+done
 
 cd - > /dev/null
 
@@ -127,15 +161,22 @@ echo ""
 command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_error "✗ Hyprland not found"
 command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_error "✗ Kitty not found"
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
+command -v sddm >/dev/null && log_info "✓ SDDM (greeter) installed" || log_warn "✗ SDDM not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 fc-list | grep -q "Hack Nerd" && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
 [ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
+[ -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ] && log_info "✓ XDG desktop portal configured" || log_warn "✗ XDG portal not configured"
 
 echo ""
 log_info "Desktop environment setup complete!"
 log_info "Next steps:"
 log_info "  1. Restart your system: sudo reboot"
-log_info "  2. Hyprland will start automatically"
-log_info "  3. Default keybind: SUPER + Q to open terminal"
-log_info "  4. All configs are managed by stow from ~/.dotfiles/"
+log_info "  2. SDDM will start automatically on login"
+log_info "  3. Select Hyprland from the session menu in SDDM"
+log_info "  4. Default keybind: SUPER + Q to open terminal"
+log_info "  5. All configs are managed by stow from ~/.dotfiles/"
+echo ""
+log_info "For more information on Hyprland keybinds:"
+log_info "  • Check: ~/.dotfiles/.config/hypr/hyprland.conf"
+log_info "  • Or in-session: Super + H (if configured)"
 echo ""
