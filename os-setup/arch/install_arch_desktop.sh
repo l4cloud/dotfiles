@@ -22,11 +22,24 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
+# Track failed package installations
+FAILED_PACKAGES=""
+
 # Check if running on Arch
 if [ ! -f /etc/arch-release ]; then
     log_error "This script requires Arch Linux"
     exit 1
 fi
+
+log_info "================================================================"
+log_info "NOTE: Some packages like hyprland, kitty, waybar may be in the AUR"
+log_info "If they don't install, you may need to:"
+log_info "  1. Enable multilib repo in /etc/pacman.conf"
+log_info "  2. Install from AUR using: yay -S hyprland kitty waybar"
+log_info "  3. Or compile from source if needed"
+log_info "This script will continue with other packages if these fail."
+log_info "================================================================"
+echo ""
 
 # Check for NVIDIA GPU
 NVIDIA_DETECTED=0
@@ -37,35 +50,72 @@ fi
 
 log_info "Starting Arch Linux Hyprland desktop setup..."
 
+# Install AUR helper if not already present
+log_step "Checking for AUR helper (yay/paru)..."
+if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
+    log_info "No AUR helper found. Installing yay..."
+    sudo pacman -S --noconfirm base-devel 2>/dev/null || log_warn "base-devel installation had issues"
+    
+    if git clone https://aur.archlinux.org/yay.git /tmp/yay 2>/dev/null && cd /tmp/yay && makepkg -si --noconfirm 2>/dev/null; then
+        log_info "yay installed successfully"
+        cd - > /dev/null
+        rm -rf /tmp/yay
+    else
+        log_warn "yay installation failed, some AUR packages won't be available"
+    fi
+else
+    if command -v yay >/dev/null 2>&1; then
+        log_info "yay found"
+    else
+        log_info "paru found"
+    fi
+fi
+
 # Update system
 log_step "Updating system packages..."
 sudo pacman -Syu --noconfirm || log_warn "System package update had issues"
 
 # Install desktop and development packages
 log_step "Installing Hyprland and desktop packages..."
-sudo pacman -S --noconfirm \
-    hyprland kitty hypridle waybar swww swaync \
-    pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
-    brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
-    thunar wofi flatpak \
-    git neovim jq gcc make patch unzip curl wget \
-    zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
-    python-pip stow docker \
-    yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip \
-    zsh tmux htop fastfetch || log_warn "Some packages may have failed to install"
+log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
+
+# List of packages to install
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock wlogout thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch"
+
+INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || true
+
+# Check each critical package
+for pkg in hyprland kitty waybar swww swaync; do
+    if echo "$INSTALL_OUTPUT" | grep -i "error.*$pkg\|$pkg.*not found\|unable.*$pkg" >/dev/null 2>&1; then
+        FAILED_PACKAGES="$FAILED_PACKAGES $pkg"
+        log_warn "✗ $pkg failed to install"
+    elif pacman -Q $pkg >/dev/null 2>&1; then
+        log_info "✓ $pkg installed"
+    else
+        FAILED_PACKAGES="$FAILED_PACKAGES $pkg"
+        log_warn "⚠️  $pkg not found after installation"
+    fi
+done
+
 log_info "Hyprland and desktop packages installation completed"
 
 # Install and setup greeter (SDDM) for login manager
 log_step "Installing SDDM (greeter) for display manager..."
-sudo pacman -S --noconfirm sddm sddm-kcm || log_warn "SDDM installation had issues"
+if ! sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 | tee /tmp/sddm_install.log; then
+    log_warn "SDDM installation had issues"
+    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
+elif ! pacman -Q sddm >/dev/null 2>&1; then
+    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
+    log_warn "⚠️  sddm not found after installation"
+else
+    log_info "✓ SDDM installed"
+fi
 log_info "SDDM installation completed"
 
 # Enable SDDM login manager
 log_step "Configuring SDDM as display manager..."
-if ! sudo systemctl enable sddm; then
-    log_warn "Failed to enable SDDM, you may need to run: sudo systemctl enable sddm"
-fi
-log_info "SDDM configuration attempted"
+sudo systemctl enable sddm || log_warn "Failed to enable SDDM"
+log_info "SDDM configuration completed"
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
@@ -192,6 +242,38 @@ fi
 log_step "Setting up Flatpak..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
 
+# Check if we need to install packages from AUR
+log_step "Checking for packages that may need AUR installation..."
+MISSING_PACKAGES=""
+
+if ! command -v hyprland >/dev/null 2>&1 && ! pacman -Q hyprland >/dev/null 2>&1; then
+    MISSING_PACKAGES="$MISSING_PACKAGES hyprland"
+    log_warn "⚠️  hyprland not found"
+fi
+
+if ! command -v kitty >/dev/null 2>&1 && ! pacman -Q kitty >/dev/null 2>&1; then
+    MISSING_PACKAGES="$MISSING_PACKAGES kitty"
+    log_warn "⚠️  kitty not found"
+fi
+
+if ! command -v waybar >/dev/null 2>&1 && ! pacman -Q waybar >/dev/null 2>&1; then
+    MISSING_PACKAGES="$MISSING_PACKAGES waybar"
+    log_warn "⚠️  waybar not found"
+fi
+
+if [ -n "$MISSING_PACKAGES" ]; then
+    log_info ""
+    log_warn "The following packages are missing:$MISSING_PACKAGES"
+    log_info "These packages may be in the AUR (Arch User Repository)"
+    log_info ""
+    
+    # Add to failed packages list if we don't have an AUR helper
+    if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
+        log_warn "No AUR helper (yay/paru) found - cannot auto-install AUR packages"
+        FAILED_PACKAGES="$FAILED_PACKAGES$MISSING_PACKAGES"
+    fi
+fi
+
 # Install Obsidian via flatpak
 log_step "Installing Obsidian via Flatpak..."
 if ! flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null; then
@@ -284,7 +366,7 @@ command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_er
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
 command -v sddm >/dev/null && log_info "✓ SDDM (greeter) installed" || log_warn "✗ SDDM not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
-fc-list | grep -q "Hack Nerd" && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
+fc-list | grep -q "Hack Nerd" 2>/dev/null && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
 [ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
 [ -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ] && log_info "✓ XDG desktop portal configured" || log_warn "✗ XDG portal not configured"
 
@@ -293,8 +375,42 @@ if [ "$NVIDIA_DETECTED" = "1" ]; then
 fi
 
 echo ""
+echo "================================================================================"
 log_info "Desktop environment setup complete!"
+echo "================================================================================"
+echo ""
+
+# Show failed packages summary
+if [ -n "$FAILED_PACKAGES" ]; then
+    echo ""
+    log_error "FAILED/MISSING PACKAGES:"
+    log_error "The following packages were unable to install:"
+    for pkg in $FAILED_PACKAGES; do
+        log_error "  • $pkg"
+    done
+    echo ""
+    log_warn "To install these packages manually, you have several options:"
+    log_info ""
+    log_info "Option 1 - If you have yay installed (AUR helper):"
+    log_info "  yay -S$FAILED_PACKAGES"
+    log_info ""
+    log_info "Option 2 - If you have paru installed (AUR helper):"
+    log_info "  paru -S$FAILED_PACKAGES"
+    log_info ""
+    log_info "Option 3 - Manual AUR installation:"
+    log_info "  Visit: https://aur.archlinux.org/packages"
+    log_info "  Search for each package and follow the AUR installation guide"
+    log_info ""
+    log_info "Option 4 - Check if they're in a different repo:"
+    log_info "  pacman -Ss <package_name>"
+    echo ""
+else
+    log_info "✓ All packages installed successfully!"
+fi
+
+log_info ""
 log_info "Next steps:"
+log_info ""
 
 if [ "$NVIDIA_DETECTED" = "1" ]; then
     log_info "  1. Restart your system for NVIDIA changes: sudo reboot"
@@ -311,3 +427,4 @@ log_info "For more information on Hyprland keybinds:"
 log_info "  • Check: ~/.dotfiles/.config/hypr/hyprland.conf"
 log_info "  • Or in-session: Super + H (if configured)"
 echo ""
+echo "================================================================================"
