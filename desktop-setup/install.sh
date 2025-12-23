@@ -48,7 +48,7 @@ main() {
         arch)
             print_success "Detected Arch Linux"
             SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-            bash "${SCRIPT_DIR}/../os-setup/arch/install_arch_desktop.sh"
+            bash "${SCRIPT_DIR}/../os-setup/arch/setup.sh"
             ;;
         fedora)
             print_success "Detected Fedora"
@@ -57,12 +57,12 @@ main() {
             ;;
         ubuntu)
             print_success "Detected Ubuntu"
-            print_info "Note: Desktop setup playbook not yet configured for Ubuntu"
-            exit 1
+            SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+            bash "${SCRIPT_DIR}/../os-setup/ubuntu/install_ubuntu_desktop.sh"
             ;;
         *)
             print_error "Unsupported operating system."
-            print_info "Supported systems: Arch Linux, Fedora"
+            print_info "Supported systems: Arch Linux, Fedora, Ubuntu"
             exit 1
             ;;
     esac

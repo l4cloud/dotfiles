@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ##############################################################################
-# Ubuntu Development Environment Setup Script
-# Installs core development tools and utilities (no desktop environment)
+# Ubuntu Complete Setup Script
+# Sets up Hyprland desktop + development environment + pipewire audio
 ##############################################################################
 
 set -e
@@ -44,14 +44,8 @@ if [ "$VERSION_ID" != "22.04" ]; then
     fi
 fi
 
-log_info "Starting Ubuntu development environment setup..."
+log_info "Starting Ubuntu setup..."
 log_info "Detected: $PRETTY_NAME"
-
-# Check for internet connectivity
-if ! ping -c 1 8.8.8.8 &> /dev/null; then
-    log_warn "No internet connectivity detected. Some features may fail."
-    log_warn "Please ensure you have internet access before continuing."
-fi
 
 # Update system
 log_step "Updating system packages..."
@@ -59,8 +53,8 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt autoremove -y
 
-# Install development packages
-log_step "Installing development packages..."
+# Install base development packages
+log_step "Installing base development packages..."
 sudo apt install -y \
     git curl wget \
     neovim zsh tmux htop fastfetch \
@@ -68,7 +62,7 @@ sudo apt install -y \
     zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libssl-dev \
     libffi-dev liblzma-dev python3-dev python3-pip \
     stow docker.io \
-    p7zip-full poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip \
+    ffmpeg p7zip-full poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip \
     build-essential apt-transport-https ca-certificates gnupg lsb-release
 
 # Configure Docker
@@ -105,6 +99,34 @@ else
     log_info "Yazi already installed"
 fi
 
+# Install Hyprland (from ubuntu repos or build)
+log_step "Installing Hyprland..."
+sudo apt install -y hyprland kitty hypridle waybar swww swaync \
+    pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
+    brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
+    thunar wofi flatpak 2>/dev/null || log_warn "Some Hyprland packages may not be available in this Ubuntu version"
+
+# Install Hack Nerd Font
+log_step "Installing Hack Nerd Font..."
+if ! fc-list | grep -q "Hack Nerd"; then
+    mkdir -p /tmp/font-install
+    cd /tmp/font-install
+    wget -q https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Hack.zip
+    sudo unzip -q Hack.zip -d /usr/share/fonts
+    sudo fc-cache -fv
+    cd /
+    rm -rf /tmp/font-install
+    log_info "Hack Nerd Font installed"
+else
+    log_info "Hack Nerd Font already installed"
+fi
+
+# Setup pipewire
+log_step "Setting up Pipewire audio..."
+systemctl --user enable pipewire pipewire-pulse wireplumber 2>/dev/null || true
+systemctl --user start pipewire pipewire-pulse wireplumber 2>/dev/null || true
+log_info "Pipewire configured"
+
 # Install lazygit from GitHub releases
 log_step "Installing lazygit..."
 if ! command -v lazygit &>/dev/null; then
@@ -120,6 +142,10 @@ if ! command -v lazygit &>/dev/null; then
 else
     log_info "lazygit already installed"
 fi
+
+# Install pulsemixer for audio control
+log_step "Installing pulsemixer..."
+pip install --user pulsemixer 2>/dev/null || log_warn "pulsemixer installation skipped"
 
 # Install language version managers
 log_step "Installing pyenv..."
@@ -164,17 +190,18 @@ log_info "Firewall configured"
 # Final verification
 log_info "Verifying installation..."
 echo ""
-command -v git >/dev/null && log_info "✓ Git installed" || log_error "✗ Git not found"
-command -v neovim >/dev/null && log_info "✓ Neovim installed" || log_error "✗ Neovim not found"
+command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_warn "✗ Hyprland may not be available"
 command -v zsh >/dev/null && log_info "✓ Zsh installed" || log_error "✗ Zsh not found"
+pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 command -v docker >/dev/null && log_info "✓ Docker installed" || log_error "✗ Docker not found"
 command -v lazygit >/dev/null && log_info "✓ lazygit installed" || log_warn "✗ lazygit not installed (non-critical)"
 command -v yazi >/dev/null && log_info "✓ yazi installed" || log_warn "✗ yazi not installed (non-critical)"
 
 echo ""
-log_info "Development environment setup complete!"
+log_info "Setup complete!"
 log_info "Next steps:"
 log_info "  1. Log out and back in to apply group changes (docker, shell)"
-log_info "  2. Run 'source ~/.zshrc' to reload shell configuration"
-log_info "  3. To install desktop environment (Hyprland), run: ./setup.sh"
+log_info "  2. Restart your system: sudo reboot"
+log_info "  3. If Hyprland is available, it will start automatically"
+log_info "  4. Default keybind (Hyprland): SUPER + Q to open terminal"
 echo ""

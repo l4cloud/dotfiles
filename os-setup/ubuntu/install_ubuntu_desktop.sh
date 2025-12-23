@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##############################################################################
-# Fedora Hyprland Desktop Setup Script
+# Ubuntu Hyprland Desktop Setup Script
 # Sets up Hyprland desktop environment and related tools
 ##############################################################################
 
@@ -20,13 +20,32 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
-# Verify running on Fedora
-if [ ! -f /etc/fedora-release ]; then
-    log_error "This script requires Fedora Linux"
+# Verify running on Ubuntu
+if [ ! -f /etc/os-release ]; then
+    log_error "Cannot determine OS"
     exit 1
 fi
 
-log_info "Starting Fedora Hyprland desktop setup..."
+. /etc/os-release
+if [ "$ID" != "ubuntu" ]; then
+    log_error "This script requires Ubuntu"
+    exit 1
+fi
+
+# Warn about non-22.04 versions but allow them
+if [ "$VERSION_ID" != "22.04" ]; then
+    log_warn "This script is optimized for Ubuntu 22.04"
+    log_warn "Detected: $PRETTY_NAME"
+    read -p "Continue anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        log_info "Exiting..."
+        exit 0
+    fi
+fi
+
+log_info "Starting Ubuntu Hyprland desktop setup..."
+log_info "Detected: $PRETTY_NAME"
 
 # Check for internet connectivity
 if ! ping -c 1 8.8.8.8 &> /dev/null; then
@@ -36,23 +55,24 @@ fi
 
 # Update system
 log_step "Updating system packages..."
-sudo dnf upgrade -y
-
-# Enable RPMFusion repositories
-log_step "Enabling RPMFusion repositories..."
-sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm 2>/dev/null || log_warn "RPMFusion free repo already enabled"
-sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm 2>/dev/null || log_warn "RPMFusion nonfree repo already enabled"
+sudo apt update
+sudo apt upgrade -y
+sudo apt autoremove -y
 
 # Install Hyprland and desktop packages
 log_step "Installing Hyprland desktop environment..."
-sudo dnf install -y \
+sudo apt install -y \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
     thunar wofi flatpak \
-    git neovim jq gcc gcc-c++ make zlib-devel bzip2-devel readline-devel \
-    sqlite-devel openssl-devel tk-devel libffi-devel xz-devel ncurses-devel \
-    patch unzip curl wget zsh python3-pip tmux htop fastfetch stow
+    git curl wget \
+    neovim zsh tmux htop fastfetch \
+    jq gcc g++ make patch unzip \
+    zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libssl-dev \
+    libffi-dev liblzma-dev python3-dev python3-pip \
+    stow ffmpeg p7zip-full poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip \
+    build-essential 2>/dev/null || log_warn "Some Hyprland packages may not be available in this Ubuntu version"
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
@@ -89,28 +109,20 @@ flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null || log_warn "Obsidia
 log_step "Installing Zen Browser via Flatpak..."
 flatpak install -y flathub app.zen_browser.zen 2>/dev/null || log_warn "Zen browser installation skipped"
 
-# Optional gaming packages
-read -p "Install gaming packages (Steam, Gamescope, GameMode)? (y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    log_step "Installing gaming packages..."
-    sudo dnf install -y gamescope steam gamemode 2>/dev/null || log_warn "Some gaming packages skipped"
-    log_info "Gaming packages installed"
-fi
-
 # Final verification
 log_info "Verifying installation..."
 echo ""
-command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_error "✗ Hyprland not found"
-command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_error "✗ Kitty not found"
-command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
+command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_warn "✗ Hyprland may not be available on this Ubuntu version"
+command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_warn "✗ Kitty not found"
+command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_warn "✗ Waybar not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 fc-list | grep -q "Hack Nerd" && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
+command -v flatpak >/dev/null && log_info "✓ Flatpak installed" || log_warn "✗ Flatpak not found"
 
 echo ""
 log_info "Desktop environment setup complete!"
 log_info "Next steps:"
 log_info "  1. Restart your system: sudo reboot"
-log_info "  2. Hyprland will start automatically"
-log_info "  3. Default keybind: SUPER + Q to open terminal"
+log_info "  2. If Hyprland is available, it will start automatically"
+log_info "  3. Default keybind (Hyprland): SUPER + Q to open terminal"
 echo ""

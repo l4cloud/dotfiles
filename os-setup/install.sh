@@ -48,7 +48,7 @@ main() {
         arch)
             print_success "Detected Arch Linux"
             SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-            bash "${SCRIPT_DIR}/arch/install_arch_services.sh"
+            bash "${SCRIPT_DIR}/arch/setup.sh"
             ;;
         fedora)
             print_success "Detected Fedora"
