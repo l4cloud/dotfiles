@@ -46,15 +46,18 @@
       register: yay_check
       ignore_errors: true
       changed_when: false
+      tags:
+        - aur
 
-    - name: Display yay check result
+    - name: Display yay already installed
       ansible.builtin.debug:
         msg: "yay is already installed at {{ yay_check.stdout }}"
       when: yay_check.rc == 0
+      tags:
+        - aur
 
-    - name: Run yay installer script
-      ansible.builtin.shell: |
-        bash "{{ playbook_dir }}/install_yay.sh"
+    - name: Run yay installer script (if not installed)
+      ansible.builtin.shell: bash "{{ playbook_dir }}/install_yay.sh"
       when: yay_check.rc != 0
       become: no
       ignore_errors: true
@@ -62,32 +65,25 @@
       tags:
         - aur
 
-    - name: Display yay installation output
-      ansible.builtin.debug:
-        msg: "{{ yay_install_result.stdout }}"
-      when: yay_check.rc != 0 and yay_install_result.stdout is defined
-      tags:
-        - aur
-
-    - name: Display yay installation errors
-      ansible.builtin.debug:
-        msg: "yay installation errors:\n{{ yay_install_result.stderr }}"
-      when: yay_check.rc != 0 and yay_install_result.rc != 0 and yay_install_result.stderr is defined
-      tags:
-        - aur
-
-    - name: Warn if yay installation failed
-      ansible.builtin.debug:
-        msg: "WARNING: yay installation failed. Continuing with pacman packages only. You can install yay manually later with: bash {{ playbook_dir }}/install_yay.sh"
-      when: yay_check.rc != 0 and yay_install_result.rc != 0
-      tags:
-        - aur
-
-    - name: Verify yay installation
+    - name: Re-check yay installation after script
       ansible.builtin.command: which yay
       register: yay_final_check
       ignore_errors: true
       changed_when: false
+      tags:
+        - aur
+
+    - name: Display final yay status
+      ansible.builtin.debug:
+        msg: "yay installation successful: {{ yay_final_check.stdout }}"
+      when: yay_final_check.rc == 0
+      tags:
+        - aur
+
+    - name: Display yay installation failed warning
+      ansible.builtin.debug:
+        msg: "WARNING: yay installation failed. Continuing with pacman packages only."
+      when: yay_final_check.rc != 0
       tags:
         - aur
 
@@ -96,13 +92,6 @@
       become: no
       when: yay_final_check.rc == 0
       ignore_errors: true
-      tags:
-        - lazygit
-
-    - name: Display lazygit installation status
-      ansible.builtin.debug:
-        msg: "lazygit installed via AUR"
-      when: yay_final_check.rc == 0
       tags:
         - lazygit
 
