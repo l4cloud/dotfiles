@@ -1,1 +1,6 @@
+# Neovim
 .config/nvim/lazy-lock.json
+
+# Cache and telemetry directories
+.config/go/telemetry/
+.config/github-copilot/versions.json

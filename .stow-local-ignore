@@ -2,6 +2,11 @@
 
 /misc/*
 
+# Cache and telemetry directories
+.config/go/telemetry/
+.config/github-copilot/versions.json
+.config/nvim/lazy-lock.json
+
 # Defaults
 RCS
 .+,v
