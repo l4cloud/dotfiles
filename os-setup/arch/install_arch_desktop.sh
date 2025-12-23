@@ -22,8 +22,9 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
-# Track failed package installations
+# Track failed package installations and error messages
 FAILED_PACKAGES=""
+INSTALL_ERRORS=""
 
 # Check if running on Arch
 if [ ! -f /etc/arch-release ]; then
@@ -82,33 +83,46 @@ log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and 
 # List of packages to install
 PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock wlogout thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch"
 
-INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || true
+INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN_EXIT=$?
+
+# Capture any error messages from pacman
+PACMAN_ERRORS=$(echo "$INSTALL_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
 
 # Check each critical package
 for pkg in hyprland kitty waybar swww swaync; do
-    if echo "$INSTALL_OUTPUT" | grep -i "error.*$pkg\|$pkg.*not found\|unable.*$pkg" >/dev/null 2>&1; then
-        FAILED_PACKAGES="$FAILED_PACKAGES $pkg"
-        log_warn "✗ $pkg failed to install"
-    elif pacman -Q $pkg >/dev/null 2>&1; then
+    if pacman -Q $pkg >/dev/null 2>&1; then
         log_info "✓ $pkg installed"
     else
         FAILED_PACKAGES="$FAILED_PACKAGES $pkg"
-        log_warn "⚠️  $pkg not found after installation"
+        log_warn "✗ $pkg not found after installation"
     fi
 done
 
 log_info "Hyprland and desktop packages installation completed"
+if [ -n "$PACMAN_ERRORS" ]; then
+    log_warn "Pacman output contained errors - see summary at end of script"
+    INSTALL_ERRORS="$INSTALL_ERRORS
+
+--- Main Package Installation Errors ---
+$PACMAN_ERRORS"
+fi
 
 # Install and setup greeter (SDDM) for login manager
 log_step "Installing SDDM (greeter) for display manager..."
-if ! sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 | tee /tmp/sddm_install.log; then
-    log_warn "SDDM installation had issues"
-    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-elif ! pacman -Q sddm >/dev/null 2>&1; then
-    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-    log_warn "⚠️  sddm not found after installation"
-else
+SDDM_OUTPUT=$(sudo pacman -S --noconfirm sddm sddm-kcm 2>&1) || SDDM_EXIT=$?
+
+if pacman -Q sddm >/dev/null 2>&1; then
     log_info "✓ SDDM installed"
+else
+    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
+    log_warn "✗ sddm not found after installation"
+    SDDM_ERRORS=$(echo "$SDDM_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
+    if [ -n "$SDDM_ERRORS" ]; then
+        INSTALL_ERRORS="$INSTALL_ERRORS
+
+--- SDDM Installation Errors ---
+$SDDM_ERRORS"
+    fi
 fi
 log_info "SDDM installation completed"
 
@@ -389,6 +403,13 @@ if [ -n "$FAILED_PACKAGES" ]; then
         log_error "  • $pkg"
     done
     echo ""
+    
+    if [ -n "$INSTALL_ERRORS" ]; then
+        log_error "DETAILED ERROR MESSAGES:"
+        echo "$INSTALL_ERRORS"
+        echo ""
+    fi
+    
     log_warn "To install these packages manually, you have several options:"
     log_info ""
     log_info "Option 1 - If you have yay installed (AUR helper):"
