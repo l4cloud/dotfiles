@@ -9,6 +9,15 @@
 .config/go/telemetry/
 .config/github-copilot/versions.json
 .config/nvim/lazy-lock.json
+.config/systemd/user/notification-sound.service
+
+# OpenCode app data (local/generated)
+.opencode/bun.lock
+.opencode/node_modules/
+.opencode/opencode.db
+.opencode/opencode.db-shm
+.opencode/opencode.db-wal
+.opencode/package.json
 
 # Defaults
 RCS
