@@ -71,6 +71,30 @@ fi
 
 log_info "yay is ready for AUR package installations"
 
+# Install pywal (required for wallpaper color generation)
+log_step "Ensuring pywal is installed..."
+if ! command -v wal >/dev/null 2>&1; then
+    log_info "pywal is not installed. Installing..."
+    if ! sudo pacman -S --noconfirm python-pywal; then
+        log_warn "Failed to install pywal from official repos, trying yay..."
+        if ! yay -S --noconfirm python-pywal; then
+            log_error "Failed to install pywal"
+            FAILED_PACKAGES="$FAILED_PACKAGES pywal"
+            PYWAL_ERROR="Unable to install python-pywal from official repos or AUR"
+            INSTALL_ERRORS="$INSTALL_ERRORS
+
+--- Pywal Installation Errors ---
+$PYWAL_ERROR"
+        else
+            log_info "✓ pywal installed via yay"
+        fi
+    else
+        log_info "✓ pywal installed"
+    fi
+else
+    log_info "✓ pywal already installed"
+fi
+
 # Update system
 log_step "Updating system packages..."
 sudo pacman -Syu --noconfirm || log_warn "System package update had issues"
