@@ -51,26 +51,25 @@ fi
 
 log_info "Starting Arch Linux Hyprland desktop setup..."
 
-# Install AUR helper if not already present
-log_step "Checking for AUR helper (yay/paru)..."
-if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
-    log_info "No AUR helper found. Installing yay..."
-    sudo pacman -S --noconfirm base-devel 2>/dev/null || log_warn "base-devel installation had issues"
-    
-    if git clone https://aur.archlinux.org/yay.git /tmp/yay 2>/dev/null && cd /tmp/yay && makepkg -si --noconfirm 2>/dev/null; then
-        log_info "yay installed successfully"
-        cd - > /dev/null
-        rm -rf /tmp/yay
-    else
-        log_warn "yay installation failed, some AUR packages won't be available"
-    fi
-else
-    if command -v yay >/dev/null 2>&1; then
-        log_info "yay found"
-    else
-        log_info "paru found"
-    fi
+# Install yay AUR helper using the dedicated script
+log_step "Ensuring yay AUR helper is installed..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_YAY_SCRIPT="$SCRIPT_DIR/install_yay.sh"
+
+if [ ! -f "$INSTALL_YAY_SCRIPT" ]; then
+    log_error "install_yay.sh not found at $INSTALL_YAY_SCRIPT"
+    log_error "Cannot continue without yay installer script"
+    exit 1
 fi
+
+if ! bash "$INSTALL_YAY_SCRIPT"; then
+    log_error "Failed to install yay"
+    log_info "You can manually install yay from: https://aur.archlinux.org/yay.git"
+    log_info "Or try: git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si"
+    exit 1
+fi
+
+log_info "yay is ready for AUR package installations"
 
 # Update system
 log_step "Updating system packages..."
@@ -80,8 +79,8 @@ sudo pacman -Syu --noconfirm || log_warn "System package update had issues"
 log_step "Installing Hyprland and desktop packages..."
 log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
 
-# List of packages to install
-PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock wlogout thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch"
+# List of packages to install (excluding wlogout which is in AUR)
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch"
 
 INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN_EXIT=$?
 
@@ -105,6 +104,22 @@ if [ -n "$PACMAN_ERRORS" ]; then
 
 --- Main Package Installation Errors ---
 $PACMAN_ERRORS"
+fi
+
+# Install wlogout from AUR (not in official repos)
+log_step "Installing wlogout from AUR..."
+if yay -S --noconfirm wlogout 2>&1 >/dev/null; then
+    log_info "✓ wlogout installed via yay"
+else
+    log_warn "✗ wlogout installation failed"
+    FAILED_PACKAGES="$FAILED_PACKAGES wlogout"
+    WLOGOUT_ERROR=$(yay -S --noconfirm wlogout 2>&1 | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
+    if [ -n "$WLOGOUT_ERROR" ]; then
+        INSTALL_ERRORS="$INSTALL_ERRORS
+
+--- wlogout (AUR) Installation Errors ---
+$WLOGOUT_ERROR"
+    fi
 fi
 
 # Install and setup greeter (SDDM) for login manager
@@ -255,38 +270,6 @@ fi
 # Install flatpak
 log_step "Setting up Flatpak..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-
-# Check if we need to install packages from AUR
-log_step "Checking for packages that may need AUR installation..."
-MISSING_PACKAGES=""
-
-if ! command -v hyprland >/dev/null 2>&1 && ! pacman -Q hyprland >/dev/null 2>&1; then
-    MISSING_PACKAGES="$MISSING_PACKAGES hyprland"
-    log_warn "⚠️  hyprland not found"
-fi
-
-if ! command -v kitty >/dev/null 2>&1 && ! pacman -Q kitty >/dev/null 2>&1; then
-    MISSING_PACKAGES="$MISSING_PACKAGES kitty"
-    log_warn "⚠️  kitty not found"
-fi
-
-if ! command -v waybar >/dev/null 2>&1 && ! pacman -Q waybar >/dev/null 2>&1; then
-    MISSING_PACKAGES="$MISSING_PACKAGES waybar"
-    log_warn "⚠️  waybar not found"
-fi
-
-if [ -n "$MISSING_PACKAGES" ]; then
-    log_info ""
-    log_warn "The following packages are missing:$MISSING_PACKAGES"
-    log_info "These packages may be in the AUR (Arch User Repository)"
-    log_info ""
-    
-    # Add to failed packages list if we don't have an AUR helper
-    if ! command -v yay >/dev/null 2>&1 && ! command -v paru >/dev/null 2>&1; then
-        log_warn "No AUR helper (yay/paru) found - cannot auto-install AUR packages"
-        FAILED_PACKAGES="$FAILED_PACKAGES$MISSING_PACKAGES"
-    fi
-fi
 
 # Install Obsidian via flatpak
 log_step "Installing Obsidian via Flatpak..."
