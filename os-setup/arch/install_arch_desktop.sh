@@ -6,7 +6,8 @@
 # Uses stow to manage dotfile configs
 ##############################################################################
 
-set -euo pipefail
+set -u
+# Don't use 'set -e' to avoid exiting on command failures - we want to continue and log errors
 
 # Colors for output
 RED='\033[0;31m'
@@ -38,13 +39,11 @@ log_info "Starting Arch Linux Hyprland desktop setup..."
 
 # Update system
 log_step "Updating system packages..."
-if ! sudo pacman -Syu --noconfirm; then
-    log_warn "System package update had issues, continuing anyway..."
-fi
+sudo pacman -Syu --noconfirm || log_warn "System package update had issues"
 
 # Install desktop and development packages
 log_step "Installing Hyprland and desktop packages..."
-if ! sudo pacman -S --noconfirm \
+sudo pacman -S --noconfirm \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
@@ -53,17 +52,13 @@ if ! sudo pacman -S --noconfirm \
     zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
     python-pip stow docker \
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip \
-    zsh tmux htop fastfetch; then
-    log_warn "Some packages may have failed to install, continuing anyway..."
-fi
-log_info "Hyprland and desktop packages installation attempted"
+    zsh tmux htop fastfetch || log_warn "Some packages may have failed to install"
+log_info "Hyprland and desktop packages installation completed"
 
 # Install and setup greeter (SDDM) for login manager
 log_step "Installing SDDM (greeter) for display manager..."
-if ! sudo pacman -S --noconfirm sddm sddm-kcm; then
-    log_warn "SDDM installation had issues, continuing anyway..."
-fi
-log_info "SDDM installation attempted"
+sudo pacman -S --noconfirm sddm sddm-kcm || log_warn "SDDM installation had issues"
+log_info "SDDM installation completed"
 
 # Enable SDDM login manager
 log_step "Configuring SDDM as display manager..."
