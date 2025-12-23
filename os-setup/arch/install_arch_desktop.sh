@@ -38,11 +38,13 @@ log_info "Starting Arch Linux Hyprland desktop setup..."
 
 # Update system
 log_step "Updating system packages..."
-sudo pacman -Syu --noconfirm
+if ! sudo pacman -Syu --noconfirm; then
+    log_warn "System package update had issues, continuing anyway..."
+fi
 
 # Install desktop and development packages
 log_step "Installing Hyprland and desktop packages..."
-sudo pacman -S --noconfirm \
+if ! sudo pacman -S --noconfirm \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
@@ -51,16 +53,24 @@ sudo pacman -S --noconfirm \
     zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
     python-pip stow docker \
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip \
-    zsh tmux htop fastfetch
+    zsh tmux htop fastfetch; then
+    log_warn "Some packages may have failed to install, continuing anyway..."
+fi
+log_info "Hyprland and desktop packages installation attempted"
 
 # Install and setup greeter (SDDM) for login manager
 log_step "Installing SDDM (greeter) for display manager..."
-sudo pacman -S --noconfirm sddm sddm-kcm
+if ! sudo pacman -S --noconfirm sddm sddm-kcm; then
+    log_warn "SDDM installation had issues, continuing anyway..."
+fi
+log_info "SDDM installation attempted"
 
 # Enable SDDM login manager
 log_step "Configuring SDDM as display manager..."
-sudo systemctl enable sddm
-log_info "SDDM display manager enabled"
+if ! sudo systemctl enable sddm; then
+    log_warn "Failed to enable SDDM, you may need to run: sudo systemctl enable sddm"
+fi
+log_info "SDDM configuration attempted"
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
@@ -212,7 +222,13 @@ cd "$DOTFILES_DIR"
 log_info "Installing dotfile configs (.config, wallpapers, etc.)..."
 for package in .config wallpapers nvim starship.toml; do
     if [ -e "$package" ]; then
-        stow -R "$package" 2>/dev/null || log_warn "stow $package had minor issues (this is often OK)"
+        if ! stow -R "$package" 2>/dev/null; then
+            log_warn "stow $package had issues (this is often OK)"
+        else
+            log_info "stow $package completed successfully"
+        fi
+    else
+        log_warn "Package $package not found in $DOTFILES_DIR"
     fi
 done
 
