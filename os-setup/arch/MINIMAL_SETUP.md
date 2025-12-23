@@ -49,13 +49,28 @@ Run the services/development setup script:
 
 This will:
 - Install development tools
-- Install AUR helper (yay) with graceful fallback
+- Install AUR helper (yay) using a dedicated installer script
 - Install language version managers (pyenv, nvm)
 - Install development utilities (lazygit, yazi, etc.)
 - Install opencode and other CLI tools
 - Set Zsh as default shell
 
 **Duration**: 15-30 minutes
+
+#### About yay Installation
+
+The setup uses a dedicated yay installer script (`install_yay.sh`) that:
+- Checks for required dependencies (git, make, gcc)
+- Clones the yay repository cleanly
+- Builds and installs yay with clear error messages
+- Automatically installs base-devel if needed
+- Gracefully continues if yay installation fails
+
+If yay installation fails, you can install it manually:
+
+```bash
+./os-setup/arch/install_yay.sh
+```
 
 ## Pipewire Audio Configuration
 
@@ -132,24 +147,34 @@ journalctl --user -u wireplumber -n 20
 
 ### AUR Helper Installation Failed
 
-The scripts gracefully handle AUR helper failures. If yay installation fails:
-1. The setup continues with pacman packages only (no AUR packages)
-2. You'll see a WARNING message in the output
-3. You can install yay manually later if needed
+The scripts use a dedicated yay installer script that gracefully handles failures. If yay installation fails:
 
-To install yay manually:
+1. The setup continues with pacman packages only
+2. You'll see a warning message in the output
+3. You can install yay manually anytime with:
 
 ```bash
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg -si --noconfirm
+./os-setup/arch/install_yay.sh
 ```
 
-Common yay installation issues:
-- **gcc/make not installed**: Run `sudo pacman -S base-devel` first
-- **No internet**: Ensure network connectivity
-- **Permission denied**: Check sudo configuration
-- **Existing build directory**: The script cleans this automatically
+The standalone installer:
+- Automatically installs base-devel if needed
+- Provides clear error messages
+- Verifies installation success
+- Cleans up after itself
+
+If even the standalone installer fails, check:
+
+```bash
+# Verify base-devel is installed
+pacman -Qs base-devel
+
+# Manually install if needed
+sudo pacman -S base-devel
+
+# Check git is available
+which git
+```
 
 ### Internet Connectivity Issues
 
