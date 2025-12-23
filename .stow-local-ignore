@@ -1,6 +1,9 @@
 # Personal
 
 /misc/*
+/os-setup/*
+/desktop-setup/*
+/.misc/*
 
 # Cache and telemetry directories
 .config/go/telemetry/
