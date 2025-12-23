@@ -15,6 +15,8 @@
       - pipewire
       - pipewire-pulse
       - pipewire-alsa
+      - pipewire-jack
+      - wireplumber
       - brightnessctl
       - playerctl
       - grim
@@ -169,6 +171,20 @@
       ansible.builtin.command: flatpak install -y flathub md.obsidian.Obsidian
       become: no
 
+    - name: Ensure pipewire is enabled and running
+      ansible.builtin.systemd_user:
+        name: pipewire
+        enabled: yes
+        state: started
+      become: no
+
+    - name: Ensure wireplumber is enabled and running
+      ansible.builtin.systemd_user:
+        name: wireplumber
+        enabled: yes
+        state: started
+      become: no
+
     - name: Install pulsemixer
       become: no
       ansible.builtin.pip:
@@ -180,6 +196,7 @@
       ansible.builtin.shell: fc-list | grep -i "hack nerd"
       register: font_check
       ignore_errors: true
+      changed_when: false
 
     - name: Download Hack Nerd Font
       ansible.builtin.get_url:

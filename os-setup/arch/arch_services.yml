@@ -9,7 +9,7 @@
   tasks:
     - name: Update all system packages
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         update_cache: yes
         upgrade: yes
       tags:
@@ -17,7 +17,7 @@
 
     - name: Install git early (required for ansible.builtin.git module)
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         name: git
         state: present
       tags:
@@ -25,7 +25,7 @@
 
     - name: Install development packages
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         name: "{{ packages }}"
         state: present
       tags:
@@ -33,7 +33,7 @@
 
     - name: Install AUR helper (yay) dependencies
       become: yes
-      pacman:
+      ansible.builtin.pacman:
         name:
           - base-devel
           - git
@@ -42,41 +42,52 @@
         - aur
 
     - name: Check if yay is installed
-      command: which yay
+      ansible.builtin.command: which yay
       register: yay_check
       ignore_errors: true
       changed_when: false
 
     - name: Remove existing yay build directory
-      file:
+      ansible.builtin.file:
         path: /tmp/yay
         state: absent
       when: yay_check.rc != 0
 
     - name: Clone yay repository
-      git:
+      ansible.builtin.git:
         repo: 'https://aur.archlinux.org/yay.git'
         dest: /tmp/yay
         force: yes
       when: yay_check.rc != 0
       become: no
+      ignore_errors: true
+      register: yay_clone
 
     - name: Build and install yay
-      shell: |
+      ansible.builtin.shell: |
         cd /tmp/yay
         makepkg -si --noconfirm
-      when: yay_check.rc != 0
+      when: yay_check.rc != 0 and yay_clone.rc == 0
       become: no
+      ignore_errors: true
+      register: yay_build
+
+    - name: Warn if yay installation failed
+      ansible.builtin.debug:
+        msg: "WARNING: yay installation failed. Some AUR packages may not be available. Continuing with pacman packages only."
+      when: yay_clone.rc != 0 or yay_build.rc != 0
 
     - name: Clean up yay build directory
-      file:
+      ansible.builtin.file:
         path: /tmp/yay
         state: absent
       when: yay_check.rc != 0
 
-    - name: Install lazygit via AUR
-      shell: yay -S --noconfirm lazygit
+    - name: Install lazygit via AUR (if yay is available)
+      ansible.builtin.shell: yay -S --noconfirm lazygit
       become: no
+      when: yay_check.rc == 0
+      ignore_errors: true
       tags:
         - lazygit
 
@@ -85,21 +96,22 @@
       ansible.builtin.pacman:
         name:
           - yazi
-          - p7zip # 7zip
+          - p7zip
           - jq
           - poppler
-          - fd # fd
+          - fd
           - ripgrep
           - fzf
           - zoxide
           - imagemagick
-          - xclip # for clipboard support
+          - xclip
         state: present
       tags:
         - yazi
+      ignore_errors: true
 
     - name: Check if pyenv is installed
-      stat:
+      ansible.builtin.stat:
         path: "{{ ansible_user_dir }}/.pyenv"
       register: pyenv_stat
       become: no
@@ -110,11 +122,12 @@
         dest: "{{ ansible_user_dir }}/.pyenv"
       when: not pyenv_stat.stat.exists
       become: no
+      ignore_errors: true
       tags:
         - pyenv
 
     - name: Check if nvm is installed
-      stat:
+      ansible.builtin.stat:
         path: "{{ ansible_user_dir }}/.nvm"
       register: nvm_stat
       become: no
@@ -126,11 +139,12 @@
         creates: "{{ ansible_user_dir }}/.nvm"
       when: not nvm_stat.stat.exists
       become: no
+      ignore_errors: true
       tags:
         - nvm
 
     - name: Check if opencode is installed
-      stat:
+      ansible.builtin.stat:
         path: "{{ ansible_user_dir }}/.opencode/bin/opencode"
       register: opencode_stat
       become: no
@@ -142,6 +156,7 @@
         creates: "{{ ansible_user_dir }}/.opencode/bin/opencode"
       when: not opencode_stat.stat.exists
       become: no
+      ignore_errors: true
       tags:
         - opencode
 
@@ -151,12 +166,14 @@
         curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh | bash
       args:
         creates: "{{ ansible_user_dir }}/.local/bin/getnf"
+      ignore_errors: true
       tags:
         - fonts
 
     - name: Update font cache
       become: no
       ansible.builtin.command: fc-cache -fv
+      ignore_errors: true
       tags:
         - fonts
 
