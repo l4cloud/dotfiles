@@ -3,6 +3,7 @@
 ##############################################################################
 # Fedora Hyprland Desktop Setup Script
 # Sets up Hyprland desktop environment and related tools
+# Uses stow to manage dotfile configs
 ##############################################################################
 
 set -e
@@ -98,6 +99,28 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Gaming packages installed"
 fi
 
+# Use stow to install dotfiles (configs)
+log_step "Installing dotfile configs using stow..."
+DOTFILES_DIR="$HOME/.dotfiles"
+
+if [ ! -d "$DOTFILES_DIR" ]; then
+    log_error "Dotfiles directory not found at $DOTFILES_DIR"
+    exit 1
+fi
+
+# Change to dotfiles directory and run stow
+cd "$DOTFILES_DIR"
+
+# Remove any existing symlinks to avoid conflicts
+log_info "Removing existing symlinks..."
+stow -D . 2>/dev/null || true
+
+# Install all symlinks from dotfiles
+log_info "Creating symlinks for all dotfile configs..."
+stow . 2>/dev/null || log_warn "Some stow operations may have had issues"
+
+cd - > /dev/null
+
 # Final verification
 log_info "Verifying installation..."
 echo ""
@@ -106,6 +129,7 @@ command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_er
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 fc-list | grep -q "Hack Nerd" && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
+[ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
 
 echo ""
 log_info "Desktop environment setup complete!"
@@ -113,4 +137,5 @@ log_info "Next steps:"
 log_info "  1. Restart your system: sudo reboot"
 log_info "  2. Hyprland will start automatically"
 log_info "  3. Default keybind: SUPER + Q to open terminal"
+log_info "  4. All configs are managed by stow from ~/.dotfiles/"
 echo ""

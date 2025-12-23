@@ -1,29 +1,28 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status.
+##############################################################################
+# Arch Linux Development Environment Setup Script
+# Installs core development tools and utilities (no desktop environment)
+##############################################################################
+
 set -e
 
-# Color output for better readability
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
-}
+# Logging functions
+log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
+log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-# Check if running on an Arch-based system by checking for /etc/arch-release
+# Check if running on Arch
 if [ ! -f /etc/arch-release ]; then
-    log_error "This script is intended for Arch-based systems."
+    log_error "This script requires Arch Linux"
     exit 1
 fi
 
@@ -41,41 +40,88 @@ if ! command -v sudo >/dev/null 2>&1; then
     exit 1
 fi
 
-# Install Ansible if it's not already installed.
-if ! command -v ansible >/dev/null 2>&1; then
-    log_info "Ansible is not installed. Installing now with pacman..."
-    # Update package manager
-    sudo pacman -Sy --noconfirm
-    sudo pacman -S --noconfirm ansible
-    if [ $? -ne 0 ]; then
-        log_error "Failed to install Ansible"
-        exit 1
+# Update system
+log_step "Updating system packages..."
+sudo pacman -Syu --noconfirm
+
+# Install development packages
+log_step "Installing development packages..."
+sudo pacman -S --noconfirm \
+    git curl wget \
+    neovim zsh tmux htop fastfetch \
+    jq gcc make patch unzip \
+    zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
+    python-pip stow go docker
+
+# Install AUR helper (yay) dependencies
+log_step "Setting up yay AUR helper..."
+if ! command -v yay &>/dev/null; then
+    sudo pacman -S --noconfirm base-devel
+    mkdir -p /tmp/yay-build
+    cd /tmp/yay-build
+    git clone https://aur.archlinux.org/yay.git . 2>/dev/null || true
+    if [ -f PKGBUILD ]; then
+        makepkg -si --noconfirm 2>&1 || log_warn "yay build had issues"
     fi
+    cd /
+    rm -rf /tmp/yay-build
+fi
+
+if command -v yay &>/dev/null; then
+    log_info "yay installed successfully"
+    log_step "Installing lazygit from AUR..."
+    yay -S --noconfirm lazygit 2>&1 || log_warn "lazygit installation skipped"
 else
-    log_info "Ansible is already installed."
+    log_warn "yay installation failed, continuing without AUR packages"
 fi
 
-log_info "Running Ansible playbook to provision machine..."
-# Get the directory of the script.
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# Install Yazi and dependencies
+log_step "Installing Yazi and dependencies..."
+sudo pacman -S --noconfirm \
+    yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip 2>/dev/null || log_warn "Some Yazi dependencies skipped"
 
-# Verify playbook exists
-if [ ! -f "${SCRIPT_DIR}/arch_services.yml" ]; then
-    log_error "Playbook not found at ${SCRIPT_DIR}/arch_services.yml"
-    exit 1
+# Install language version managers
+log_step "Installing pyenv..."
+if [ ! -d ~/.pyenv ]; then
+    git clone https://github.com/pyenv/pyenv.git ~/.pyenv 2>/dev/null || true
+    log_info "pyenv installed"
 fi
 
-# Run the playbook from the script's directory.
-# The playbook will handle privilege escalation.
-if ! ansible-playbook "${SCRIPT_DIR}/arch_services.yml" --ask-become-pass; then
-    log_error "Ansible playbook execution failed"
-    exit 1
+log_step "Installing nvm..."
+if [ ! -d ~/.nvm ]; then
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh 2>/dev/null | bash || log_warn "nvm installation skipped"
+    log_info "nvm installed"
 fi
 
-log_info "Validating shell configuration..."
-if ! zsh -x -c "source ~/.zshrc" 2>/dev/null; then
-    log_warn "Shell configuration validation had issues, but setup may still be complete"
+# Install opencode
+log_step "Installing opencode..."
+if [ ! -f ~/.opencode/bin/opencode ]; then
+    curl -fsSL https://opencode.ai/install 2>/dev/null | bash || log_warn "opencode installation skipped"
 fi
 
-log_info "Provisioning complete."
-log_info "Please restart your terminal or run 'exec zsh' to load the new configuration."
+# Install getnf for fonts
+log_step "Installing getnf font installer..."
+if [ ! -f ~/.local/bin/getnf ]; then
+    curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh 2>/dev/null | bash || log_warn "getnf installation skipped"
+fi
+
+# Set Zsh as default shell
+log_step "Setting Zsh as default shell..."
+sudo usermod -s /bin/zsh $USER
+
+# Final verification
+log_info "Verifying installation..."
+echo ""
+command -v git >/dev/null && log_info "✓ Git installed" || log_error "✗ Git not found"
+command -v neovim >/dev/null && log_info "✓ Neovim installed" || log_error "✗ Neovim not found"
+command -v zsh >/dev/null && log_info "✓ Zsh installed" || log_error "✗ Zsh not found"
+command -v yay >/dev/null && log_info "✓ yay installed" || log_warn "✗ yay not installed (non-critical)"
+command -v lazygit >/dev/null && log_info "✓ lazygit installed" || log_warn "✗ lazygit not installed (non-critical)"
+
+echo ""
+log_info "Development environment setup complete!"
+log_info "Next steps:"
+log_info "  1. Log out and back in to apply shell changes"
+log_info "  2. Run 'source ~/.zshrc' to reload shell configuration"
+log_info "  3. To install desktop environment, use: install.sh --desktop"
+echo ""
