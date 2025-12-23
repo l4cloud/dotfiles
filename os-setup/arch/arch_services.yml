@@ -67,7 +67,7 @@
       ansible.builtin.shell: |
         cd /tmp/yay
         makepkg -si --noconfirm
-      when: yay_check.rc != 0 and yay_clone.rc == 0
+      when: yay_check.rc != 0 and yay_clone.failed == false
       become: no
       ignore_errors: true
       register: yay_build
@@ -75,7 +75,7 @@
     - name: Warn if yay installation failed
       ansible.builtin.debug:
         msg: "WARNING: yay installation failed. Some AUR packages may not be available. Continuing with pacman packages only."
-      when: yay_clone.rc != 0 or yay_build.rc != 0
+      when: yay_clone.failed == true or yay_build.failed == true
 
     - name: Clean up yay build directory
       ansible.builtin.file:
