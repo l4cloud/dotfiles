@@ -1,6 +1,6 @@
 {
     "$schema": "/etc/xdg/swaync/configSchema.json",
-    "positionX": "left",
+    "positionX": "right",
     "positionY": "top",
     "layer": "overlay",
     "control-center-layer": "top",
@@ -18,8 +18,8 @@
     "notification-body-image-height":  180,
     "notification-body-image-width": 180,
     "timeout": 12,
-    "timeout-low": 6,
-    "timeout-critical": 1,
+    "timeout-low": 8,
+    "timeout-critical": 0,
     "fit-to-screen": true,
     "keyboard-shortcuts": true,
     "image-visibility": "when available",
@@ -73,37 +73,16 @@
                 },
 
                 {
-                    "label": "",
-                    "command": "kitty nmtui"
+                    "label": "󰤨",
+                    "command": "hyprctl dispatch exec '[float] kitty nmtui'"
+                },
+                {
+                    "label": "󰂯",
+                    "command": "hyprctl dispatch exec '[float] blueman-manager'"
                 },
                 {
                     "label": "",
                     "command": "blueman-manager"
-                },
-                {
-                    "label":"󰤄",
-                    "command": "swaync-client -d",
-                    "type":"toggle"
-                },
-
-                {
-                    "label": "󰀟",
-                    "command": "gnome-network-displays"
-                },
-
-                {
-                    "label": "󰈙",
-                    "command": "kitty bash -i -c 'Docs'"
-                },
-                {
-                    "label": "",
-                    "command": "kitty bash -i -c 'Settings'"
-                    
-                },
-                {
-                    "label": "",
-                    "command": "kitty bash -i -c 'tasks'"
-
                 },
                 {
                     "label": "",

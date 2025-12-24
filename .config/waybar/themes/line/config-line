@@ -8,7 +8,7 @@
         "reload_style_on_change": true,
         "modules-left": ["custom/notification","clock","custom/pacman","tray"],
         "modules-center": ["hyprland/workspaces"],
-        "modules-right": ["group/expand","bluetooth","network","battery"],
+        "modules-right": ["group/expand","pulseaudio","bluetooth","network","battery"],
 
 
         "hyprland/workspaces": {
@@ -127,6 +127,40 @@
         "temperature": {
             "critical-threshold": 80,
             "format": "",
+        },
+        "pulseaudio": {
+             "format": "{icon}",
+             "format-bluetooth": "{icon}",
+             "format-muted": "🔇",
+             "format-icons": {
+                 "headphone": "",
+                 "hands-free": "󰋎",
+                 "headset": "󰋎",
+                 "phone": "",
+                 "portable": "",
+                 "car": "",
+                 "default": ["", "", ""]
+             },
+             "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+             "on-click-right": "kitty ~/.local/bin/pulsemixer",
+             "tooltip-format": "{volume}%"
+         },
+        "pulseaudio": {
+            "format": "{icon}",
+            "format-bluetooth": "{icon}",
+            "format-muted": "🔇",
+            "format-icons": {
+                "headphone": "",
+                "hands-free": "󰋎",
+                "headset": "󰋎",
+                "phone": "",
+                "portable": "",
+                "car": "",
+                "default": ["", "", ""]
+            },
+            "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+            "on-click-right": "kitty ~/.local/bin/pulsemixer",
+            "tooltip-format": "{volume}%"
         },
         "tray": {
             "icon-size": 14,

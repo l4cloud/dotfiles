@@ -29,7 +29,7 @@ window {
 }
 #inner-box {
     margin: 2px;
-    padding: 5px
+    padding: 1px 5px
     border: none;
 }
 #outer-box {    
@@ -45,7 +45,7 @@ window {
     margin-left:20px;
     margin-right:20px;
     margin-top:20px;
-    padding: 20px;
+    padding: 10px;
     border: none;
     outline: none;
     color: @text;
