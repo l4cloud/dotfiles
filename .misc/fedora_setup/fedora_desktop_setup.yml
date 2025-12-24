@@ -21,8 +21,9 @@
       - hyprlock
       - wlogout
       - thunar
-      - wofi
-      - git
+       - wofi
+       - blueman
+       - git
       - neovim
       - jq
       - gcc

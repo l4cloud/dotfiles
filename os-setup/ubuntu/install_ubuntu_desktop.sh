@@ -66,7 +66,7 @@ sudo apt install -y \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
-    thunar wofi flatpak \
+    thunar wofi flatpak blueman \
     git curl wget \
     neovim zsh tmux htop fastfetch \
     jq gcc g++ make patch unzip \

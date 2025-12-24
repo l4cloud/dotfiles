@@ -104,7 +104,7 @@ log_step "Installing Hyprland and desktop packages..."
 log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
 
 # List of packages to install (excluding wlogout which is in AUR)
-PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch"
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch blueman"
 
 INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN_EXIT=$?
 
@@ -112,7 +112,7 @@ INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN
 PACMAN_ERRORS=$(echo "$INSTALL_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
 
 # Check each critical package
-for pkg in hyprland kitty waybar swww swaync; do
+for pkg in hyprland kitty waybar swww swaync blueman; do
     if pacman -Q $pkg >/dev/null 2>&1; then
         log_info "✓ $pkg installed"
     else
@@ -300,6 +300,14 @@ if ! flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null; then
     log_warn "Obsidian installation skipped"
 else
     log_info "Obsidian installed"
+fi
+
+# Install Zen Browser via flatpak
+log_step "Installing Zen Browser via Flatpak..."
+if ! flatpak install -y flathub app.zen_browser.zen 2>/dev/null; then
+    log_warn "Zen browser installation skipped"
+else
+    log_info "Zen browser installed"
 fi
 
 # Install language version managers

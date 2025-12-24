@@ -43,7 +43,7 @@ sudo pacman -S --noconfirm \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
-    thunar wofi flatpak \
+    thunar wofi flatpak blueman \
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip
 
 # Install Hack Nerd Font
@@ -92,6 +92,10 @@ fi
 log_step "Installing Obsidian via Flatpak..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
 flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null || log_warn "Obsidian installation skipped"
+
+# Install Zen Browser via flatpak
+log_step "Installing Zen Browser via Flatpak..."
+flatpak install -y flathub app.zen_browser.zen 2>/dev/null || log_warn "Zen browser installation skipped"
 
 # Install pulsemixer for audio control
 log_step "Installing pulsemixer..."

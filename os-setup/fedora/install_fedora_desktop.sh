@@ -50,7 +50,7 @@ sudo dnf install -y \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
-    thunar wofi flatpak \
+    thunar wofi flatpak blueman \
     git neovim jq gcc gcc-c++ make zlib-devel bzip2-devel readline-devel \
     sqlite-devel openssl-devel tk-devel libffi-devel xz-devel ncurses-devel \
     patch unzip curl wget zsh python3-pip tmux htop fastfetch stow
