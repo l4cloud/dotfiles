@@ -148,7 +148,7 @@ fi
 
 # Install and setup greeter (ly) for login manager
 log_step "Installing ly (greeter) for display manager..."
-LY_OUTPUT=$(sudo pacman -S --noconfirm ly 2>&1) || LY_EXIT=$?
+LY_OUTPUT=$(yay -S --noconfirm ly 2>&1) || LY_EXIT=$?
 
 if pacman -Q ly >/dev/null 2>&1; then
     log_info "✓ ly installed"
