@@ -146,17 +146,28 @@ $WLOGOUT_ERROR"
     fi
 fi
 
-# Install and setup greeter (cdm) for login manager
-log_step "Installing cdm (console display manager)..."
-if yay -S --noconfirm cdm 2>&1 >/dev/null; then
-    log_info "✓ cdm installed"
-    
-    # Configure cdm to start on boot
-    log_step "Configuring cdm as default login manager..."
-    if ! grep -q "cdm" ~/.bashrc 2>/dev/null; then
-        echo "[[ \"\$TERM\" == linux ]] && /usr/bin/cdm" >> ~/.bashrc
-        log_info "✓ cdm configured in .bashrc"
+# Install and setup greeter (SDDM) for login manager - best DM for Wayland
+log_step "Installing SDDM (display manager for Wayland)..."
+
+if sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 >/dev/null; then
+    if pacman -Q sddm >/dev/null 2>&1; then
+        log_info "✓ SDDM installed successfully"
+        
+        # Enable SDDM service
+        log_step "Enabling SDDM service..."
+        if sudo systemctl enable sddm 2>&1 >/dev/null; then
+            log_info "✓ SDDM enabled and will start on boot"
+        else
+            log_warn "Failed to enable SDDM service"
+        fi
+    else
+        FAILED_PACKAGES="$FAILED_PACKAGES sddm"
+        log_error "✗ SDDM installation verification failed"
     fi
+else
+    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
+    log_error "✗ SDDM installation failed"
+fi
     if ! grep -q "cdm" ~/.zshrc 2>/dev/null; then
         echo "[[ \"\$TERM\" == linux ]] && /usr/bin/cdm" >> ~/.zshrc
         log_info "✓ cdm configured in .zshrc"
@@ -323,10 +334,15 @@ fi
 log_info "Installing dotfile configs (.config, wallpapers, etc.)..."
 for package in .config wallpapers nvim starship.toml; do
     if [ -e "$DOTFILES_DIR/$package" ]; then
-        if ! stow -d "$DOTFILES_DIR" -t "$HOME" "$package" 2>/dev/null; then
-            log_warn "stow $package had issues (this is often OK)"
-        else
+        # Remove any existing files/symlinks to avoid conflicts
+        stow -d "$DOTFILES_DIR" -t "$HOME" -R "$package" 2>/dev/null || true
+        # Now create fresh symlinks
+        if stow -d "$DOTFILES_DIR" -t "$HOME" -S "$package" 2>/dev/null; then
             log_info "stow $package completed successfully"
+        else
+            log_warn "stow $package had issues"
+            # Try verbose mode to see what went wrong
+            stow -d "$DOTFILES_DIR" -t "$HOME" -v "$package" 2>&1 | head -5
         fi
     else
         log_warn "Package $package not found in $DOTFILES_DIR"
@@ -386,15 +402,8 @@ echo ""
 command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_error "✗ Hyprland not found"
 command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_error "✗ Kitty not found"
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
-{ command -v cdm >/dev/null || command -v sddm >/dev/null; } && log_info "✓ Login manager installed (cdm or SDDM)" || log_warn "✗ Login manager not found"
-pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
-fc-list | grep -q "Hack Nerd" 2>/dev/null && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
-[ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
-[ -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ] && log_info "✓ XDG desktop portal configured" || log_warn "✗ XDG portal not configured"
-
-if [ "$NVIDIA_DETECTED" = "1" ]; then
-    log_info "✓ NVIDIA GPU detected and configured"
-fi
+pacman -Q sddm >/dev/null 2>&1 && log_info "✓ SDDM display manager installed" || log_error "✗ SDDM not found"
+systemctl is-enabled sddm >/dev/null 2>&1 && log_info "✓ SDDM enabled for boot" || log_warn "⚠ SDDM not enabled"
 
 echo ""
 echo "================================================================================"
@@ -447,10 +456,11 @@ else
     log_info "  1. Restart your system: sudo reboot"
 fi
 
-log_info "  2. cdm will launch automatically on login"
-log_info "  3. Use arrow keys to select Hyprland and press Enter"
-log_info "  4. Default keybind: ALT + T to open terminal"
-log_info "  5. All configs are managed by stow from ~/.dotfiles/"
+log_info "  2. SDDM will start automatically on boot"
+log_info "  3. Select 'Hyprland' from the session dropdown menu"
+log_info "  4. Enter your credentials and login"
+log_info "  5. Default keybind: ALT + T to open terminal"
+log_info "  6. All configs are managed by stow from ~/.dotfiles/"
 echo ""
 log_info "For more information on Hyprland keybinds:"
 log_info "  • Check: ~/.dotfiles/.config/hypr/hyprland.conf"
