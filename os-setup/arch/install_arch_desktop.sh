@@ -148,28 +148,35 @@ fi
 
 # Install and setup greeter (ly) for login manager
 log_step "Installing ly (greeter) for display manager..."
-if yay -S --noconfirm ly 2>&1; then
-    LY_INSTALLED=1
+if yay -S --noconfirm ly 2>&1 >/dev/null; then
     log_info "✓ ly installed"
     
-    # Enable ly login manager
-    log_step "Configuring ly as display manager..."
-    sudo systemctl enable ly 2>/dev/null || sudo systemctl enable ly-dm 2>/dev/null || log_warn "Failed to enable ly"
-    log_info "ly configuration completed"
-else
-    log_warn "ly installation failed, falling back to SDDM..."
-    LY_INSTALLED=0
+    # Configure ly to start on boot by modifying getty@tty1
+    log_step "Configuring ly as default greeter..."
+    sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+    sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null <<EOF
+[Service]
+ExecStart=
+ExecStart=-/usr/bin/ly
+Type=idle
+StandardInput=tty
+StandardOutput=tty
+EOF
     
+    sudo systemctl daemon-reload
+    log_info "✓ ly configured to start on tty1"
+else
+    log_warn "✗ ly installation failed, installing SDDM..."
     # Fallback to SDDM
     log_step "Installing SDDM (greeter) for display manager..."
-    if sudo pacman -S --noconfirm sddm sddm-kcm 2>&1; then
+    if sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 >/dev/null; then
         log_info "✓ SDDM installed"
         log_step "Configuring SDDM as display manager..."
         sudo systemctl enable sddm || log_warn "Failed to enable SDDM"
         log_info "SDDM configuration completed"
     else
         FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-        log_warn "✗ Both ly and SDDM installation failed"
+        log_error "✗ Both ly and SDDM installation failed"
     fi
 fi
 
