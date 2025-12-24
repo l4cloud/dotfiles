@@ -146,29 +146,29 @@ $WLOGOUT_ERROR"
     fi
 fi
 
-# Install and setup greeter (SDDM) for login manager
-log_step "Installing SDDM (greeter) for display manager..."
-SDDM_OUTPUT=$(sudo pacman -S --noconfirm sddm sddm-kcm 2>&1) || SDDM_EXIT=$?
+# Install and setup greeter (ly) for login manager
+log_step "Installing ly (greeter) for display manager..."
+LY_OUTPUT=$(sudo pacman -S --noconfirm ly 2>&1) || LY_EXIT=$?
 
-if pacman -Q sddm >/dev/null 2>&1; then
-    log_info "✓ SDDM installed"
+if pacman -Q ly >/dev/null 2>&1; then
+    log_info "✓ ly installed"
 else
-    FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-    log_warn "✗ sddm not found after installation"
-    SDDM_ERRORS=$(echo "$SDDM_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
-    if [ -n "$SDDM_ERRORS" ]; then
+    FAILED_PACKAGES="$FAILED_PACKAGES ly"
+    log_warn "✗ ly not found after installation"
+    LY_ERRORS=$(echo "$LY_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
+    if [ -n "$LY_ERRORS" ]; then
         INSTALL_ERRORS="$INSTALL_ERRORS
 
---- SDDM Installation Errors ---
-$SDDM_ERRORS"
+--- ly Installation Errors ---
+$LY_ERRORS"
     fi
 fi
-log_info "SDDM installation completed"
+log_info "ly installation completed"
 
-# Enable SDDM login manager
-log_step "Configuring SDDM as display manager..."
-sudo systemctl enable sddm || log_warn "Failed to enable SDDM"
-log_info "SDDM configuration completed"
+# Enable ly login manager
+log_step "Configuring ly as display manager..."
+sudo systemctl enable ly || log_warn "Failed to enable ly"
+log_info "ly configuration completed"
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
@@ -385,7 +385,7 @@ echo ""
 command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_error "✗ Hyprland not found"
 command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_error "✗ Kitty not found"
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
-command -v sddm >/dev/null && log_info "✓ SDDM (greeter) installed" || log_warn "✗ SDDM not found"
+command -v ly >/dev/null && log_info "✓ ly (display manager) installed" || log_warn "✗ ly not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 fc-list | grep -q "Hack Nerd" 2>/dev/null && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
 [ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
@@ -446,9 +446,9 @@ else
     log_info "  1. Restart your system: sudo reboot"
 fi
 
-log_info "  2. SDDM will start automatically on login"
-log_info "  3. Select Hyprland from the session menu in SDDM"
-log_info "  4. Default keybind: SUPER + Q to open terminal"
+log_info "  2. ly will start automatically on login"
+log_info "  3. Use arrow keys to select Hyprland as the session"
+log_info "  4. Default keybind: ALT + T to open terminal"
 log_info "  5. All configs are managed by stow from ~/.dotfiles/"
 echo ""
 log_info "For more information on Hyprland keybinds:"
