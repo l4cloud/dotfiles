@@ -80,3 +80,4 @@ if [ -n "$TMUX" ]; then
 else
   export TERM=xterm-256color
 fi
+export XDG_SESSION_TYPE=wayland

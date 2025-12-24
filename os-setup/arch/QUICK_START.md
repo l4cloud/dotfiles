@@ -75,17 +75,14 @@ After setup completes, you'll see a summary like:
 3. Deploy dotfiles: `cd ~/.dotfiles && stow -v -t ~ .config`
 4. Set up SSH for GitHub
 
-## Old Files
+## Additional Scripts
 
-The following are no longer needed but kept for reference:
-- `install_arch_desktop.sh` - Old desktop setup
-- `install_arch_services.sh` - Old services setup
-- `install_yay.sh` - Standalone yay installer (still works)
-- `arch_desktop_setup.yml` - Old Ansible playbook
-- `arch_services.yml` - Old Ansible playbook
-- `MINIMAL_SETUP.md` - Old minimal setup guide
+The following scripts are also available for more granular control:
+- `install_arch_desktop.sh` - Desktop environment only (with advanced NVIDIA detection)
+- `install_arch_services.sh` - Development tools only (CLI without desktop)
+- `install_yay.sh` - Standalone yay installer
 
-You can safely delete these if you only use `setup.sh`.
+All scripts are pure shell scripts with no external dependencies.
 
 ## Troubleshooting
 

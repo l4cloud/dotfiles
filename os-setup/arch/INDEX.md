@@ -27,15 +27,13 @@
 | **NVIDIA_README.md** | GPU setup if needed | 2.1K |
 | **MINIMAL_SETUP.md** | Old minimal setup guide | 5.9K |
 
-### 🔧 FALLBACK (Legacy - Don't Use)
+### 🔧 ADDITIONAL SCRIPTS
 
 | File | Purpose | Note |
 |------|---------|------|
-| `install_arch_desktop.sh` | Old wrapper | Use setup.sh instead |
-| `install_arch_services.sh` | Old wrapper | Use setup.sh instead |
+| `install_arch_desktop.sh` | Desktop environment only | Advanced NVIDIA detection |
+| `install_arch_services.sh` | Development tools only | CLI tools without desktop |
 | `install_yay.sh` | Standalone yay installer | Only if you need just yay |
-| `arch_desktop_setup.yml` | Old Ansible playbook | Replaced by setup.sh |
-| `arch_services.yml` | Old Ansible playbook | Replaced by setup.sh |
 
 ---
 
@@ -65,8 +63,8 @@
 ### setup.sh
 **THE MAIN SCRIPT** - Everything happens here.
 
-- 148 lines of straightforward bash
-- No dependencies on Ansible
+- 159 lines of straightforward bash
+- Pure shell script, no dependencies
 - Installs 150+ packages
 - Configures Pipewire
 - Sets up language managers

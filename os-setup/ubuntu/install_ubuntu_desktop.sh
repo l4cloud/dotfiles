@@ -170,6 +170,16 @@ done
 
 cd - > /dev/null
 
+# Fix waybar power-profile.sh symlink
+log_step "Setting up waybar scripts..."
+if [ -f "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" ]; then
+    mkdir -p "$HOME/.config/waybar/scripts"
+    ln -sf "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" "$HOME/.config/waybar/scripts/power-profile.sh"
+    log_info "Waybar power profile script linked"
+else
+    log_warn "Power profile script not found in dotfiles"
+fi
+
 # Final verification
 log_info "Verifying installation..."
 echo ""

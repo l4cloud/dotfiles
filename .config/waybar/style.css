@@ -42,7 +42,8 @@ window#waybar {
 #custom-swaync {
 	padding: 0px 6px;
 	margin-right: 2px;
-	color: @color7;
+	color: @color9;
+	font-weight: bold;
 	transition: all 0.2s ease;
 }
 
@@ -87,7 +88,8 @@ window#waybar {
 #pulseaudio {
 	padding: 0px 6px;
 	margin-right: 2px;
-	color: @color7;
+	color: @color9;
+	font-weight: bold;
 	transition: all 0.2s ease;
 }
 
@@ -103,7 +105,8 @@ window#waybar {
 #network {
 	padding: 0px 6px;
 	margin-right: 2px;
-	color: @color7;
+	color: @color9;
+	font-weight: bold;
 	transition: all 0.2s ease;
 }
 
@@ -118,7 +121,8 @@ window#waybar {
 /* Bluetooth */
 #bluetooth {
 	padding: 0px 6px;
-	color: @color7;
+	color: @color9;
+	font-weight: bold;
 	transition: all 0.2s ease;
 }
 
@@ -127,31 +131,20 @@ window#waybar {
 }
 
 #bluetooth.off {
-	color: alpha(@color7, 0.5);
+	color: alpha(@color9, 0.5);
 }
 
 /* Power Profile */
 #custom-power-profile {
 	padding: 0px 6px;
 	margin-right: 2px;
-	color: @color7;
+	color: @color9;
+	font-weight: bold;
 	transition: all 0.2s ease;
 }
 
 #custom-power-profile:hover {
 	color: @color9;
-}
-
-#custom-power-profile.performance {
-	color: #f53c3c;
-}
-
-#custom-power-profile.balanced {
-	color: @color9;
-}
-
-#custom-power-profile.power-saver {
-	color: #4CBB17;
 }
 
 /* Tooltip */

@@ -112,7 +112,7 @@ INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN
 PACMAN_ERRORS=$(echo "$INSTALL_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
 
 # Check each critical package
-for pkg in hyprland kitty waybar swww swaync blueman; do
+for pkg in hyprland kitty waybar swww swaync blueman power-profiles-daemon; do
     if pacman -Q $pkg >/dev/null 2>&1; then
         log_info "✓ $pkg installed"
     else
@@ -383,6 +383,16 @@ if [ ! -f ~/.local/bin/getnf ]; then
     fi
 else
     log_info "getnf already installed"
+fi
+
+# Fix waybar power-profile.sh symlink
+log_step "Setting up waybar scripts..."
+if [ -f "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" ]; then
+    mkdir -p "$HOME/.config/waybar/scripts"
+    ln -sf "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" "$HOME/.config/waybar/scripts/power-profile.sh"
+    log_info "Waybar power profile script linked"
+else
+    log_warn "Power profile script not found in dotfiles"
 fi
 
 # Final verification

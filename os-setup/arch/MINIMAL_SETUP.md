@@ -30,12 +30,12 @@ Run the desktop environment installation script:
 This will:
 - Check for Arch Linux system
 - Verify internet connectivity
-- Install Ansible
 - Install Hyprland desktop environment
 - Install pipewire and related audio packages
 - Configure NVIDIA drivers (if detected)
 - Install essential applications and utilities
 - Install Hack Nerd Font
+- Set up power profile management
 
 **Duration**: 20-40 minutes depending on system and internet speed
 
@@ -95,23 +95,7 @@ pulsemixer
 
 ## Minimal Setup Mode
 
-If you encounter issues on a very minimal system:
-
-### Option 1: Skip Optional Components
-
-Run playbooks with specific tags to skip non-essential packages:
-
-```bash
-# Desktop setup without flatpak/obsidian
-ansible-playbook os-setup/arch/arch_desktop_setup.yml --skip-tags flatpak
-
-# Services setup without AUR packages
-ansible-playbook os-setup/arch/arch_services.yml --skip-tags aur,fonts
-```
-
-### Option 2: Manual Package Installation
-
-If automation fails, install packages manually:
+If you encounter issues on a very minimal system, you can manually install core packages:
 
 ```bash
 # Install desktop environment
@@ -125,14 +109,6 @@ sudo pacman -S git neovim zsh tmux base-devel
 ```
 
 ## Troubleshooting
-
-### Ansible Not Installing
-
-```bash
-# Manually install Ansible
-sudo pacman -Sy
-sudo pacman -S ansible
-```
 
 ### Pipewire Not Working
 
@@ -180,7 +156,7 @@ which git
 
 - The scripts check for internet before starting
 - If you lose internet during installation, restart the script
-- It will continue from where it left off
+- It will continue from where it left off (most packages)
 
 ### Package Manager Locks
 
@@ -189,6 +165,9 @@ If `pacman` is locked:
 ```bash
 # Wait for any background updates to complete
 sudo lsof /var/lib/pacman/db.lck
+
+# Or remove the lock file (only if no pacman is running)
+sudo rm /var/lib/pacman/db.lck
 
 # Or reboot
 sudo reboot
@@ -209,6 +188,9 @@ pactl info
 git --version
 nvim --version
 zsh --version
+
+# Check power profiles
+powerprofilesctl list
 ```
 
 ## Post-Installation
@@ -225,34 +207,35 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ### Dotfiles Installation
 
 ```bash
-# Clone your dotfiles repository
+# If not already cloned, clone your dotfiles repository
 git clone https://github.com/your-username/your-dotfiles.git ~/.dotfiles
 
 # Install with stow
 cd ~/.dotfiles
-stow -v -t ~ .config
+stow .
 ```
 
 ### First Boot Hyprland
 
-After reboot, Hyprland will start. Default keybinds:
-- `SUPER + Q`: Open terminal
+After reboot, SDDM display manager will start. Select Hyprland from the session dropdown.
+
+Default keybinds:
+- `ALT + T`: Open terminal
 - `SUPER + E`: File manager
-- `SUPER + ALT + Q`: Quit Hyprland
-- `SUPER + M`: Logout
+- `SUPER + M`: Logout menu
 
 ## Additional Notes
 
 - The scripts are idempotent - you can run them multiple times safely
-- Use tags to customize installation: `ansible-playbook ... --tags=zsh`
-- Check logs for detailed error messages if something fails
+- All scripts provide detailed error tracking and reporting
 - Internet connection is required for initial setup
-- System will ask for password during installation (Ansible become)
+- NVIDIA GPU detection is automatic
+- Power profile management is configured automatically
 
 ## Support
 
 If you encounter issues:
 1. Check script output for specific error messages
-2. Review Ansible logs
+2. Review the detailed error summary at the end of the script
 3. Try manual installation steps from troubleshooting section
 4. Check GitHub issues for similar problems

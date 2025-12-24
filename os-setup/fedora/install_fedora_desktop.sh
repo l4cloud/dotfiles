@@ -86,18 +86,18 @@ fi
 
 # Install desktop and development packages
 log_step "Installing Hyprland and desktop packages..."
-log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
+log_info "Attempting to install: hyprland kitty hypridle waybar swww SwayNotificationCenter and others..."
 
 # List of packages to install
-PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire-utils brightnessctl playerctl power-profiles-daemon grim slurp hyprshot hyprlock wlogout thunar wofi flatpak git neovim jq gcc gcc-c++ make patch unzip curl wget zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel ncurses-devel python3-pip stow yazi p7zip poppler fd-find ripgrep fzf zoxide ImageMagick xclip zsh tmux htop fastfetch blueman golang"
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww SwayNotificationCenter pipewire-utils brightnessctl playerctl grim slurp hyprshot hyprlock wlogout thunar wofi flatpak git neovim jq gcc gcc-c++ make patch unzip curl wget zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel tk-devel libffi-devel xz-devel ncurses-devel python3-pip stow yazi p7zip poppler fd-find ripgrep fzf zoxide ImageMagick xclip zsh tmux htop fastfetch blueman golang"
 
 INSTALL_OUTPUT=$(sudo dnf install -y $PACKAGES_TO_INSTALL 2>&1) || DNF_EXIT=$?
 
 # Capture any error messages from dnf
 DNF_ERRORS=$(echo "$INSTALL_OUTPUT" | grep -i "error\|failed\|not found\|could not\|unable\|invalid" || true)
 
-# Check each critical package
-for pkg in hyprland kitty waybar swww swaync blueman; do
+# Check each critical package (excluding power-profiles-daemon which is installed later)
+for pkg in hyprland kitty waybar swww SwayNotificationCenter blueman; do
     if rpm -q $pkg >/dev/null 2>&1; then
         log_info "✓ $pkg installed"
     else
@@ -211,6 +211,13 @@ log_info "Bluetooth configured"
 
 # Setup power-profiles-daemon
 log_step "Setting up power profile management..."
+log_info "Installing power-profiles-daemon (will replace tuned/tuned-ppd if needed)..."
+if sudo dnf install -y --allowerasing power-profiles-daemon 2>/dev/null; then
+    log_info "power-profiles-daemon installed successfully"
+else
+    log_warn "Failed to install power-profiles-daemon"
+fi
+
 if ! sudo systemctl enable power-profiles-daemon 2>/dev/null; then
     log_warn "Failed to enable power-profiles-daemon service"
 else
@@ -362,6 +369,16 @@ fi
 # Set Zsh as default shell
 log_step "Setting Zsh as default shell..."
 sudo usermod -s /bin/zsh $USER || log_warn "Failed to set Zsh as default shell"
+
+# Fix waybar power-profile.sh symlink
+log_step "Setting up waybar scripts..."
+if [ -f "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" ]; then
+    mkdir -p "$HOME/.config/waybar/scripts"
+    ln -sf "$HOME/.dotfiles/.config/waybar/scripts/power-profile.sh" "$HOME/.config/waybar/scripts/power-profile.sh"
+    log_info "Waybar power profile script linked"
+else
+    log_warn "Power profile script not found in dotfiles"
+fi
 
 # Final verification
 log_info "Verifying installation..."
