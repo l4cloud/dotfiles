@@ -43,7 +43,7 @@ sudo pacman -S --noconfirm \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \
     brightnessctl playerctl grim slurp hyprshot hyprlock wlogout \
-    thunar wofi flatpak blueman \
+    thunar wofi flatpak bluez bluez-utils blueman \
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip
 
 # Install Hack Nerd Font

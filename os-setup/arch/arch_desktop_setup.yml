@@ -26,6 +26,8 @@
       - wlogout
       - thunar
        - wofi
+       - bluez
+       - bluez-utils
        - blueman
        - git
       - neovim
