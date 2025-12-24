@@ -226,6 +226,20 @@ else
 fi
 log_info "Pipewire configured"
 
+# Setup Bluetooth (BlueZ)
+log_step "Setting up Bluetooth (BlueZ)..."
+if ! systemctl enable bluetooth 2>/dev/null; then
+    log_warn "Failed to enable Bluetooth service"
+else
+    log_info "Bluetooth service enabled"
+fi
+if ! systemctl start bluetooth 2>/dev/null; then
+    log_warn "Failed to start Bluetooth service"
+else
+    log_info "Bluetooth service started"
+fi
+log_info "Bluetooth configured"
+
 # Install pulsemixer for audio control
 log_step "Installing pulsemixer..."
 pip install --user pulsemixer 2>/dev/null || log_warn "pulsemixer installation skipped"

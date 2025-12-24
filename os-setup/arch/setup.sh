@@ -67,6 +67,12 @@ systemctl --user enable pipewire pipewire-pulse wireplumber 2>/dev/null || true
 systemctl --user start pipewire pipewire-pulse wireplumber 2>/dev/null || true
 log_info "Pipewire configured"
 
+# Setup Bluetooth (BlueZ)
+log_step "Setting up Bluetooth (BlueZ)..."
+sudo systemctl enable bluetooth 2>/dev/null || log_warn "Failed to enable Bluetooth service"
+sudo systemctl start bluetooth 2>/dev/null || log_warn "Failed to start Bluetooth service"
+log_info "Bluetooth configured"
+
 # Install yay for AUR packages
 log_step "Installing yay AUR helper..."
 if ! command -v yay &>/dev/null; then
