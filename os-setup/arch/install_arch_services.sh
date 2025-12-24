@@ -109,6 +109,34 @@ fi
 log_step "Setting Zsh as default shell..."
 sudo usermod -s /bin/zsh $USER
 
+# Install dotfiles with stow
+log_step "Installing dotfile configs using stow..."
+DOTFILES_DIR="$HOME/.dotfiles"
+
+if [ ! -d "$DOTFILES_DIR" ]; then
+    log_error "Dotfiles directory not found at $DOTFILES_DIR"
+    exit 1
+fi
+
+log_info "Removing existing files to allow stow to overwrite..."
+# Remove all existing files/symlinks that stow will replace
+for item in .config wallpapers nvim starship.toml .aliases.zsh .func.zsh .ssh_fzf.zsh .tmux.conf .zshrc; do
+    target="$HOME/$item"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+        rm -rf "$target"
+        log_info "  Removed $item"
+    fi
+done
+
+log_info "Running stow to install dotfiles..."
+cd "$HOME" || exit 1
+
+if stow -d "$DOTFILES_DIR" -t "$HOME" -R . 2>&1; then
+    log_info "✓ Dotfiles installed successfully"
+else
+    log_warn "stow installation had issues"
+fi
+
 # Final verification
 log_info "Verifying installation..."
 echo ""

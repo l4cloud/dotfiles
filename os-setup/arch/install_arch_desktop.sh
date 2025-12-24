@@ -168,24 +168,6 @@ else
     FAILED_PACKAGES="$FAILED_PACKAGES sddm"
     log_error "✗ SDDM installation failed"
 fi
-    if ! grep -q "cdm" ~/.zshrc 2>/dev/null; then
-        echo "[[ \"\$TERM\" == linux ]] && /usr/bin/cdm" >> ~/.zshrc
-        log_info "✓ cdm configured in .zshrc"
-    fi
-else
-    log_warn "✗ cdm installation failed, installing SDDM..."
-    # Fallback to SDDM
-    log_step "Installing SDDM (greeter) for display manager..."
-    if sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 >/dev/null; then
-        log_info "✓ SDDM installed"
-        log_step "Configuring SDDM as display manager..."
-        sudo systemctl enable sddm || log_warn "Failed to enable SDDM"
-        log_info "SDDM configuration completed"
-    else
-        FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-        log_error "✗ Both cdm and SDDM installation failed"
-    fi
-fi
 
 # Install Hack Nerd Font
 log_step "Installing Hack Nerd Font..."
@@ -319,35 +301,6 @@ if ! flatpak install -y flathub md.obsidian.Obsidian 2>/dev/null; then
 else
     log_info "Obsidian installed"
 fi
-
-# Use stow to install dotfiles (configs)
-log_step "Installing dotfile configs using stow..."
-DOTFILES_DIR="$HOME/.dotfiles"
-
-if [ ! -d "$DOTFILES_DIR" ]; then
-    log_error "Dotfiles directory not found at $DOTFILES_DIR"
-    exit 1
-fi
-
-# Stow configuration directories (.config, wallpapers, etc.)
-# Run stow from home directory, targeting the dotfiles directory
-log_info "Installing dotfile configs (.config, wallpapers, etc.)..."
-for package in .config wallpapers nvim starship.toml; do
-    if [ -e "$DOTFILES_DIR/$package" ]; then
-        # Remove any existing files/symlinks to avoid conflicts
-        stow -d "$DOTFILES_DIR" -t "$HOME" -R "$package" 2>/dev/null || true
-        # Now create fresh symlinks
-        if stow -d "$DOTFILES_DIR" -t "$HOME" -S "$package" 2>/dev/null; then
-            log_info "stow $package completed successfully"
-        else
-            log_warn "stow $package had issues"
-            # Try verbose mode to see what went wrong
-            stow -d "$DOTFILES_DIR" -t "$HOME" -v "$package" 2>&1 | head -5
-        fi
-    else
-        log_warn "Package $package not found in $DOTFILES_DIR"
-    fi
-done
 
 # Install language version managers
 log_step "Installing pyenv..."
