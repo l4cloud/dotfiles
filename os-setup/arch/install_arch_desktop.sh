@@ -146,27 +146,23 @@ $WLOGOUT_ERROR"
     fi
 fi
 
-# Install and setup greeter (ly) for login manager
-log_step "Installing ly (greeter) for display manager..."
-if yay -S --noconfirm ly 2>&1 >/dev/null; then
-    log_info "✓ ly installed"
+# Install and setup greeter (cdm) for login manager
+log_step "Installing cdm (console display manager)..."
+if yay -S --noconfirm cdm 2>&1 >/dev/null; then
+    log_info "✓ cdm installed"
     
-    # Configure ly to start on boot by modifying getty@tty1
-    log_step "Configuring ly as default greeter..."
-    sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-    sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null <<EOF
-[Service]
-ExecStart=
-ExecStart=-/usr/bin/ly
-Type=idle
-StandardInput=tty
-StandardOutput=tty
-EOF
-    
-    sudo systemctl daemon-reload
-    log_info "✓ ly configured to start on tty1"
+    # Configure cdm to start on boot
+    log_step "Configuring cdm as default login manager..."
+    if ! grep -q "cdm" ~/.bashrc 2>/dev/null; then
+        echo "[[ \"\$TERM\" == linux ]] && /usr/bin/cdm" >> ~/.bashrc
+        log_info "✓ cdm configured in .bashrc"
+    fi
+    if ! grep -q "cdm" ~/.zshrc 2>/dev/null; then
+        echo "[[ \"\$TERM\" == linux ]] && /usr/bin/cdm" >> ~/.zshrc
+        log_info "✓ cdm configured in .zshrc"
+    fi
 else
-    log_warn "✗ ly installation failed, installing SDDM..."
+    log_warn "✗ cdm installation failed, installing SDDM..."
     # Fallback to SDDM
     log_step "Installing SDDM (greeter) for display manager..."
     if sudo pacman -S --noconfirm sddm sddm-kcm 2>&1 >/dev/null; then
@@ -176,7 +172,7 @@ else
         log_info "SDDM configuration completed"
     else
         FAILED_PACKAGES="$FAILED_PACKAGES sddm"
-        log_error "✗ Both ly and SDDM installation failed"
+        log_error "✗ Both cdm and SDDM installation failed"
     fi
 fi
 
@@ -390,7 +386,7 @@ echo ""
 command -v hyprctl >/dev/null && log_info "✓ Hyprland installed" || log_error "✗ Hyprland not found"
 command -v kitty >/dev/null && log_info "✓ Kitty terminal installed" || log_error "✗ Kitty not found"
 command -v waybar >/dev/null && log_info "✓ Waybar installed" || log_error "✗ Waybar not found"
-{ command -v ly >/dev/null || command -v sddm >/dev/null; } && log_info "✓ Display manager installed (ly or SDDM)" || log_warn "✗ Display manager not found"
+{ command -v cdm >/dev/null || command -v sddm >/dev/null; } && log_info "✓ Login manager installed (cdm or SDDM)" || log_warn "✗ Login manager not found"
 pactl info >/dev/null 2>&1 && log_info "✓ Pipewire working" || log_warn "✗ Pipewire not responding"
 fc-list | grep -q "Hack Nerd" 2>/dev/null && log_info "✓ Hack Nerd Font installed" || log_warn "✗ Hack Nerd Font not found"
 [ -L "$HOME/.config/hypr" ] && log_info "✓ Hyprland configs linked via stow" || log_warn "✗ Hyprland configs not linked"
@@ -451,8 +447,8 @@ else
     log_info "  1. Restart your system: sudo reboot"
 fi
 
-log_info "  2. Your display manager (ly or SDDM) will start automatically"
-log_info "  3. Select Hyprland from the session menu"
+log_info "  2. cdm will launch automatically on login"
+log_info "  3. Use arrow keys to select Hyprland and press Enter"
 log_info "  4. Default keybind: ALT + T to open terminal"
 log_info "  5. All configs are managed by stow from ~/.dotfiles/"
 echo ""
