@@ -312,15 +312,12 @@ if [ ! -d "$DOTFILES_DIR" ]; then
     exit 1
 fi
 
-# Change to dotfiles directory and run stow
-cd "$DOTFILES_DIR"
-
 # Stow configuration directories (.config, wallpapers, etc.)
-# Remove any existing symlinks first to avoid conflicts
+# Run stow from home directory, targeting the dotfiles directory
 log_info "Installing dotfile configs (.config, wallpapers, etc.)..."
 for package in .config wallpapers nvim starship.toml; do
-    if [ -e "$package" ]; then
-        if ! stow -R "$package" 2>/dev/null; then
+    if [ -e "$DOTFILES_DIR/$package" ]; then
+        if ! stow -d "$DOTFILES_DIR" -t "$HOME" "$package" 2>/dev/null; then
             log_warn "stow $package had issues (this is often OK)"
         else
             log_info "stow $package completed successfully"
@@ -329,8 +326,6 @@ for package in .config wallpapers nvim starship.toml; do
         log_warn "Package $package not found in $DOTFILES_DIR"
     fi
 done
-
-cd - > /dev/null
 
 # Install language version managers
 log_step "Installing pyenv..."
