@@ -99,6 +99,15 @@ fi
 log_step "Updating system packages..."
 sudo pacman -Syu --noconfirm || log_warn "System package update had issues"
 
+# Install linux headers (required for DKMS kernel modules)
+log_step "Installing Linux headers for kernel module compilation..."
+if ! sudo pacman -S --noconfirm linux-headers; then
+    log_error "Failed to install linux-headers - required for NVIDIA DKMS modules"
+    FAILED_PACKAGES="$FAILED_PACKAGES linux-headers"
+else
+    log_info "✓ Linux headers installed"
+fi
+
 # Install desktop and development packages
 log_step "Installing Hyprland and desktop packages..."
 log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
@@ -193,21 +202,30 @@ fi
 log_step "Configuring Hyprland optimizations..."
 
 # Create/ensure XDG desktop portal config for Hyprland
-mkdir -p "$HOME/.config/xdg-desktop-portal"
-if [ ! -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ]; then
-    tee "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" > /dev/null <<EOF
+# Note: This will be managed by stow, don't create it if it exists in dotfiles
+if [ ! -d "$HOME/.dotfiles/.config/xdg-desktop-portal" ]; then
+    mkdir -p "$HOME/.config/xdg-desktop-portal"
+    if [ ! -f "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" ]; then
+        tee "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf" > /dev/null <<EOF
 [General]
 backends=hyprland;gtk
 EOF
-    log_info "XDG desktop portal configured"
+        log_info "XDG desktop portal configured"
+    fi
+else
+    log_info "XDG desktop portal will be managed by stow"
 fi
 
 # Ensure XDG Session Type environment variable is set for Hyprland
+# Only add to bashrc, let stow manage .zshrc
 if ! grep -q "XDG_SESSION_TYPE=wayland" ~/.bashrc 2>/dev/null; then
     echo "export XDG_SESSION_TYPE=wayland" >> ~/.bashrc
 fi
-if ! grep -q "XDG_SESSION_TYPE=wayland" ~/.zshrc 2>/dev/null; then
-    echo "export XDG_SESSION_TYPE=wayland" >> ~/.zshrc
+# Check if zshrc is managed by stow before modifying
+if [ ! -L "$HOME/.zshrc" ]; then
+    if ! grep -q "XDG_SESSION_TYPE=wayland" ~/.zshrc 2>/dev/null; then
+        echo "export XDG_SESSION_TYPE=wayland" >> ~/.zshrc
+    fi
 fi
 
 log_info "Hyprland environment variables configured"
@@ -273,15 +291,20 @@ if [ "$NVIDIA_DETECTED" = "1" ]; then
         fi
     fi
     
-    # Install NVIDIA drivers and utils
-    log_step "Installing NVIDIA driver packages..."
+    # Install NVIDIA drivers and utils with all kernel modules
+    log_step "Installing NVIDIA driver packages with kernel modules..."
     if ! sudo pacman -S --noconfirm \
         nvidia \
         nvidia-utils \
-        nvidia-settings 2>/dev/null; then
+        nvidia-settings \
+        nvidia-dkms \
+        opencl-nvidia \
+        cuda \
+        libvdpau \
+        libva-nvidia-driver 2>/dev/null; then
         log_warn "NVIDIA drivers installation had issues - you may need to install manually"
     else
-        log_info "NVIDIA drivers installed"
+        log_info "NVIDIA drivers with kernel modules installed"
     fi
     
     # Configure NVIDIA for Hyprland
@@ -294,17 +317,62 @@ options nvidia_drm modeset=1
 options nvidia_drm fbdev=1
 EOF
     
-    # Update mkinitcpio
-    sudo sed -i 's/^MODULES=.*/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
+    # Update mkinitcpio with complete NVIDIA kernel modules
+    if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/mkinitcpio.conf; then
+        sudo sed -i 's/^MODULES=.*/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
+        log_info "Added NVIDIA modules to mkinitcpio.conf"
+    else
+        log_info "NVIDIA modules already in mkinitcpio.conf"
+    fi
     
     # Create/update environment variables
     sudo tee /etc/environment.d/90-nvidia.conf > /dev/null <<EOF
-# NVIDIA environment variables for Hyprland
+# NVIDIA environment variables for Hyprland - Performance & Compatibility
 LIBVA_DRIVER_NAME=nvidia
 XDG_SESSION_TYPE=wayland
 GBM_BACKEND=nvidia-drm
 __GLX_VENDOR_LIBRARY_NAME=nvidia
 WLR_NO_HARDWARE_CURSORS=1
+
+# Performance optimization variables
+__NV_PRIME_RENDER_OFFLOAD=1
+__VK_LAYER_NV_optimus=NVIDIA_only
+__GL_VRR_ALLOWED=1
+PROTON_ENABLE_NVAPI=1
+PROTON_ENABLE_NGX_UPSCALING=1
+
+# Video acceleration and codec support
+VDPAU_DRIVER=nvidia
+NVHPC_ENABLE CUDA=1
+
+# OpenGL and Vulkan optimizations
+__GL_THREADED_OPTIMIZATIONS=1
+__GL_SHADER_DISK_CACHE=1
+__GL_SHADER_DISK_CACHE_PATH=/tmp
+__GL_IGNORE_MIPMAP_LEVEL=1
+
+# Frame pacing and sync
+__GL_SYNC_TO_VBLANK=0
+CLGL_SHARE_GL_RESOURCES=1
+
+# Memory management
+__GL_MAX_TEXTURE_UNITS=32
+__GL_HEAP_MEMORY_LIMIT_KB=1048576
+
+# Wayland specific optimizations
+WLR_DRM_NO_ATOMIC=1
+WLR_RENDERER=vulkan
+
+# Power management and thermal
+__NV_REGISTERS=0
+
+# Development and debugging (set to 0 for production)
+__GL_DEBUG=0
+__GL_LOG_MIN_SEVERITY=0
+
+# Legacy compatibility
+__GL_FORCE_STANDARD_GAMMA_CORRECTIONS=1
+__GL_X_SWAP_SUPPORTED=1
 EOF
     
     # Regenerate initramfs
@@ -313,6 +381,15 @@ EOF
         log_warn "mkinitcpio regeneration had issues - you may need to run: sudo mkinitcpio -P"
     else
         log_info "Initramfs regenerated successfully"
+    fi
+    
+    # Verify environment variables are set
+    log_step "Verifying NVIDIA environment variables..."
+    if [ -f /etc/environment.d/90-nvidia.conf ]; then
+        log_info "NVIDIA environment variables configured in /etc/environment.d/90-nvidia.conf"
+        log_info "These will be loaded automatically on next boot/login"
+    else
+        log_warn "NVIDIA environment variables file not found"
     fi
     
     log_info "NVIDIA configuration complete - reboot required for changes to take effect"
@@ -461,6 +538,22 @@ log_info "  3. Select 'Hyprland' from the session dropdown menu"
 log_info "  4. Enter your credentials and login"
 log_info "  5. Default keybind: ALT + T to open terminal"
 log_info "  6. All configs are managed by stow from ~/.dotfiles/"
+echo ""
+
+# Setup dotfile symlinks with stow
+log_step "Setting up dotfile symlinks with stow..."
+if cd "$HOME/.dotfiles" 2>/dev/null; then
+    if stow -v . 2>/dev/null; then
+        log_info "✓ Dotfile symlinks created successfully"
+    else
+        log_warn "⚠ Stow had some conflicts, but main configs should be working"
+        log_info "  You may need to run: cd ~/.dotfiles && stow -v ."
+    fi
+    cd - >/dev/null
+else
+    log_error "✗ Could not access ~/.dotfiles directory"
+fi
+
 echo ""
 log_info "For more information on Hyprland keybinds:"
 log_info "  • Check: ~/.dotfiles/.config/hypr/hyprland.conf"

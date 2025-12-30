@@ -4,3 +4,14 @@
 # Cache and telemetry directories
 .config/go/telemetry/
 .config/github-copilot/versions.json
+
+# Config directories to ignore
+.config/QtProject/
+.config/Thunar/
+.config/btop/
+.config/dconf/
+.config/discord/
+.config/lsfg-vk/
+.config/pulse/
+.config/xdg-desktop-portal/
+.opencode/

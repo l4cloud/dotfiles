@@ -11,13 +11,27 @@
 .config/nvim/lazy-lock.json
 .config/systemd/user/notification-sound.service
 
-# OpenCode app data (local/generated)
-.opencode/bun.lock
-.opencode/node_modules/
-.opencode/opencode.db
-.opencode/opencode.db-shm
-.opencode/opencode.db-wal
-.opencode/package.json
+# OpenCode app data (local/generated) - entire config directory managed by opencode
+.config/opencode/
+
+# Steam related (from arch desktop setup)
+.steampath
+
+# Config conflicts
+.config/lsfg-vk/conf.toml
+
+# Files created by arch desktop setup that should not be stowed
+.config/xdg-desktop-portal/hyprland-portals.conf
+
+# Config directories to ignore
+.config/QtProject/
+.config/Thunar/
+.config/btop/
+.config/dconf/
+.config/discord/
+.config/pulse/
+.opencode/
+.zshrc
 
 # Defaults
 RCS
