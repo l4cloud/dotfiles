@@ -8,10 +8,7 @@
 
 	"hyprland/workspaces": {
 		"format": "{id}",
-		"on-click": "hyprctl dispatch workspace {id}",
-		"persistent-workspaces": {
-			"*": [1, 2, 3, 4, 5]
-		}
+		"on-click": "hyprctl dispatch workspace {id}"
 	},
 	"hyprland/window": {
 		"format": "{}",
