@@ -7,8 +7,18 @@
 	"modules-right": ["tray", "pulseaudio", "network", "bluetooth", "custom/power-profile", "custom/swaync"],
 
 	"hyprland/workspaces": {
-		"format": "{id}",
-		"on-click": "hyprctl dispatch workspace {id}"
+		"format": "{icon}",
+		"on-click": "hyprctl dispatch workspace {id}",
+		"format-icons": {
+			"1": "1",
+			"2": "2", 
+			"3": "3",
+			"4": "4",
+			"5": "a",
+			"6": "s",
+			"7": "d", 
+			"8": "f"
+		}
 	},
 	"hyprland/window": {
 		"format": "{}",
@@ -50,6 +60,9 @@
 		},
 		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
 		"on-click-right": "hyprctl dispatch exec '[float] kitty pulsemixer'",
+		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-click-right": "hyprctl dispatch exec '[float] kitty pulsemixer'",
+		"on-shift-left": "~/.config/waybar/scripts/audio-switch.sh",
 		"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
 		"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%"
 	},
