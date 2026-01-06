@@ -31,7 +31,6 @@
 .config/discord/
 .config/pulse/
 .opencode/
-.zshrc
 
 # Defaults
 RCS

@@ -1,0 +1,89 @@
+[2026-01-06 10:33:54.492]: Info: Sunshine version: 2025.924.154138 commit: 86188d47a7463b0f73b35de18a628353adeaa20e
+[2026-01-06 10:33:54.492]: Info: Package Publisher: LizardByte
+[2026-01-06 10:33:54.492]: Info: Publisher Website: https://app.lizardbyte.dev
+[2026-01-06 10:33:54.492]: Info: Get support: https://app.lizardbyte.dev/support
+[2026-01-06 10:33:54.492]: Info: config: 'capture' = kms
+[2026-01-06 10:33:54.492]: Info: config: 'output_name' = 2
+[2026-01-06 10:33:54.494]: Info: /dev/dri/card0 -> amdgpu
+[2026-01-06 10:33:54.496]: Info: /dev/dri/card1 -> nvidia-drm
+[2026-01-06 10:33:54.557]: Info: Found display [wayland-1]
+[2026-01-06 10:33:54.557]: Info: Found display [wayland-1]
+[2026-01-06 10:33:54.736]: Info: Found interface: zxdg_output_manager_v1(9) version 3
+[2026-01-06 10:33:54.736]: Info: Found interface: zwlr_screencopy_manager_v1(41) version 3
+[2026-01-06 10:33:54.736]: Info: Found interface: zwp_linux_dmabuf_v1(63) version 5
+[2026-01-06 10:33:54.736]: Info: Found interface: wl_output(64) version 4
+[2026-01-06 10:33:54.736]: Info: Found interface: wl_output(65) version 4
+[2026-01-06 10:33:54.736]: Info: Found interface: wl_output(66) version 4
+[2026-01-06 10:33:54.736]: Info: Resolution: 1920x1080
+[2026-01-06 10:33:54.736]: Info: Resolution: 2560x1440
+[2026-01-06 10:33:54.736]: Info: Resolution: 1024x768
+[2026-01-06 10:33:54.736]: Info: Name: HDMI-A-1
+[2026-01-06 10:33:54.736]: Info: Found monitor: Microstep MSI MP165 E6 PE5M035800353 (HDMI-A-1)
+[2026-01-06 10:33:54.736]: Info: Offset: 340x1440
+[2026-01-06 10:33:54.736]: Info: Logical size: 1920x1080
+[2026-01-06 10:33:54.736]: Info: Name: DP-1
+[2026-01-06 10:33:54.736]: Info: Found monitor: Dell Inc. AW2725DF 26K2ZZ3 (DP-1)
+[2026-01-06 10:33:54.736]: Info: Offset: 0x0
+[2026-01-06 10:33:54.736]: Info: Logical size: 2560x1440
+[2026-01-06 10:33:54.736]: Info: Name: DP-3
+[2026-01-06 10:33:54.736]: Info: Found monitor: sisel muhendislik EK1080T4KV2 0x00005445 (DP-3)
+[2026-01-06 10:33:54.736]: Info: Offset: 3440x975
+[2026-01-06 10:33:54.736]: Info: Logical size: 1024x768
+[2026-01-06 10:33:54.736]: Info: -------- Start of KMS monitor list --------
+[2026-01-06 10:33:54.736]: Warning: Mismatch on expected Resolution compared to actual resolution: 0x0 vs 1920x1080
+[2026-01-06 10:33:54.736]: Info: Monitor 0 is HDMI-A-1: Microstep MSI MP165 E6 PE5M035800353 (HDMI-A-1)
+[2026-01-06 10:33:54.736]: Info: --------- End of KMS monitor list ---------
+[2026-01-06 10:33:54.844]: Warning: Gamepad ds5 is disabled due to Permission denied
+[2026-01-06 10:33:54.844]: Info: // Testing for available encoders, this may generate errors. You can safely ignore those errors. //
+[2026-01-06 10:33:54.844]: Info: Trying encoder [nvenc]
+[2026-01-06 10:33:54.845]: Info: Screencasting with KMS
+[2026-01-06 10:33:54.845]: Info: /dev/dri/card0 -> amdgpu
+[2026-01-06 10:33:54.845]: Info: /dev/dri/card1 -> nvidia-drm
+[2026-01-06 10:33:54.845]: Info: Found monitor for DRM screencasting
+[2026-01-06 10:33:54.845]: Warning: Couldn't find crtc_id, this shouldn't have happened :\
+[2026-01-06 10:33:54.845]: Info: Found connector ID [142]
+[2026-01-06 10:33:54.846]: Info: Found cursor plane [94]
+[2026-01-06 10:33:54.846]: Info: Creating encoder [h264_nvenc]
+[2026-01-06 10:33:54.846]: Info: Color coding: SDR (Rec. 601)
+[2026-01-06 10:33:54.846]: Info: Color depth: 8-bit
+[2026-01-06 10:33:54.846]: Info: Color range: JPEG
+[2026-01-06 10:33:55.061]: Info: Streaming bitrate is 1000000
+[2026-01-06 10:33:55.124]: Info: Creating encoder [hevc_nvenc]
+[2026-01-06 10:33:55.124]: Info: Color coding: SDR (Rec. 601)
+[2026-01-06 10:33:55.124]: Info: Color depth: 8-bit
+[2026-01-06 10:33:55.124]: Info: Color range: JPEG
+[2026-01-06 10:33:55.126]: Info: Streaming bitrate is 1000000
+[2026-01-06 10:33:55.157]: Info: Creating encoder [av1_nvenc]
+[2026-01-06 10:33:55.157]: Info: Color coding: SDR (Rec. 601)
+[2026-01-06 10:33:55.157]: Info: Color depth: 8-bit
+[2026-01-06 10:33:55.157]: Info: Color range: JPEG
+[2026-01-06 10:33:55.159]: Info: Streaming bitrate is 1000000
+[2026-01-06 10:33:55.191]: Info: Screencasting with KMS
+[2026-01-06 10:33:55.191]: Info: /dev/dri/card0 -> amdgpu
+[2026-01-06 10:33:55.193]: Info: /dev/dri/card1 -> nvidia-drm
+[2026-01-06 10:33:55.193]: Info: Found monitor for DRM screencasting
+[2026-01-06 10:33:55.193]: Warning: Couldn't find crtc_id, this shouldn't have happened :\
+[2026-01-06 10:33:55.193]: Info: Found connector ID [142]
+[2026-01-06 10:33:55.193]: Info: Found cursor plane [94]
+[2026-01-06 10:33:55.193]: Info: Creating encoder [hevc_nvenc]
+[2026-01-06 10:33:55.193]: Info: Color coding: SDR (Rec. 709)
+[2026-01-06 10:33:55.193]: Info: Color depth: 10-bit
+[2026-01-06 10:33:55.193]: Info: Color range: JPEG
+[2026-01-06 10:33:55.195]: Info: Streaming bitrate is 1000000
+[2026-01-06 10:33:55.239]: Info: Creating encoder [av1_nvenc]
+[2026-01-06 10:33:55.239]: Info: Color coding: SDR (Rec. 709)
+[2026-01-06 10:33:55.239]: Info: Color depth: 10-bit
+[2026-01-06 10:33:55.239]: Info: Color range: JPEG
+[2026-01-06 10:33:55.241]: Info: Streaming bitrate is 1000000
+[2026-01-06 10:33:55.274]: Info: 
+[2026-01-06 10:33:55.274]: Info: // Ignore any errors mentioned above, they are not relevant. //
+[2026-01-06 10:33:55.274]: Info: 
+[2026-01-06 10:33:55.274]: Info: Found H.264 encoder: h264_nvenc [nvenc]
+[2026-01-06 10:33:55.274]: Info: Found HEVC encoder: hevc_nvenc [nvenc]
+[2026-01-06 10:33:55.274]: Info: Found AV1 encoder: av1_nvenc [nvenc]
+[2026-01-06 10:33:55.275]: Info: Starting system tray
+[2026-01-06 10:33:55.275]: Info: Adding avahi service desktop
+[2026-01-06 10:33:55.277]: Info: Configuration UI available at [https://localhost:47990]
+[2026-01-06 10:33:55.292]: Info: System tray created
+[2026-01-06 10:33:55.292]: Info: Starting main loop
+[2026-01-06 10:33:56.086]: Info: Avahi service desktop successfully established.

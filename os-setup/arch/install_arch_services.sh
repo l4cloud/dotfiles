@@ -118,15 +118,48 @@ if [ ! -d "$DOTFILES_DIR" ]; then
     exit 1
 fi
 
-log_info "Removing existing files to allow stow to overwrite..."
-# Remove all existing files/symlinks that stow will replace
+log_info "Preparing existing files for stow (safe mode)..."
+# Create a temporary backup directory and move existing files there. At the end,
+# we create a compressed archive in /tmp so the backups are grouped and easy to
+# remove. This avoids littering the home directory with multiple backup files.
+stamp=$(date +%Y%m%d%H%M%S)
+TMPBACKDIR=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-backup-$stamp-XXXX")
+moved_any=0
 for item in .config wallpapers nvim starship.toml .aliases.zsh .func.zsh .ssh_fzf.zsh .tmux.conf .zshrc; do
     target="$HOME/$item"
-    if [ -e "$target" ] || [ -L "$target" ]; then
-        rm -rf "$target"
-        log_info "  Removed $item"
+    if [ -L "$target" ]; then
+        # If it's a symlink, remove it so stow can replace it
+        rm -f "$target"
+        log_info "  Removed existing symlink $item"
+    elif [ -e "$target" ]; then
+        # Move file/dir into the temp backup directory (preserve name)
+        mkdir -p "$(dirname "$TMPBACKDIR/$item")" 2>/dev/null || true
+        mv "$target" "$TMPBACKDIR/$item"
+        log_warn "  Moved existing $item to backup directory"
+        moved_any=1
+    else
+        log_info "  No existing $item found"
     fi
 done
+
+# If we moved anything, create a compressed archive in /tmp and remove the temp dir
+if [ "$moved_any" -eq 1 ]; then
+    archive="${TMPDIR:-/tmp}/dotfiles-backup-$stamp.tar.gz"
+    if command -v tar >/dev/null 2>&1; then
+        tar -C "$TMPBACKDIR" -czf "$archive" . || log_warn "Failed to create archive $archive"
+        if [ -f "$archive" ]; then
+            log_info "Backups archived to $archive"
+            rm -rf "$TMPBACKDIR"
+        else
+            log_warn "Archive creation failed; backups remain in $TMPBACKDIR"
+        fi
+    else
+        log_warn "tar not available; backups are in $TMPBACKDIR"
+    fi
+else
+    # Nothing moved, remove the empty temp dir
+    rmdir "$TMPBACKDIR" 2>/dev/null || true
+fi
 
 log_info "Running stow to install dotfiles..."
 cd "$HOME" || exit 1

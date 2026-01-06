@@ -150,6 +150,45 @@ if [ ! -f ~/.local/bin/getnf ]; then
     curl -fsSL https://raw.githubusercontent.com/MounirErhili/getnf/main/install.sh 2>/dev/null | bash || log_warn "getnf installation skipped"
 fi
 
+# If dotfiles exist, prepare existing files for stow (safe mode)
+if [ -d "$HOME/.dotfiles" ]; then
+    log_info "Preparing existing files for stow (safe mode)..."
+    stamp=$(date +%Y%m%d%H%M%S)
+    TMPBACKDIR=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-backup-$stamp-XXXX")
+    moved_any=0
+    for item in .config wallpapers nvim starship.toml .aliases.zsh .func.zsh .ssh_fzf.zsh .tmux.conf .zshrc; do
+        target="$HOME/$item"
+        if [ -L "$target" ]; then
+            rm -f "$target"
+            log_info "  Removed existing symlink $item"
+        elif [ -e "$target" ]; then
+            mkdir -p "$(dirname "$TMPBACKDIR/$item")" 2>/dev/null || true
+            mv "$target" "$TMPBACKDIR/$item"
+            log_warn "  Moved existing $item to backup directory"
+            moved_any=1
+        else
+            log_info "  No existing $item found"
+        fi
+    done
+
+    if [ "$moved_any" -eq 1 ]; then
+        archive="${TMPDIR:-/tmp}/dotfiles-backup-$stamp.tar.gz"
+        if command -v tar >/dev/null 2>&1; then
+            tar -C "$TMPBACKDIR" -czf "$archive" . || log_warn "Failed to create archive $archive"
+            if [ -f "$archive" ]; then
+                log_info "Backups archived to $archive"
+                rm -rf "$TMPBACKDIR"
+            else
+                log_warn "Archive creation failed; backups remain in $TMPBACKDIR"
+            fi
+        else
+            log_warn "tar not available; backups are in $TMPBACKDIR"
+        fi
+    else
+        rmdir "$TMPBACKDIR" 2>/dev/null || true
+    fi
+fi
+
 # Set Zsh as default shell
 log_step "Setting Zsh as default shell..."
 sudo usermod -s /bin/zsh $USER

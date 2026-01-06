@@ -1,0 +1,15 @@
+{
+    "username": "lu",
+    "salt": "bL4%av&LB%4ou4sg",
+    "password": "E3D712316870AED8820B05FCDB1B600EE306DDEC9818C2D40A76D8D0BE48EDB2",
+    "root": {
+        "uniqueid": "DBE22371-5A37-8305-9C10-3F82A4689A81",
+        "named_devices": [
+            {
+                "name": "deck",
+                "cert": "-----BEGIN CERTIFICATE-----\nMIICvzCCAaegAwIBAgIBADANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDDBhOVklE\nSUEgR2FtZVN0cmVhbSBDbGllbnQwHhcNMjYwMTA1MTYzNzM5WhcNNDUxMjMxMTYz\nNzM5WjAjMSEwHwYDVQQDDBhOVklESUEgR2FtZVN0cmVhbSBDbGllbnQwggEiMA0G\nCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCTzozwgwJyNVEUDuKnm3ZfGoQht1Sf\nEiMWGLiDb\/rOLqaFNs7SDYVgT2sZtREOVrBaqPYoQ9xYfK05zbF9DcMHZgJ1Es43\ntz+pEoricMz2NTSLnyqcExQ3j6eb3vt+pmXQ6UoavOMTwZhzpLxGH1jNlFFvLK14\nB342HOrj5CQ9xS92yS\/9HHuJ6HY2hrTz4eZevqXJjrhdllFhZPBUyWfNA70szfU9\nhsjbZwoL6btlGHMAiOuGj8oHGv9uidi7Tae7yuvEgxdpruwioue1XIS9MYJKgNLF\nt41oVGGnU\/u6chNeuu9lMzGXzr2bmraZECXK8x4sJoTVh6rQZTkprQYXAgMBAAEw\nDQYJKoZIhvcNAQELBQADggEBAE4aEyUxIdVLcBNN\/tS+oEKbXVUq9lTKlgsShWFL\nbb30dc7CbFJVRRQwa0wSn6ZxNGkdx930Hy3Zc6koJgWeX00q\/BE5HRj13nZ01LRb\n7JkVgdB2mUsH7WAeZQ4berIgrwVeLs5yXhfs11rlacmXJyIhlWBRC4zahzlnFbzy\n1wYoFXxj6\/JAnC5cmEbi6RSeXFWKbPwhos9OR+f\/nos2iOY2X1n1uDIW6+fpG4W8\n\/uRlPyqN\/9V32kkHZnyCjq6gASCvjuBEVCelIvz0ef1zK0BEumDLbcZ48t\/q9vHI\n7sUg7bwgB+cxdrymf2QVOMZ9fBYuCEmGuoWdJSgPmA8K6F0=\n-----END CERTIFICATE-----\n",
+                "uuid": "48D99B34-C5A7-8405-5D9D-BA4F6930728E"
+            }
+        ]
+    }
+}

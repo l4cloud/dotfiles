@@ -134,20 +134,43 @@ window#waybar {
 	color: alpha(@color9, 0.5);
 }
 
-/* Power Profile */
-#custom-power-profile {
+/* Media controls */
+#custom-media-prev, #custom-media-play, #custom-media-next, #custom-media-divider {
 	padding: 0px 6px;
-	margin-right: 2px;
+	margin-right: 4px;
 	color: @color9;
 	font-weight: bold;
-	transition: all 0.2s ease;
+	transition: all 0.12s ease;
+	font-size: 16px;
 }
 
-#custom-power-profile:hover {
+#custom-media-prev:hover, #custom-media-play:hover, #custom-media-next:hover, #custom-media-divider:hover {
 	color: @color9;
 }
 
-/* Tooltip */
+/* Small visual divider */
+#custom-media-divider {
+	padding: 0px 4px;
+	margin-right: 6px;
+	color: alpha(@color9, 0.6);
+	font-weight: normal;
+	font-size: 14px;
+}
+
+/* Power profile widget */
+#custom-power-profile {
+	padding: 0px 6px;
+	margin-right: 4px;
+	color: @color9;
+	font-weight: bold;
+	transition: all 0.12s ease;
+	font-size: 16px;
+}
+
+/* Color states for power profile removed so it matches other modules */
+
+
+/* Tooltip styling */
 tooltip {
 	background: @background;
 	border: 1px solid @color8;

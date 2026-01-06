@@ -4,7 +4,7 @@
 	"reload_style_on_change": true,
 	"modules-left": ["hyprland/workspaces"],
 	"modules-center": ["clock"],
-	"modules-right": ["tray", "pulseaudio", "network", "bluetooth", "custom/power-profile", "custom/swaync"],
+	"modules-right": ["custom/media-prev", "custom/media-play", "custom/media-next", "custom/media-divider", "tray", "pulseaudio", "network", "bluetooth", "custom/power-profile", "custom/swaync"],
 
 	"hyprland/workspaces": {
 		"format": "{icon}",
@@ -90,6 +90,38 @@
 	"tray": {
 		"spacing": 10
 	},
+
+	"custom/media-prev": {
+		"exec": "~/.config/waybar/scripts/media-prev.py",
+		"interval": 1,
+		"on-click": "playerctl previous",
+		"tooltip": true,
+		"return-type": "json"
+	},
+
+	"custom/media-play": {
+		"exec": "~/.config/waybar/scripts/media-play.py",
+		"interval": 1,
+		"on-click": "playerctl play-pause",
+		"tooltip": true,
+		"return-type": "json"
+	},
+
+	"custom/media-next": {
+		"exec": "~/.config/waybar/scripts/media-next.py",
+		"interval": 1,
+		"on-click": "playerctl next",
+		"tooltip": true,
+		"return-type": "json"
+	},
+
+	"custom/media-divider": {
+		"exec": "echo '•'",
+		"interval": 3600,
+		"tooltip": false,
+		"return-type": "text"
+	},
+
 	"custom/power-profile": {
 		"exec": "~/.config/waybar/scripts/power-profile.sh",
 		"return-type": "json",
