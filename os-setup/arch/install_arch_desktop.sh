@@ -113,7 +113,7 @@ log_step "Installing Hyprland and desktop packages..."
 log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
 
 # List of packages to install (excluding wlogout which is in AUR)
-PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl power-profiles-daemon grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch bluez bluez-utils blueman"
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl power-profiles-daemon grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch bluez bluez-utils blueman ethtool"
 
 INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN_EXIT=$?
 
@@ -271,6 +271,167 @@ else
     log_info "power-profiles-daemon service started"
 fi
 log_info "Power profile management configured"
+
+# Setup Wake-on-LAN (WoL)
+log_step "Configuring Wake-on-LAN (WoL)..."
+
+# Track WoL configuration errors
+WOL_ERRORS=""
+
+# Verify ethtool is installed (should be from main package list)
+if ! command -v ethtool >/dev/null 2>&1; then
+    WOL_ERRORS="${WOL_ERRORS}\n  • ethtool not found after package installation"
+    log_warn "ethtool not available - WoL configuration skipped"
+else
+    # Auto-detect active ethernet interface
+    ETHERNET_INTERFACE=$(ip -o link show | awk -F': ' '{print $2}' | grep -E '^(eth|enp|eno)' | head -1)
+    
+    if [ -z "$ETHERNET_INTERFACE" ]; then
+        WOL_ERRORS="${WOL_ERRORS}\n  • No ethernet interface detected (checked: eth*, enp*, eno*)"
+        log_warn "No ethernet interface detected - WoL configuration skipped"
+        AVAILABLE_IFACES=$(ip -o link show | awk -F': ' '{print $2}' | grep -v "lo" | tr '\n' ', ' | sed 's/,$//')
+        if [ -n "$AVAILABLE_IFACES" ]; then
+            log_info "Available interfaces: $AVAILABLE_IFACES"
+            WOL_ERRORS="${WOL_ERRORS}\n  • Available interfaces: $AVAILABLE_IFACES"
+        fi
+    else
+        log_info "Detected ethernet interface: $ETHERNET_INTERFACE"
+        
+        # Check if interface supports WoL
+        WOL_SUPPORT=$(sudo ethtool "$ETHERNET_INTERFACE" 2>/dev/null | grep "Supports Wake-on" | awk '{print $3}')
+        if [ -z "$WOL_SUPPORT" ]; then
+            WOL_ERRORS="${WOL_ERRORS}\n  • Interface $ETHERNET_INTERFACE may not support Wake-on-LAN"
+            log_warn "Interface $ETHERNET_INTERFACE may not support Wake-on-LAN"
+        else
+            log_info "WoL capabilities: $WOL_SUPPORT"
+        fi
+        
+        # Enable WoL in NetworkManager (if available)
+        if command -v nmcli >/dev/null 2>&1; then
+            ETHERNET_CONNECTION=$(nmcli -t -f NAME,DEVICE connection show --active 2>/dev/null | grep "$ETHERNET_INTERFACE" | cut -d: -f1)
+            if [ -n "$ETHERNET_CONNECTION" ]; then
+                if nmcli connection modify "$ETHERNET_CONNECTION" 802-3-ethernet.wake-on-lan magic 2>/dev/null; then
+                    nmcli connection up "$ETHERNET_CONNECTION" 2>/dev/null || true
+                    log_info "✓ WoL enabled in NetworkManager for '$ETHERNET_CONNECTION'"
+                else
+                    WOL_ERRORS="${WOL_ERRORS}\n  • Failed to configure WoL in NetworkManager for '$ETHERNET_CONNECTION'"
+                    log_warn "Failed to configure WoL in NetworkManager"
+                fi
+            else
+                WOL_ERRORS="${WOL_ERRORS}\n  • No active NetworkManager connection found for $ETHERNET_INTERFACE"
+                log_warn "No active NetworkManager connection found for $ETHERNET_INTERFACE"
+            fi
+        fi
+        
+        # Enable WoL using ethtool immediately
+        if sudo ethtool -s "$ETHERNET_INTERFACE" wol g 2>/dev/null; then
+            log_info "✓ WoL enabled for $ETHERNET_INTERFACE using ethtool"
+            
+            # Verify WoL is enabled
+            WOL_STATUS=$(sudo ethtool "$ETHERNET_INTERFACE" 2>/dev/null | grep "Wake-on:" | awk '{print $2}')
+            if [ "$WOL_STATUS" = "g" ]; then
+                log_info "✓ WoL status verified: magic packet enabled"
+            else
+                WOL_ERRORS="${WOL_ERRORS}\n  • WoL status verification: got '$WOL_STATUS', expected 'g'"
+                log_warn "WoL status: $WOL_STATUS (expected: g)"
+            fi
+        else
+            WOL_ERRORS="${WOL_ERRORS}\n  • Failed to enable WoL with ethtool on $ETHERNET_INTERFACE"
+            log_warn "Failed to enable WoL with ethtool"
+        fi
+        
+        # Setup systemd user service for WoL persistence (managed by stow)
+        if [ -f "$HOME/.config/systemd/user/wol@.service" ]; then
+            if systemctl --user enable "wol@${ETHERNET_INTERFACE}.service" 2>/dev/null; then
+                log_info "✓ WoL systemd user service enabled for $ETHERNET_INTERFACE"
+            else
+                WOL_ERRORS="${WOL_ERRORS}\n  • Failed to enable systemd user service wol@${ETHERNET_INTERFACE}.service"
+                log_warn "Failed to enable WoL user service"
+            fi
+        else
+            log_info "WoL systemd service template not found (will be available after stow)"
+        fi
+    fi
+    
+    # Setup ACPI wakeup for ethernet device
+    log_step "Configuring ACPI wakeup for ethernet device..."
+    
+    # Find ethernet device in ACPI wakeup
+    ETHERNET_PCI=$(lspci 2>/dev/null | grep -i "ethernet controller" | head -1 | cut -d' ' -f1)
+    if [ -n "$ETHERNET_PCI" ]; then
+        log_info "Ethernet controller at PCI address: $ETHERNET_PCI"
+        
+        # Find corresponding ACPI device
+        ACPI_DEVICE=$(grep "pci:0000:$ETHERNET_PCI" /proc/acpi/wakeup 2>/dev/null | awk '{print $1}' | head -1)
+        if [ -n "$ACPI_DEVICE" ]; then
+            log_info "ACPI wakeup device: $ACPI_DEVICE"
+            
+            # Check if disabled
+            if grep "$ACPI_DEVICE.*disabled" /proc/acpi/wakeup >/dev/null 2>&1; then
+                log_info "Enabling ACPI wakeup for $ACPI_DEVICE..."
+                if echo "$ACPI_DEVICE" | sudo tee /proc/acpi/wakeup >/dev/null 2>&1; then
+                    log_info "✓ ACPI wakeup enabled for $ACPI_DEVICE"
+                else
+                    WOL_ERRORS="${WOL_ERRORS}\n  • Failed to enable ACPI wakeup for $ACPI_DEVICE"
+                    log_warn "Failed to enable ACPI wakeup (may need reboot)"
+                fi
+            else
+                log_info "✓ ACPI wakeup already enabled for $ACPI_DEVICE"
+            fi
+            
+            # Install system service for ACPI wakeup persistence
+            log_info "Installing ACPI wakeup systemd service..."
+            if sudo tee /etc/systemd/system/acpi-wakeup-ethernet.service > /dev/null 2>&1 <<'EOF'
+[Unit]
+Description=Enable ACPI Wake for Ethernet Device
+After=multi-user.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'for device in $(grep "disabled.*pci:" /proc/acpi/wakeup 2>/dev/null | grep -i "ethernet\|EP00\|LN00" | awk "{print \$1}"); do echo $device > /proc/acpi/wakeup 2>/dev/null || true; done'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+            then
+                if sudo systemctl enable acpi-wakeup-ethernet.service 2>/dev/null; then
+                    log_info "✓ ACPI wakeup service enabled for boot"
+                else
+                    WOL_ERRORS="${WOL_ERRORS}\n  • Failed to enable acpi-wakeup-ethernet.service"
+                    log_warn "Failed to enable ACPI wakeup service"
+                fi
+            else
+                WOL_ERRORS="${WOL_ERRORS}\n  • Failed to create acpi-wakeup-ethernet.service"
+                log_warn "Failed to create ACPI wakeup service file"
+            fi
+        else
+            WOL_ERRORS="${WOL_ERRORS}\n  • Could not find ACPI device for ethernet at PCI $ETHERNET_PCI"
+            log_warn "Could not find ACPI device for ethernet controller"
+        fi
+    else
+        WOL_ERRORS="${WOL_ERRORS}\n  • Could not detect ethernet PCI device via lspci"
+        log_warn "Could not detect ethernet PCI device"
+    fi
+    
+    log_info "Wake-on-LAN configuration complete"
+    log_info ""
+    log_info "IMPORTANT: WoL also requires BIOS/UEFI configuration:"
+    log_info "  1. Enter BIOS/UEFI setup (usually DEL, F2, or F12 during boot)"
+    log_info "  2. Look for Power Management or Advanced settings"
+    log_info "  3. Enable 'Wake on LAN' or 'Wake on PCIe/PCI'"
+    log_info "  4. Disable 'ErP' or enable 'EuP 2013' (if present)"
+    log_info "  5. Save and exit BIOS"
+    log_info ""
+fi
+
+# Store WoL errors for end summary (if there were any)
+if [ -n "$WOL_ERRORS" ]; then
+    INSTALL_ERRORS="$INSTALL_ERRORS
+
+--- Wake-on-LAN Configuration Errors ---$WOL_ERRORS"
+fi
 
 # Install pulsemixer for audio control
 log_step "Installing pulsemixer..."

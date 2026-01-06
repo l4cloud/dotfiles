@@ -1,0 +1,12 @@
+[Unit]
+Description=Enable Wake-on-LAN for %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sudo /usr/sbin/ethtool -s %i wol g
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

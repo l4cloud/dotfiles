@@ -15,3 +15,6 @@
 .config/pulse/
 .config/xdg-desktop-portal/
 .opencode/
+
+# Sunshine credentials
+.config/sunshine/credentials.json
