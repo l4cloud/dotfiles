@@ -30,6 +30,7 @@
 .config/dconf/
 .config/discord/
 .config/pulse/
+.config/sunshine/
 .opencode/
 
 # Defaults
