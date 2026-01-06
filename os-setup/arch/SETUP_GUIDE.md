@@ -46,7 +46,7 @@ The `setup.sh` script is a single, straightforward bash script that:
 - jq, go, docker, stow, python-pip
 
 ### Build Dependencies (10+ packages)
-- zlib, bzip2, readline, sqlite, openssl, tk, libffi, xz, ncurses
+- zlib-ng-compat, bzip2, readline, sqlite, openssl, tk, libffi, xz, ncurses
 
 ### Utilities (10+ packages)
 - yazi, p7zip, poppler, fd, ripgrep, fzf, zoxide

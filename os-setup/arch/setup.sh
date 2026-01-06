@@ -38,7 +38,7 @@ sudo pacman -S --noconfirm \
     base-devel git curl wget \
     neovim zsh tmux htop fastfetch \
     jq gcc make patch unzip \
-    zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
+    zlib-ng-compat bzip2 readline sqlite openssl tk libffi xz ncurses \
     python-pip stow go docker \
     hyprland kitty hypridle waybar swww swaync \
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber \

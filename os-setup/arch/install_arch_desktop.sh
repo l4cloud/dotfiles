@@ -113,7 +113,7 @@ log_step "Installing Hyprland and desktop packages..."
 log_info "Attempting to install: hyprland kitty hypridle waybar swww swaync and others..."
 
 # List of packages to install (excluding wlogout which is in AUR)
-PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl power-profiles-daemon grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch bluez bluez-utils blueman ethtool"
+PACKAGES_TO_INSTALL="hyprland kitty hypridle waybar swww swaync pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber brightnessctl playerctl power-profiles-daemon grim slurp hyprshot hyprlock thunar wofi flatpak git neovim jq gcc make patch unzip curl wget zlib-ng-compat bzip2 readline sqlite openssl tk libffi xz ncurses python-pip stow docker yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip zsh tmux htop fastfetch bluez bluez-utils blueman ethtool"
 
 INSTALL_OUTPUT=$(sudo pacman -S --noconfirm $PACKAGES_TO_INSTALL 2>&1) || PACMAN_EXIT=$?
 

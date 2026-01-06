@@ -50,8 +50,8 @@ sudo pacman -S --noconfirm \
     git curl wget \
     neovim zsh tmux htop fastfetch \
     jq gcc make patch unzip \
-    zlib bzip2 readline sqlite openssl tk libffi xz ncurses \
-    python-pip stow go docker
+    zlib-ng-compat bzip2 readline sqlite openssl tk libffi xz ncurses \
+    python-pip stow go docker ethtool
 
 # Install AUR helper (yay) dependencies
 log_step "Setting up yay AUR helper..."
