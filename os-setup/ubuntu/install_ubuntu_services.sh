@@ -187,6 +187,22 @@ if [ -d "$HOME/.dotfiles" ]; then
     else
         rmdir "$TMPBACKDIR" 2>/dev/null || true
     fi
+
+    # Run stow to create symlinks
+    log_step "Installing dotfile configs using stow..."
+    cd "$HOME/.dotfiles"
+    
+    # Stow all dotfiles
+    log_info "Creating symlinks for dotfiles..."
+    if stow -v -t "$HOME" . 2>&1 | grep -v "^LINK:" | grep -v "^UNLINK:" | grep -v "^$"; then
+        log_info "Dotfiles linked successfully"
+    else
+        log_warn "stow completed with warnings (this is often OK)"
+    fi
+    
+    cd - > /dev/null
+else
+    log_warn "Dotfiles directory not found at $HOME/.dotfiles - skipping stow"
 fi
 
 # Set Zsh as default shell
