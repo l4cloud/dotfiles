@@ -75,9 +75,14 @@ log_info "Docker configured (you may need to log out and back in)"
 # Install Rust for Yazi
 log_step "Installing Rust (for Yazi)..."
 if ! command -v cargo &>/dev/null; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null || log_warn "Rust installation skipped"
-    # Source cargo environment
-    source "$HOME/.cargo/env" 2>/dev/null || true
+    log_info "Downloading and installing Rust..."
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        # Source cargo environment
+        source "$HOME/.cargo/env" 2>/dev/null || true
+        log_info "Rust installed successfully"
+    else
+        log_warn "Rust installation failed or skipped"
+    fi
 else
     log_info "Rust already installed"
 fi
@@ -87,11 +92,16 @@ log_step "Installing Yazi..."
 if ! command -v yazi &>/dev/null; then
     if command -v cargo &>/dev/null; then
         source "$HOME/.cargo/env" 2>/dev/null || true
-        cargo install --locked yazi-fm yazi-cli 2>/dev/null || log_warn "Yazi installation skipped"
-        # Create symlinks
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$HOME/.cargo/bin/yazi" "$HOME/.local/bin/yazi" 2>/dev/null || true
-        ln -sf "$HOME/.cargo/bin/ya" "$HOME/.local/bin/ya" 2>/dev/null || true
+        log_info "This may take 5-15 minutes to compile..."
+        if cargo install --locked yazi-fm yazi-cli; then
+            # Create symlinks
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$HOME/.cargo/bin/yazi" "$HOME/.local/bin/yazi" 2>/dev/null || true
+            ln -sf "$HOME/.cargo/bin/ya" "$HOME/.local/bin/ya" 2>/dev/null || true
+            log_info "Yazi installed successfully"
+        else
+            log_warn "Yazi installation failed or skipped"
+        fi
     else
         log_warn "Cargo not available, skipping Yazi"
     fi
