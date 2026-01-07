@@ -78,38 +78,22 @@ sudo systemctl start docker
 sudo usermod -aG docker $USER
 log_info "Docker configured (you may need to log out and back in)"
 
-# Install Rust for Yazi
-log_step "Installing Rust (for Yazi)..."
-if ! command -v cargo &>/dev/null; then
-    log_info "Downloading and installing Rust..."
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
-        # Source cargo environment
-        source "$HOME/.cargo/env" 2>/dev/null || true
-        log_info "Rust installed successfully"
-    else
-        log_warn "Rust installation failed or skipped"
-    fi
-else
-    log_info "Rust already installed"
-fi
-
-# Install Yazi via Cargo
+# Install Yazi from GitHub releases
 log_step "Installing Yazi..."
 if ! command -v yazi &>/dev/null; then
-    if command -v cargo &>/dev/null; then
-        source "$HOME/.cargo/env" 2>/dev/null || true
-        log_info "This may take 5-15 minutes to compile..."
-        if cargo install --locked yazi-fm yazi-cli; then
-            # Create symlinks
-            mkdir -p "$HOME/.local/bin"
-            ln -sf "$HOME/.cargo/bin/yazi" "$HOME/.local/bin/yazi" 2>/dev/null || true
-            ln -sf "$HOME/.cargo/bin/ya" "$HOME/.local/bin/ya" 2>/dev/null || true
-            log_info "Yazi installed successfully"
-        else
-            log_warn "Yazi installation failed or skipped"
-        fi
+    YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [ -n "$YAZI_VERSION" ]; then
+        log_info "Downloading Yazi v${YAZI_VERSION}..."
+        curl -L "https://github.com/sxyazi/yazi/releases/download/v${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip" -o /tmp/yazi.zip
+        unzip -q /tmp/yazi.zip -d /tmp/yazi
+        mkdir -p "$HOME/.local/bin"
+        cp /tmp/yazi/yazi-x86_64-unknown-linux-gnu/yazi "$HOME/.local/bin/yazi"
+        cp /tmp/yazi/yazi-x86_64-unknown-linux-gnu/ya "$HOME/.local/bin/ya"
+        chmod +x "$HOME/.local/bin/yazi" "$HOME/.local/bin/ya"
+        rm -rf /tmp/yazi.zip /tmp/yazi
+        log_info "Yazi installed successfully"
     else
-        log_warn "Cargo not available, skipping Yazi"
+        log_warn "Could not determine Yazi version"
     fi
 else
     log_info "Yazi already installed"
