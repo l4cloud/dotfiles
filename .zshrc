@@ -5,6 +5,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 export EDITOR=nvim
 export VISUAL="$EDITOR"
 export PATH="$PATH:/usr/local/go/bin:/home/lu/.local/bin"
+export PATH=/home/culletonl/.opencode/bin:$PATH
 export GOPATH="$HOME/.go"
 DISABLE_LS_COLORS="true"
 
