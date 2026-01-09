@@ -36,7 +36,6 @@ declare -a MODULES=(
     "70:07-fonts.sh:Fonts Installation:false"
     "80:08-devtools.sh:Development Tools:false"
     "90:09-nvidia.sh:NVIDIA Configuration:optional"
-    "100:10-wol.sh:Wake-on-LAN:optional"
     "110:11-flatpak.sh:Flatpak Applications:false"
     "120:12-dotfiles.sh:Dotfiles Installation:false"
 )

@@ -26,8 +26,8 @@ install_nvidia_packages() {
         nvidia-utils
         nvidia-settings
         nvidia-dkms
-        opencl-nvidia
-        cuda
+        # opencl-nvidia    # Uncomment for OpenCL compute support
+        # cuda             # Uncomment for CUDA development (large download ~3GB)
         libvdpau
         libva-nvidia-driver
     )
@@ -36,7 +36,7 @@ install_nvidia_packages() {
         log_success "NVIDIA packages installed"
         return 0
     else
-        log_error "Failed to install NVIDIA packages"
+        log_error "Failed to install NVIDIA packages. Check your internet connection and pacman mirrors."
         return 1
     fi
 }
@@ -45,64 +45,93 @@ configure_nvidia_modules() {
     log_step "Configuring NVIDIA kernel modules..."
     
     # Create modprobe config
-    sudo tee /etc/modprobe.d/nvidia.conf > /dev/null <<'EOF'
+    if ! sudo tee /etc/modprobe.d/nvidia.conf > /dev/null <<'EOF'
 # Enable NVIDIA DRM kernel mode setting
 options nvidia_drm modeset=1
 options nvidia_drm fbdev=1
 EOF
+    then
+        log_error "Failed to create /etc/modprobe.d/nvidia.conf. Check sudo permissions."
+        return 1
+    fi
+    log_info "Created NVIDIA modprobe configuration"
     
-    # Update mkinitcpio
+    # Backup mkinitcpio.conf before modification
+    if [ -f /etc/mkinitcpio.conf ] && [ ! -f /etc/mkinitcpio.conf.backup ]; then
+        sudo cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.backup
+        log_info "Backed up mkinitcpio.conf"
+    fi
+    
+    # Append NVIDIA modules to existing MODULES array (preserves other modules like Intel/AMD)
     if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/mkinitcpio.conf; then
-        sudo sed -i 's/^MODULES=.*/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
-        log_info "Added NVIDIA modules to mkinitcpio.conf"
+        # Check if MODULES line exists
+        if ! grep -q "^MODULES=" /etc/mkinitcpio.conf; then
+            log_error "Could not find MODULES= line in /etc/mkinitcpio.conf"
+            return 1
+        fi
+        
+        # Append NVIDIA modules to existing MODULES array
+        if sudo sed -i '/^MODULES=/ s/)/ nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf; then
+            log_info "Added NVIDIA modules to mkinitcpio.conf (preserving existing modules)"
+        else
+            log_error "Failed to modify mkinitcpio.conf. Restore from /etc/mkinitcpio.conf.backup if needed."
+            return 1
+        fi
     else
-        log_info "NVIDIA modules already in mkinitcpio.conf"
+        log_info "NVIDIA modules already present in mkinitcpio.conf"
     fi
     
     # Regenerate initramfs
     log_step "Regenerating initramfs..."
-    if sudo mkinitcpio -P 2>&1; then
-        log_success "Initramfs regenerated"
-        return 0
-    else
-        log_warn "Initramfs regeneration had issues"
+    local mkinitcpio_output
+    if ! mkinitcpio_output=$(sudo mkinitcpio -P 2>&1); then
+        log_error "Initramfs regeneration failed. Output:"
+        echo "$mkinitcpio_output"
+        log_error "This may indicate missing kernel headers or module compilation issues."
+        log_error "Try: sudo pacman -S linux-headers"
         return 1
     fi
+    log_success "Initramfs regenerated successfully"
+    return 0
 }
 
 configure_nvidia_environment() {
     log_step "Configuring NVIDIA environment variables..."
     
-    sudo tee /etc/environment.d/90-nvidia.conf > /dev/null <<'EOF'
-# NVIDIA environment variables for Hyprland - Performance & Compatibility
+    if ! sudo tee /etc/environment.d/90-nvidia.conf > /dev/null <<'EOF'
+# NVIDIA environment variables for Wayland/Hyprland
+# Essential variables for proper NVIDIA driver operation
 LIBVA_DRIVER_NAME=nvidia
-XDG_SESSION_TYPE=wayland
 GBM_BACKEND=nvidia-drm
 __GLX_VENDOR_LIBRARY_NAME=nvidia
-WLR_NO_HARDWARE_CURSORS=1
 
-# Performance optimization variables
-__NV_PRIME_RENDER_OFFLOAD=1
-__VK_LAYER_NV_optimus=NVIDIA_only
-__GL_VRR_ALLOWED=1
-PROTON_ENABLE_NVAPI=1
-PROTON_ENABLE_NGX_UPSCALING=1
-
-# Video acceleration and codec support
-VDPAU_DRIVER=nvidia
-NVHPC_CUDA_ENABLE=1
-
-# OpenGL and Vulkan optimizations
+# Gaming and performance optimizations (safe for RTX 40 series)
 __GL_THREADED_OPTIMIZATIONS=1
 __GL_SHADER_DISK_CACHE=1
 __GL_SHADER_DISK_CACHE_PATH=/tmp
+__GL_VRR_ALLOWED=1
 
-# Wayland specific optimizations
-WLR_DRM_NO_ATOMIC=1
+# Video acceleration
+VDPAU_DRIVER=nvidia
+
+# Vulkan renderer for Wayland compositors
 WLR_RENDERER=vulkan
+
+# Prime render offload (for hybrid graphics - safe to set even on discrete GPU)
+__NV_PRIME_RENDER_OFFLOAD=1
+__VK_LAYER_NV_optimus=NVIDIA_only
+
+# Proton/Gaming support
+PROTON_ENABLE_NVAPI=1
+PROTON_ENABLE_NGX_UPSCALING=1
 EOF
+    then
+        log_error "Failed to create /etc/environment.d/90-nvidia.conf. Check sudo permissions."
+        return 1
+    fi
     
     log_success "NVIDIA environment variables configured"
+    log_info "Configuration file: /etc/environment.d/90-nvidia.conf"
     return 0
 }
 

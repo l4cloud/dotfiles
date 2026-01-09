@@ -39,7 +39,6 @@ Desktop +
 - Flatpak apps (Obsidian, Zen Browser)
 - Dotfiles via Stow
 - NVIDIA drivers (if detected)
-- Wake-on-LAN (if ethernet detected)
 
 ## Module Structure
 
@@ -55,7 +54,6 @@ modules/
 ├── 07-fonts.sh            # Font installation
 ├── 08-devtools.sh         # pyenv, nvm, etc.
 ├── 09-nvidia.sh           # NVIDIA configuration
-├── 10-wol.sh              # Wake-on-LAN
 ├── 11-flatpak.sh          # Flatpak apps
 └── 12-dotfiles.sh         # Dotfiles (stow)
 ```
@@ -86,10 +84,10 @@ The installation continues even if optional modules fail. You'll get a summary:
   ...
 
 [WARN] Failed Modules (1):
-  ✗ Wake-on-LAN
+  ✗ NVIDIA Configuration
   
 [ERROR] Detailed Errors:
-  10-wol.sh: No ethernet interface detected
+  09-nvidia.sh: No NVIDIA GPU detected
 ```
 
 ## Retry Failed Modules

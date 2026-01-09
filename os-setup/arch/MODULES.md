@@ -23,7 +23,6 @@ os-setup/arch/
 │   ├── 07-fonts.sh
 │   ├── 08-devtools.sh
 │   ├── 09-nvidia.sh
-│   ├── 10-wol.sh
 │   ├── 11-flatpak.sh
 │   └── 12-dotfiles.sh
 └── (legacy scripts...)
@@ -66,7 +65,6 @@ Each module is a self-contained script that can be run independently:
 | 07-fonts | Nerd Fonts installation | ✗ | ✗ | ✓ |
 | 08-devtools | Dev tools (pyenv, nvm, etc.) | ✗ | ✗ | ✓ |
 | 09-nvidia | NVIDIA driver configuration | ○ | ○ | ○ |
-| 10-wol | Wake-on-LAN configuration | ○ | ○ | ○ |
 | 11-flatpak | Flatpak applications | ✗ | ✗ | ✓ |
 | 12-dotfiles | Dotfiles installation (stow) | ✗ | ✗ | ✓ |
 
@@ -123,10 +121,10 @@ Installation Mode: full
   ...
 
 [WARN] Failed Modules (1):
-  ✗ Wake-on-LAN
+  ✗ NVIDIA Configuration
 
 [ERROR] Detailed Errors:
-  10-wol.sh: Exit code: 1 (No ethernet interface detected)
+  09-nvidia.sh: Exit code: 1 (No NVIDIA GPU detected)
 
 ================================================================================
 ```
