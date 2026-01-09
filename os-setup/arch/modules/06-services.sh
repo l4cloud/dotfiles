@@ -52,10 +52,66 @@ configure_sddm() {
         return 1
     fi
     
+    # Verify Hyprland is installed (required for SDDM to have a session)
+    if ! pacman -Q hyprland >/dev/null 2>&1; then
+        log_warn "Hyprland not installed - SDDM needs a desktop session to start"
+        log_warn "Install Hyprland first before enabling SDDM"
+        return 1
+    fi
+    
+    # Create SDDM configuration directory
+    sudo mkdir -p /etc/sddm.conf.d
+    
+    # Create SDDM configuration to prevent crashes
+    log_step "Creating SDDM configuration..."
+    if ! sudo tee /etc/sddm.conf.d/10-wayland.conf > /dev/null <<'EOF'
+[General]
+# Use Wayland for SDDM itself (better for Wayland compositors)
+DisplayServer=wayland
+
+# Set default session to Hyprland
+DefaultSession=hyprland.desktop
+
+# Number of login attempts
+Numlock=on
+
+[Wayland]
+# Compositor command for SDDM greeter
+CompositorCommand=kwin_wayland --no-global-shortcuts --no-kactivities --no-lockscreen --locale1
+
+[Theme]
+# Use breeze theme (comes with sddm)
+Current=breeze
+
+[Users]
+# Remember last logged in user
+RememberLastUser=true
+RememberLastSession=true
+EOF
+    then
+        log_error "Failed to create SDDM configuration file"
+        return 1
+    fi
+    log_info "Created SDDM configuration at /etc/sddm.conf.d/10-wayland.conf"
+    
+    # Verify Hyprland session file exists
+    if [ ! -f /usr/share/wayland-sessions/hyprland.desktop ]; then
+        log_warn "Hyprland session file not found at /usr/share/wayland-sessions/hyprland.desktop"
+        log_warn "SDDM may crash on login. Hyprland package should create this file."
+        log_info "You may need to reinstall Hyprland: sudo pacman -S hyprland"
+    else
+        log_info "✓ Hyprland session file found"
+    fi
+    
     # Enable SDDM but DO NOT start it (would take over display during install)
     if enable_service_no_start sddm false; then
         log_info "SDDM display manager enabled for next boot"
-        log_warn "SDDM will start after reboot - do not start it manually during installation"
+        log_warn ""
+        log_warn "SDDM Configuration Summary:"
+        log_warn "  - Display server: Wayland"
+        log_warn "  - Default session: Hyprland"
+        log_warn "  - Will start automatically after reboot"
+        log_warn "  - Do NOT manually start SDDM during installation"
         return 0
     else
         log_warn "SDDM configuration had issues"
@@ -96,10 +152,21 @@ main() {
     if [ ${#failed_services[@]} -eq 0 ]; then
         log_success "All system services configured successfully"
         log_warn ""
-        log_warn "IMPORTANT: SDDM display manager is enabled but NOT started"
-        log_warn "  - SDDM will automatically start after reboot"
-        log_warn "  - Do NOT manually start SDDM during installation"
-        log_warn "  - Reboot your system when installation is complete"
+        log_warn "========================================"
+        log_warn "SDDM Display Manager Configuration"
+        log_warn "========================================"
+        log_warn "SDDM is enabled but NOT started"
+        log_warn "  - Will start automatically after reboot"
+        log_warn "  - Configured for Wayland + Hyprland"
+        log_warn "  - Do NOT manually start SDDM now"
+        log_warn ""
+        log_warn "If SDDM crashes after reboot:"
+        log_warn "  1. Press Ctrl+Alt+F2 to get to TTY"
+        log_warn "  2. Check logs: journalctl -u sddm -b"
+        log_warn "  3. Verify session: ls /usr/share/wayland-sessions/"
+        log_warn "  4. Disable SDDM: sudo systemctl disable sddm"
+        log_warn "  5. Start Hyprland manually: Hyprland"
+        log_warn "========================================"
         return 0
     else
         log_warn "Some services failed to configure:"

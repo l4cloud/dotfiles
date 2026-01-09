@@ -44,6 +44,13 @@ install_nvidia_packages() {
 configure_nvidia_modules() {
     log_step "Configuring NVIDIA kernel modules..."
     
+    # Check if mkinitcpio.conf exists
+    if [ ! -f /etc/mkinitcpio.conf ]; then
+        log_error "mkinitcpio.conf not found. This is required for Arch Linux."
+        log_error "Make sure you're running this on a proper Arch Linux installation."
+        return 1
+    fi
+    
     # Create modprobe config
     if ! sudo tee /etc/modprobe.d/nvidia.conf > /dev/null <<'EOF'
 # Enable NVIDIA DRM kernel mode setting
@@ -73,6 +80,8 @@ EOF
         # Append NVIDIA modules to existing MODULES array
         if sudo sed -i '/^MODULES=/ s/)/ nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf; then
             log_info "Added NVIDIA modules to mkinitcpio.conf (preserving existing modules)"
+            log_info "New MODULES line:"
+            grep "^MODULES=" /etc/mkinitcpio.conf | sed 's/^/  /'
         else
             log_error "Failed to modify mkinitcpio.conf. Restore from /etc/mkinitcpio.conf.backup if needed."
             return 1
@@ -161,7 +170,24 @@ main() {
     fi
     
     log_success "NVIDIA configuration complete"
-    log_warn "System reboot required for NVIDIA changes to take effect"
+    echo ""
+    log_warn "=========================================="
+    log_warn "CRITICAL: REBOOT REQUIRED"
+    log_warn "=========================================="
+    log_warn "NVIDIA kernel modules will NOT work until you reboot!"
+    log_warn ""
+    log_warn "Before starting Hyprland/Wayland:"
+    log_warn "  1. Complete the entire installation"
+    log_warn "  2. Run: sudo reboot"
+    log_warn "  3. After reboot, NVIDIA modules will be loaded"
+    log_warn ""
+    log_warn "If you try to start Hyprland NOW, you will see:"
+    log_warn "  'failed to open nvidia-drm: No such file or directory'"
+    log_warn ""
+    log_warn "To verify NVIDIA is loaded after reboot:"
+    log_warn "  lsmod | grep nvidia"
+    log_warn "=========================================="
+    echo ""
     return 0
 }
 
