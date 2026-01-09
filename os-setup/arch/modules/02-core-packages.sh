@@ -28,7 +28,7 @@ main() {
         # Verify critical packages
         log_step "Verifying critical packages..."
         verify_command git
-        verify_command neovim
+        verify_command nvim
         verify_command zsh
         verify_command stow
         
