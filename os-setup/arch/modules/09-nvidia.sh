@@ -21,22 +21,64 @@ detect_nvidia() {
 install_nvidia_packages() {
     log_step "Installing NVIDIA driver packages..."
     
-    local nvidia_packages=(
-        nvidia
-        nvidia-utils
-        nvidia-settings
-        nvidia-dkms
+    # Determine which kernel is installed to choose the right driver
+    local kernel_type=""
+    if pacman -Qq linux &>/dev/null; then
+        kernel_type="linux"
+    elif pacman -Qq linux-lts &>/dev/null; then
+        kernel_type="linux-lts"
+    else
+        # Fallback to DKMS for custom kernels
+        kernel_type="dkms"
+    fi
+    
+    log_info "Detected kernel type: $kernel_type"
+    
+    # Nvidia package name changed as of 2024/2025
+    # For RTX 40 series and newer: nvidia-open is recommended by upstream
+    # For older GPUs (Maxwell through Ada Lovelace): nvidia-580xx-dkms works
+    local nvidia_packages=()
+    
+    case "$kernel_type" in
+        linux)
+            nvidia_packages=(
+                nvidia-open          # Open-source kernel modules (recommended for Turing+)
+                nvidia-utils         # Userspace utilities
+                nvidia-settings      # Configuration GUI/CLI tool
+            )
+            ;;
+        linux-lts)
+            nvidia_packages=(
+                nvidia-open-lts      # Open-source kernel modules for LTS kernel
+                nvidia-utils         # Userspace utilities
+                nvidia-settings      # Configuration GUI/CLI tool
+            )
+            ;;
+        dkms|*)
+            nvidia_packages=(
+                nvidia-open-dkms     # DKMS variant for custom kernels
+                nvidia-utils         # Userspace utilities
+                nvidia-settings      # Configuration GUI/CLI tool
+            )
+            ;;
+    esac
+    
+    # Add optional packages
+    nvidia_packages+=(
         # opencl-nvidia    # Uncomment for OpenCL compute support
         # cuda             # Uncomment for CUDA development (large download ~3GB)
         libvdpau
         libva-nvidia-driver
     )
     
+    log_info "Installing packages: ${nvidia_packages[*]}"
+    
     if install_packages "${nvidia_packages[@]}"; then
         log_success "NVIDIA packages installed"
         return 0
     else
         log_error "Failed to install NVIDIA packages. Check your internet connection and pacman mirrors."
+        log_error "If you have an older GPU (pre-Turing), you may need nvidia-580xx-dkms from AUR instead."
         return 1
     fi
 }
