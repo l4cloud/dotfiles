@@ -113,8 +113,32 @@ enable_service() {
     fi
 }
 
+# Enable systemd service WITHOUT starting it (useful for display managers)
+enable_service_no_start() {
+    local service=$1
+    local user_mode=${2:-false}
+    
+    if [ "$user_mode" = true ]; then
+        if systemctl --user enable "$service" 2>/dev/null; then
+            log_info "✓ $service enabled for next boot (user)"
+            return 0
+        else
+            log_warn "Failed to enable $service (user)"
+            return 1
+        fi
+    else
+        if sudo systemctl enable "$service" 2>/dev/null; then
+            log_info "✓ $service enabled for next boot (system)"
+            return 0
+        else
+            log_warn "Failed to enable $service (system)"
+            return 1
+        fi
+    fi
+}
+
 # Export functions for use in other scripts
 export -f log_error log_info log_warn log_step log_success log_section
 export -f check_arch check_internet check_sudo
 export -f verify_package verify_command
-export -f install_packages enable_service
+export -f install_packages enable_service enable_service_no_start

@@ -52,8 +52,10 @@ configure_sddm() {
         return 1
     fi
     
-    if enable_service sddm false; then
-        log_info "SDDM display manager configured"
+    # Enable SDDM but DO NOT start it (would take over display during install)
+    if enable_service_no_start sddm false; then
+        log_info "SDDM display manager enabled for next boot"
+        log_warn "SDDM will start after reboot - do not start it manually during installation"
         return 0
     else
         log_warn "SDDM configuration had issues"
@@ -93,12 +95,19 @@ main() {
     
     if [ ${#failed_services[@]} -eq 0 ]; then
         log_success "All system services configured successfully"
+        log_warn ""
+        log_warn "IMPORTANT: SDDM display manager is enabled but NOT started"
+        log_warn "  - SDDM will automatically start after reboot"
+        log_warn "  - Do NOT manually start SDDM during installation"
+        log_warn "  - Reboot your system when installation is complete"
         return 0
     else
         log_warn "Some services failed to configure:"
         for svc in "${failed_services[@]}"; do
             log_warn "  - $svc"
         done
+        log_warn ""
+        log_warn "IMPORTANT: Reboot required for display manager and service changes"
         return 1
     fi
 }
