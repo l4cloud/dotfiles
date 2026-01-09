@@ -4,8 +4,8 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 # Environment
 export EDITOR=nvim
 export VISUAL="$EDITOR"
-export PATH="$PATH:/usr/local/go/bin:/home/lu/.local/bin"
-export PATH=/home/culletonl/.opencode/bin:$PATH
+export PATH="$PATH:/usr/local/go/bin:$HOME/.local/bin"
+export PATH="$HOME/.opencode/bin:$PATH"
 export GOPATH="$HOME/.go"
 DISABLE_LS_COLORS="true"
 
@@ -73,8 +73,7 @@ export NVM_DIR="$HOME/.nvm"
 zstyle ':completion:*' menu select
 
 
-# opencode
-export PATH=/home/lu/.opencode/bin:$PATH
+
 
 if [ -n "$TMUX" ]; then
   export TERM=tmux-256color

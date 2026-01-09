@@ -129,14 +129,13 @@ main() {
             print_success "Detected Arch Linux"
             SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
             
-            # Install services (always)
-            print_step "Installing development environment..."
-            bash "${SCRIPT_DIR}/arch/install_arch_services.sh"
-            
-            # Install desktop if requested
+            # Use modular installation system
             if [ "$INSTALL_DESKTOP" = "1" ]; then
-                print_step "Installing desktop environment..."
-                bash "${SCRIPT_DIR}/arch/install_arch_desktop.sh"
+                print_step "Installing full system (development + desktop)..."
+                bash "${SCRIPT_DIR}/arch/install.sh" --desktop
+            else
+                print_step "Installing development environment only..."
+                bash "${SCRIPT_DIR}/arch/install.sh" --minimal
             fi
             ;;
             

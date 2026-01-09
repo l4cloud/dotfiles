@@ -1,6 +1,33 @@
 #!/bin/bash
 
 ##############################################################################
+# DEPRECATED: This script is no longer maintained
+# USE: ./install.sh --desktop instead
+# 
+# This legacy script is kept for compatibility but will be removed in future.
+# Please use the new modular installation system.
+##############################################################################
+
+echo "=================================================="
+echo "⚠️  WARNING: This script is DEPRECATED"
+echo "=================================================="
+echo ""
+echo "Please use the new modular installation system:"
+echo "  ./install.sh --desktop"
+echo ""
+echo "This script will redirect in 5 seconds..."
+echo "Press Ctrl+C to cancel"
+sleep 5
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/install.sh" --desktop
+
+##############################################################################
+# OLD SCRIPT CONTENT BELOW (NO LONGER EXECUTED)
+##############################################################################
+exit 0
+
+##############################################################################
 # Arch Linux Hyprland Desktop Setup Script
 # Sets up Hyprland desktop environment with optional NVIDIA driver support
 # Uses stow to manage dotfile configs
