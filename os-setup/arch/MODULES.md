@@ -60,18 +60,18 @@ Each module is a self-contained script that can be run independently:
 | 02-core-packages | Core development tools | ✓ | ✓ | ✓ |
 | 03-desktop-packages | Hyprland and desktop packages | ✗ | ✓ | ✓ |
 | 04-yay | AUR helper installation | ✓ | ✓ | ✓ |
-| 05-aur-packages | AUR packages (lazygit, etc.) | ✗ | ✗ | ✓ |
+| 05-aur-packages | AUR packages (lazygit, etc.) | ✗ | ✓ | ✓ |
 | 06-services | System services configuration | ✗ | ✓ | ✓ |
-| 07-fonts | Nerd Fonts installation | ✗ | ✗ | ✓ |
-| 08-devtools | Dev tools (pyenv, nvm, etc.) | ✗ | ✗ | ✓ |
-| 09-nvidia | NVIDIA driver configuration | ○ | ○ | ○ |
-| 11-flatpak | Flatpak applications | ✗ | ✗ | ✓ |
-| 12-dotfiles | Dotfiles installation (stow) | ✗ | ✗ | ✓ |
+| 07-fonts | Nerd Fonts installation | ✗ | ✓ | ✓ |
+| 08-devtools | Dev tools (pyenv, nvm, etc.) | ✗ | ✓ | ✓ |
+| 09-nvidia | NVIDIA driver configuration | ✗ | ⚡ | ⚡ |
+| 11-flatpak | Flatpak applications | ✗ | ✓ | ✓ |
+| 12-dotfiles | Dotfiles installation (stow) | ✗ | ✓ | ✓ |
 
 Legend:
 - ✓ = Always installed
 - ✗ = Not installed in this mode
-- ○ = Optional (auto-detected or conditional)
+- ⚡ = Auto-detected (or force with --nvidia flag)
 
 ## Running Individual Modules
 

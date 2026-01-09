@@ -148,13 +148,20 @@ main() {
     log_section "NVIDIA Configuration"
     
     if ! detect_nvidia; then
-        log_info "No NVIDIA GPU detected, skipping NVIDIA configuration"
-        return 0
+        if [ "${FORCE_NVIDIA:-false}" = true ]; then
+            log_warn "No NVIDIA GPU detected, but --nvidia flag is set"
+            log_warn "Forcing NVIDIA driver installation anyway..."
+            log_info "This may fail if no compatible hardware is present"
+        else
+            log_info "No NVIDIA GPU detected, skipping NVIDIA configuration"
+            log_info "Use --nvidia flag to force installation"
+            return 0
+        fi
+    else
+        log_info "NVIDIA GPU detected"
     fi
     
-    log_info "NVIDIA GPU detected"
-    
-    local gpu_info=$(lspci | grep -i nvidia | head -1)
+    local gpu_info=$(lspci | grep -i nvidia | head -1 2>/dev/null || echo "Unknown GPU")
     log_info "GPU: $gpu_info"
     
     if ! install_nvidia_packages; then

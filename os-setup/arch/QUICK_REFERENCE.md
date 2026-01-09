@@ -13,6 +13,9 @@ cd ~/.dotfiles/os-setup/arch
 
 # Minimal (no desktop environment)
 ./install.sh --minimal
+
+# Force NVIDIA installation
+./install.sh --desktop --nvidia
 ```
 
 ## What Gets Installed
@@ -30,15 +33,26 @@ Minimal +
 - Bluetooth
 - Display manager (SDDM)
 - System services
-
-### Full Mode
-Desktop + 
 - Fonts (Hack Nerd Font)
 - Dev tools (pyenv, nvm, opencode)
 - AUR packages (lazygit)
 - Flatpak apps (Obsidian, Zen Browser)
 - Dotfiles via Stow
-- NVIDIA drivers (if detected)
+- NVIDIA drivers (auto-detected, or use --nvidia to force)
+
+### Full Mode
+Same as Desktop mode (Desktop now includes everything)
+
+## NVIDIA Support
+
+NVIDIA drivers are automatically detected and installed in desktop/full modes.
+
+To force NVIDIA installation (even if not detected):
+```bash
+./install.sh --desktop --nvidia
+```
+
+Note: --nvidia flag requires --desktop or --full mode.
 
 ## Module Structure
 

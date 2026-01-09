@@ -24,6 +24,9 @@ SKIPPED_MODULES=()
 # Installation mode
 INSTALL_MODE="full"  # full, minimal, desktop-only
 
+# Force NVIDIA installation flag
+FORCE_NVIDIA=false
+
 # Module definitions
 # Format: "priority:module_file:description:required"
 declare -a MODULES=(
@@ -31,13 +34,13 @@ declare -a MODULES=(
     "20:02-core-packages.sh:Core Development Packages:true"
     "30:04-yay.sh:AUR Helper (yay):true"
     "40:03-desktop-packages.sh:Desktop Environment Packages:desktop"
-    "50:05-aur-packages.sh:AUR Packages:false"
+    "50:05-aur-packages.sh:AUR Packages:desktop"
     "60:06-services.sh:System Services:desktop"
-    "70:07-fonts.sh:Fonts Installation:false"
-    "80:08-devtools.sh:Development Tools:false"
-    "90:09-nvidia.sh:NVIDIA Configuration:optional"
-    "110:11-flatpak.sh:Flatpak Applications:false"
-    "120:12-dotfiles.sh:Dotfiles Installation:false"
+    "70:07-fonts.sh:Fonts Installation:desktop"
+    "80:08-devtools.sh:Development Tools:desktop"
+    "90:09-nvidia.sh:NVIDIA Configuration:desktop"
+    "110:11-flatpak.sh:Flatpak Applications:desktop"
+    "120:12-dotfiles.sh:Dotfiles Installation:desktop"
 )
 
 # Parse command line arguments
@@ -56,6 +59,10 @@ parse_args() {
                 INSTALL_MODE="full"
                 shift
                 ;;
+            --nvidia)
+                FORCE_NVIDIA=true
+                shift
+                ;;
             --help|-h)
                 show_help
                 exit 0
@@ -67,6 +74,13 @@ parse_args() {
                 ;;
         esac
     done
+    
+    # Validate --nvidia requires desktop or full mode
+    if [ "$FORCE_NVIDIA" = true ] && [ "$INSTALL_MODE" = "minimal" ]; then
+        log_error "--nvidia flag requires --desktop or --full mode"
+        log_error "NVIDIA drivers are not installed in minimal mode"
+        exit 1
+    fi
 }
 
 show_help() {
@@ -79,17 +93,24 @@ Options:
     --minimal       Install only core packages (no desktop environment)
     --desktop       Install desktop environment and essentials
     --full          Install everything (default)
+    --nvidia        Force NVIDIA driver installation (requires --desktop or --full)
     --help, -h      Show this help message
 
 Installation Modes:
     minimal:  System update, core packages, yay
-    desktop:  minimal + desktop packages + services + dotfiles
-    full:     desktop + all optional modules
+    desktop:  Full desktop environment with all features (fonts, devtools, flatpak, dotfiles)
+    full:     Same as desktop (desktop now includes everything)
+
+NVIDIA Support:
+    By default, NVIDIA drivers are auto-detected in desktop/full modes.
+    Use --nvidia to force installation even if GPU is not detected.
+    Note: --nvidia requires --desktop or --full mode.
 
 Examples:
-    $0                  # Full installation
-    $0 --minimal        # Minimal server setup
-    $0 --desktop        # Desktop environment setup
+    $0                      # Full installation (auto-detects NVIDIA)
+    $0 --minimal            # Minimal server setup (no NVIDIA)
+    $0 --desktop            # Desktop environment setup (auto-detects NVIDIA)
+    $0 --desktop --nvidia   # Force NVIDIA installation in desktop mode
 
 EOF
 }
