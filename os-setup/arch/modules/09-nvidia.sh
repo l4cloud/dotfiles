@@ -149,6 +149,12 @@ EOF
 configure_nvidia_environment() {
     log_step "Configuring NVIDIA environment variables..."
     
+    # Ensure environment.d directory exists
+    if ! sudo mkdir -p /etc/environment.d; then
+        log_error "Failed to create /etc/environment.d directory. Check sudo permissions."
+        return 1
+    fi
+    
     if ! sudo tee /etc/environment.d/90-nvidia.conf > /dev/null <<'EOF'
 # NVIDIA environment variables for Wayland/Hyprland
 # Essential variables for proper NVIDIA driver operation
