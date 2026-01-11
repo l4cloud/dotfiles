@@ -19,3 +19,11 @@
 # Sunshine credentials
 .config/sunshine/
 .config/sunshine/*
+
+# Newly added ignores for portability
+.config/unity3d/
+.config/wslu/
+.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+.config/partitionmanagerrc
+.config/nwg-displays/config
+.config/nvim/doc/tags
