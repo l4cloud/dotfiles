@@ -25,6 +25,10 @@ hyprctl keyword windowrulev2 "workspace $DUMMY_WORKSPACE silent,class:^(steam)$,
 
 # 5. Move cursor to DP-3 to ensure focus
 hyprctl dispatch focusmonitor $DUMMY
+# Calculate center of DP-3 based on its position and resolution
+CURSOR_X=$((3440 + WIDTH / 2))
+CURSOR_Y=$((975 + HEIGHT / 2))
+hyprctl dispatch movecursor $CURSOR_X $CURSOR_Y
 
 echo "═══════════════════════════════════════════════════"
 echo "  Streaming Setup Complete"

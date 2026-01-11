@@ -61,18 +61,6 @@ install_opencode() {
     fi
 }
 
-install_pulsemixer() {
-    log_step "Installing pulsemixer (audio control)..."
-    
-    if pip install --user pulsemixer 2>/dev/null; then
-        log_success "pulsemixer installed"
-        return 0
-    else
-        log_warn "Failed to install pulsemixer"
-        return 1
-    fi
-}
-
 configure_zsh() {
     log_step "Setting Zsh as default shell..."
     
@@ -98,7 +86,6 @@ main() {
     install_pyenv || failed_tools+=("pyenv")
     install_nvm || failed_tools+=("nvm")
     install_opencode || failed_tools+=("opencode")
-    install_pulsemixer || failed_tools+=("pulsemixer")
     configure_zsh || failed_tools+=("zsh-config")
     
     if [ ${#failed_tools[@]} -eq 0 ]; then

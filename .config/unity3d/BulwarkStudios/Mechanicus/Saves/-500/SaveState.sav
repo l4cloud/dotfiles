@@ -1,0 +1,27 @@
+{
+    "$type": "0|Mechanicus.Saves.SaveState+Data, Assembly-CSharp",
+    "index": -500,
+    "type": 1,
+    "dateCreated": {
+        "$type": "1|System.DateTime, mscorlib",
+        -8585546029633839183
+    },
+    "dateUpdated": {
+        "$type": 1,
+        -8585546029631156359
+    },
+    "missionName": "Mission: The Threshold",
+    "currentDeployment": 0,
+    "battleId": null,
+    "format": 1,
+    "state": 1,
+    "sector": 0,
+    "saveStateName": null,
+    "ironman": false,
+    "crc32Meta": "0d23a2c5",
+    "crc32MetaRef": "fb5a8cc7",
+    "crc32Dungeon": "ebfa380a",
+    "crc32DungeonRef": "ea0ff5c3",
+    "crc32Battle": "",
+    "crc32BattleRef": ""
+}

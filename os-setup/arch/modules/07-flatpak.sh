@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 FLATPAK_APPS=(
+    "com.spotify.Client"
     "md.obsidian.Obsidian"
     "app.zen_browser.zen"
 )

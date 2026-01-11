@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ##############################################################################
-# Arch Linux Master Installation Script
-# Orchestrates modular installation with comprehensive error handling
+# Arch Linux Hyprland Ecosystem Installer
+# Runs Hyprland add-on modules sequentially with clear output and summary
 ##############################################################################
 
 set -euo pipefail
@@ -14,55 +14,31 @@ MODULES_DIR="$SCRIPT_DIR/modules"
 # Source common functions
 source "$MODULES_DIR/common.sh"
 
-# Track installation state
-declare -A MODULE_STATUS
-declare -A MODULE_ERRORS
-FAILED_MODULES=()
+# Tracking
 SUCCESSFUL_MODULES=()
-SKIPPED_MODULES=()
+FAILED_MODULE=""
 
-# Installation mode
-INSTALL_MODE="full"  # full, minimal, desktop-only
-
-# Force NVIDIA installation flag
-FORCE_NVIDIA=false
+# Installer focuses on Hyprland ecosystem by default
+INSTALL_MODE="de"
+DE_ENABLED=true
 
 # Module definitions
 # Format: "priority:module_file:description:required"
 declare -a MODULES=(
-    "10:01-system-update.sh:System Update:true"
-    "20:02-core-packages.sh:Core Development Packages:true"
-    "30:04-yay.sh:AUR Helper (yay):true"
-    "40:03-desktop-packages.sh:Desktop Environment Packages:desktop"
-    "50:05-aur-packages.sh:AUR Packages:desktop"
-    "60:06-services.sh:System Services:desktop"
-    "70:07-fonts.sh:Fonts Installation:desktop"
-    "80:08-devtools.sh:Development Tools:desktop"
-    "90:09-nvidia.sh:NVIDIA Configuration:desktop"
-    "110:11-flatpak.sh:Flatpak Applications:desktop"
-    "120:12-dotfiles.sh:Dotfiles Installation:desktop"
+    "10:02-yay.sh:AUR Helper (yay):true"
+    "20:01-desktop.sh:Desktop Environment Packages:de"
+    "30:03-aur.sh:AUR Packages:de"
+    "40:04-services.sh:User Services (PipeWire):de"
+    "50:05-fonts.sh:Fonts Installation:de"
+    "60:06-devtools.sh:Development Tools:de"
+    "70:07-flatpak.sh:Flatpak Applications:de"
+    "80:08-dotfiles.sh:Dotfiles Installation:de"
 )
 
 # Parse command line arguments
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --minimal)
-                INSTALL_MODE="minimal"
-                shift
-                ;;
-            --desktop)
-                INSTALL_MODE="desktop"
-                shift
-                ;;
-            --full)
-                INSTALL_MODE="full"
-                shift
-                ;;
-            --nvidia)
-                FORCE_NVIDIA=true
-                shift
-                ;;
             --help|-h)
                 show_help
                 exit 0
@@ -75,263 +51,117 @@ parse_args() {
         esac
     done
     
-    # Validate --nvidia requires desktop or full mode
-    if [ "$FORCE_NVIDIA" = true ] && [ "$INSTALL_MODE" = "minimal" ]; then
-        log_error "--nvidia flag requires --desktop or --full mode"
-        log_error "NVIDIA drivers are not installed in minimal mode"
-        exit 1
-    fi
+    export INSTALL_MODE
+    export DE_ENABLED
 }
 
 show_help() {
     cat <<EOF
-Arch Linux Modular Installation Script
+Arch Linux Hyprland Ecosystem Installer
 
 Usage: $0 [OPTIONS]
 
 Options:
-    --minimal       Install only core packages (no desktop environment)
-    --desktop       Install desktop environment and essentials
-    --full          Install everything (default)
-    --nvidia        Force NVIDIA driver installation (requires --desktop or --full)
     --help, -h      Show this help message
 
-Installation Modes:
-    minimal:  System update, core packages, yay
-    desktop:  Full desktop environment with all features (fonts, devtools, flatpak, dotfiles)
-    full:     Same as desktop (desktop now includes everything)
+Behavior:
+    Default: Installs Hyprland ecosystem programs (waybar, swww, swaync, hypridle, hyprlock, thunar, wofi, pywal, etc.), fonts/devtools, Flatpak, dotfiles; configures PipeWire user services; writes SDDM Hyprland session default if SDDM/Hyprland are present.
 
-NVIDIA Support:
-    By default, NVIDIA drivers are auto-detected in desktop/full modes.
-    Use --nvidia to force installation even if GPU is not detected.
-    Note: --nvidia requires --desktop or --full mode.
+Notes:
+    Core system configuration (kernel, drivers, mkinitcpio, display manager enablement) is not handled here. Manage these via Archinstall or manually.
 
 Examples:
-    $0                      # Full installation (auto-detects NVIDIA)
-    $0 --minimal            # Minimal server setup (no NVIDIA)
-    $0 --desktop            # Desktop environment setup (auto-detects NVIDIA)
-    $0 --desktop --nvidia   # Force NVIDIA installation in desktop mode
+    $0                      # Install Hyprland ecosystem
 
 EOF
 }
 
-# Check if module should be installed based on mode
-should_install_module() {
-    local required=$1
-    
-    case "$required" in
-        true)
-            return 0  # Always install
-            ;;
-        false)
-            [ "$INSTALL_MODE" = "full" ] && return 0 || return 1
-            ;;
-        desktop)
-            [ "$INSTALL_MODE" = "desktop" ] || [ "$INSTALL_MODE" = "full" ] && return 0 || return 1
-            ;;
-        optional)
-            [ "$INSTALL_MODE" = "full" ] && return 0 || return 1
-            ;;
-        *)
-            return 1
-            ;;
-    esac
-}
+# All modules are required in this simple flow
+should_install_module() { return 0; }
 
 # Execute a module
 execute_module() {
     local module_file=$1
     local description=$2
     local module_path="$MODULES_DIR/$module_file"
-    
-    log_section "Running: $description"
-    log_info "Module: $module_file"
-    echo ""
-    
+
+    log_section "→ $description"
+    log_info "Running: $module_file"
+
     if [ ! -f "$module_path" ]; then
-        log_error "Module not found: $module_path"
-        MODULE_STATUS["$module_file"]="MISSING"
-        MODULE_ERRORS["$module_file"]="Module file not found"
-        FAILED_MODULES+=("$module_file")
+        log_error "Missing: $module_path"
+        FAILED_MODULE="$description (missing file)"
         return 1
     fi
-    
-    if [ ! -x "$module_path" ]; then
-        chmod +x "$module_path"
-    fi
-    
-    # Execute module and capture output
+
+    chmod +x "$module_path" 2>/dev/null || true
+
     local start_time=$(date +%s)
-    local output
-    local exit_code=0
-    
-    output=$("$module_path" 2>&1) || exit_code=$?
-    
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-    
-    echo "$output"
-    echo ""
-    
-    if [ $exit_code -eq 0 ]; then
-        MODULE_STATUS["$module_file"]="SUCCESS"
-        SUCCESSFUL_MODULES+=("$description")
+    if "$module_path"; then
+        local end_time=$(date +%s)
+        local duration=$((end_time - start_time))
         log_success "$description completed in ${duration}s"
+        SUCCESSFUL_MODULES+=("$description")
+        echo "--------------------------------------------------------------"
+        return 0
     else
-        MODULE_STATUS["$module_file"]="FAILED"
-        MODULE_ERRORS["$module_file"]="Exit code: $exit_code"
-        FAILED_MODULES+=("$description")
-        log_error "$description failed (exit code: $exit_code)"
-        
-        # Decide whether to continue or abort
-        return $exit_code
+        FAILED_MODULE="$description"
+        log_error "$description failed"
+        echo "--------------------------------------------------------------"
+        return 1
     fi
-    
-    echo ""
-    echo "================================================================"
-    echo ""
-    
-    return 0
 }
 
 # Print installation summary
 print_summary() {
     echo ""
-    echo "================================================================================"
-    log_section "Installation Summary"
-    echo "================================================================================"
-    echo ""
-    
-    log_info "Installation Mode: $INSTALL_MODE"
-    echo ""
-    
-    if [ ${#SUCCESSFUL_MODULES[@]} -gt 0 ]; then
-        log_success "Successfully Completed (${#SUCCESSFUL_MODULES[@]}):"
-        for module in "${SUCCESSFUL_MODULES[@]}"; do
-            echo "  ✓ $module"
-        done
-        echo ""
-    fi
-    
-    if [ ${#SKIPPED_MODULES[@]} -gt 0 ]; then
-        log_info "Skipped Modules (${#SKIPPED_MODULES[@]}):"
-        for module in "${SKIPPED_MODULES[@]}"; do
-            echo "  ○ $module"
-        done
-        echo ""
-    fi
-    
-    if [ ${#FAILED_MODULES[@]} -gt 0 ]; then
-        log_error "Failed Modules (${#FAILED_MODULES[@]}):"
-        for module in "${FAILED_MODULES[@]}"; do
-            echo "  ✗ $module"
-        done
-        echo ""
-        
-        log_error "Detailed Errors:"
-        for module_file in "${!MODULE_ERRORS[@]}"; do
-            log_error "  $module_file: ${MODULE_ERRORS[$module_file]}"
-        done
-        echo ""
-    fi
-    
-    echo "================================================================================"
-    
-    if [ ${#FAILED_MODULES[@]} -eq 0 ]; then
-        log_success "Installation completed successfully!"
-        echo ""
-        log_warn "=========================================="
-        log_warn "REBOOT REQUIRED"
-        log_warn "=========================================="
-        log_warn "CRITICAL: Do NOT start Hyprland/Wayland yet!"
-        log_warn ""
-        log_warn "Why you must reboot:"
-        log_warn "  - NVIDIA kernel modules need to be loaded"
-        log_warn "  - SDDM display manager will start"
-        log_warn "  - System services need initialization"
-        log_warn ""
-        log_warn "If you start Hyprland now, you'll see:"
-        log_warn "  'failed to open nvidia-drm: No such file'"
-        log_warn ""
-        log_info "Next steps:"
-        log_info "  1. Review any warnings above"
-        log_info "  2. Run: sudo reboot"
-        log_info "  3. After reboot, log in via SDDM"
-        log_info "  4. Hyprland will start automatically"
-        log_warn "=========================================="
-        echo ""
-        return 0
+    echo "=============================================================="
+    log_section "Summary"
+    echo "=============================================================="
+
+    if [ -z "$FAILED_MODULE" ]; then
+        log_success "All modules completed successfully"
     else
-        log_error "Installation completed with errors"
-        echo ""
-        log_info "To retry failed modules:"
-        log_info "  cd $MODULES_DIR"
-        for module in "${FAILED_MODULES[@]}"; do
-            log_info "  ./<module-file>.sh"
-        done
-        echo ""
-        return 1
+        log_error "Failed: $FAILED_MODULE"
     fi
+
+    echo ""
+    log_info "Completed modules: ${#SUCCESSFUL_MODULES[@]}"
+    for module in "${SUCCESSFUL_MODULES[@]}"; do
+        echo "  ✓ $module"
+    done
+    echo "=============================================================="
 }
 
 # Main installation function
 main() {
-    log_section "Arch Linux Modular Installation"
-    echo "Installation Mode: $INSTALL_MODE"
-    echo "Script Directory: $SCRIPT_DIR"
-    echo ""
-    
+    log_section "Hyprland Ecosystem Setup"
+    log_info "Script Directory: $SCRIPT_DIR"
+
     # Pre-flight checks
-    log_step "Running pre-flight checks..."
+    log_step "Pre-flight checks"
     check_arch || exit 1
     check_sudo || exit 1
     check_internet || log_warn "No internet connection detected - some modules may fail"
-    echo ""
-    
+
     # Sort modules by priority
     IFS=$'\n' sorted_modules=($(sort -t: -k1 -n <<<"${MODULES[*]}"))
     unset IFS
-    
+
     log_info "Modules to process: ${#sorted_modules[@]}"
-    echo ""
-    
-    # Process each module
+
+    # Run sequentially, abort on first failure
     for module_entry in "${sorted_modules[@]}"; do
         IFS=':' read -r priority module_file description required <<< "$module_entry"
-        
-        # Check if module should be installed
-        if ! should_install_module "$required"; then
-            log_info "Skipping: $description (not required for $INSTALL_MODE mode)"
-            SKIPPED_MODULES+=("$description")
-            echo ""
-            continue
-        fi
-        
-        # Execute module
         if ! execute_module "$module_file" "$description"; then
-            # Check if module is required
-            if [ "$required" = "true" ]; then
-                log_error "Required module failed: $description"
-                log_error "Cannot continue installation"
-                print_summary
-                exit 1
-            else
-                log_warn "Optional module failed: $description"
-                log_info "Continuing with installation..."
-                echo ""
-            fi
+            FAILED_MODULE=${FAILED_MODULE:-$description}
+            print_summary
+            exit 1
         fi
     done
-    
-    # Print summary
+
     print_summary
-    
-    # Return exit code based on failures
-    if [ ${#FAILED_MODULES[@]} -eq 0 ]; then
-        exit 0
-    else
-        exit 1
-    fi
+    exit 0
 }
 
 # Script entry point

@@ -1,0 +1,172 @@
+{
+    "$id": 0,
+    "$type": "0|Mechanicus.Saves.SaveDataReference, Assembly-CSharp",
+    "refObjects": {
+        "$id": 1,
+        "$type": "1|System.Collections.Generic.List`1[[Mechanicus.Saves.SaveDataReference+DataRefObject, Assembly-CSharp]], mscorlib",
+        "$rlength": 23,
+        "$rcontent": [
+            {
+                "$type": "2|Mechanicus.Saves.SaveDataReference+DataRefObject, Assembly-CSharp",
+                "name": "Litany of Life T1",
+                "path": "Assets/Data/Configs/Canticles/LitanyOfLife/Litany of Life T1.asset",
+                "type": "Mechanicus.Data.Canticles.Canticle",
+                "guid": "9d4776d910cef0e43a8cc003043c3a38"
+            },
+            {
+                "$type": 2,
+                "name": "Power Axe T1",
+                "path": "Assets/Data/Configs/Blueprints/Hands/Power Axe T1.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "c223c183779fe314daa08feaacf8cd3e"
+            },
+            {
+                "$type": 2,
+                "name": "Phosphor Blast Pistol",
+                "path": "Assets/Data/Configs/Blueprints/Weapons/Light/Phosphor Blast Pistol.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "0551beb75b071464f8227593a2215029"
+            },
+            {
+                "$type": 2,
+                "name": "V1",
+                "path": "Assets/Data/Missions/Story/Videx/V1.asset",
+                "type": "Mechanicus.Data.Missions.Mission",
+                "guid": "707750bc3fdc20b4b8c72e0ce7bffe5b"
+            },
+            {
+                "$type": 2,
+                "name": "Arc Rifle",
+                "path": "Assets/Data/Configs/Blueprints/Weapons/Light/Arc Rifle.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "aa984ae5f23b1604f949c7d1ccd10f63"
+            },
+            {
+                "$type": 2,
+                "name": "Omnispex T1",
+                "path": "Assets/Data/Configs/Blueprints/Backpacks/Omnispex T1.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "631ad108dab8d4a428ddc7cbd1d7137e"
+            },
+            {
+                "$type": 2,
+                "name": "S1",
+                "path": "Assets/Data/Missions/Story/Scaevola/S1.asset",
+                "type": "Mechanicus.Data.Missions.Mission",
+                "guid": "ef9df05f5b94f384ea3f4218862d12a6"
+            },
+            {
+                "$type": 2,
+                "name": "Volkite Blaster",
+                "path": "Assets/Data/Configs/Blueprints/Weapons/Heavy/Volkite Blaster.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "7d78563ca16b1d748bcd84566c404fb9"
+            },
+            {
+                "$type": 2,
+                "name": "Curatio Claw T1",
+                "path": "Assets/Data/Configs/Blueprints/Backpacks/Curatio Claw T1.asset",
+                "type": "Mechanicus.Data.Customizations.Blueprint",
+                "guid": "e1b002d72e76ea242a0066bc9138cc50"
+            },
+            {
+                "$type": 2,
+                "name": "Agrolekh",
+                "path": "Assets/Data/Configs/Sectors/Agrolekh.asset",
+                "type": "SectorConfig",
+                "guid": "37d77cbeb22849747915112b0e947627"
+            },
+            {
+                "$type": 2,
+                "name": "Techpriest1",
+                "path": "Assets/Data/Entities/Mechanicus/Techpriest/NewGame/Techpriest1.asset",
+                "type": "Mechanicus.Data.Entities.TechpriestDataBase",
+                "guid": "d50913e85efd9e040b235dfa0069182b"
+            },
+            {
+                "$type": 2,
+                "name": "Servo Skull",
+                "path": "Assets/Data/Configs/Objects/Equipments/Backpack/Servo Skull/Servo Skull.asset",
+                "type": "Mechanicus.Dungeon.Data.Equipments.Equipment",
+                "guid": "2a321a4ef1cf34845b8e5bd6afd1b64b"
+            },
+            {
+                "$type": 2,
+                "name": "TP 1",
+                "path": "Assets/Data/Configs/TechpriestInfos/TP 1.asset",
+                "type": "Mechanicus.ArkMechanicus.Entities.TechpriestInfo",
+                "guid": "e9831b9792e472d42b3238529c74c544"
+            },
+            {
+                "$type": 2,
+                "name": "Techpriest2",
+                "path": "Assets/Data/Entities/Mechanicus/Techpriest/NewGame/Techpriest2.asset",
+                "type": "Mechanicus.Data.Entities.TechpriestDataBase",
+                "guid": "eea14738d9d00a446b203912962cc9f3"
+            },
+            {
+                "$type": 2,
+                "name": "TP 2",
+                "path": "Assets/Data/Configs/TechpriestInfos/TP 2.asset",
+                "type": "Mechanicus.ArkMechanicus.Entities.TechpriestInfo",
+                "guid": "6b7f396f9f5ad6048bb7194b000bac89"
+            },
+            {
+                "$type": 2,
+                "name": "Servitor T1",
+                "path": "Assets/Data/Configs/Blueprints/Troops/Servitor T1.asset",
+                "type": "Mechanicus.Data.Customizations.TroopBlueprint",
+                "guid": "b1695d2cceab6fc4f983a70617e5a3d7"
+            },
+            {
+                "$type": 2,
+                "name": "Techpriest1",
+                "path": "Assets/Data/Entities/Mechanicus/Tutorial/Techpriest1.asset",
+                "type": "Mechanicus.Data.Entities.TechpriestDataBase",
+                "guid": "4c8eca113c1c0434783a08d9ea15c7b5"
+            },
+            {
+                "$type": 2,
+                "name": "Macrostubber Tuto",
+                "path": "Assets/Data/Configs/Objects/Equipments/Weapons/Light/Macrostubber Tuto.asset",
+                "type": "Mechanicus.Dungeon.Data.Equipments.Equipment",
+                "guid": "3787858917f298744bf8d93d2af77384"
+            },
+            {
+                "$type": 2,
+                "name": "Techpriest2",
+                "path": "Assets/Data/Entities/Mechanicus/Tutorial/Techpriest2.asset",
+                "type": "Mechanicus.Data.Entities.TechpriestDataBase",
+                "guid": "f28d5bc707d961445bd8c893a17df368"
+            },
+            {
+                "$type": 2,
+                "name": "Phosphor Serpenta",
+                "path": "Assets/Data/Configs/Objects/Equipments/Weapons/Light/Phosphor Serpenta.asset",
+                "type": "Mechanicus.Dungeon.Data.Equipments.Equipment",
+                "guid": "208561298c4256a4cb04aafa40e3605a"
+            },
+            {
+                "$type": 2,
+                "name": "Omnissian Axe lvl1",
+                "path": "Assets/Data/Configs/Objects/Equipments/Axes/Omnissian Axe/Omnissian Axe lvl1.asset",
+                "type": "Mechanicus.Dungeon.Data.Equipments.Equipment",
+                "guid": "caa0ba81df69ab246b3badfd14018ea1"
+            },
+            {
+                "$type": 2,
+                "name": "Servitor T1",
+                "path": "Assets/Data/Entities/Mechanicus/Troops/Servitor/Servitor T1.asset",
+                "type": "Mechanicus.Data.Entities.ServitorDataBase",
+                "guid": "e2bd4f14cb2d6e3448d3820210cde057"
+            },
+            {
+                "$type": 2,
+                "name": "TUT1",
+                "path": "Assets/Data/Missions/Story/Tutorial/TUT1.asset",
+                "type": "Mechanicus.Data.Missions.Mission",
+                "guid": "64b8a6dc0c803584a8832addb5ebb6a3"
+            }
+        ]
+    }
+}

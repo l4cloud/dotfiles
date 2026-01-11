@@ -15,10 +15,9 @@ DESKTOP_PACKAGES=(
     pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
     brightnessctl playerctl power-profiles-daemon
     grim slurp hyprshot hyprlock
-    thunar wofi flatpak
+    thunar wofi flatpak steam
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip
     bluez bluez-utils blueman
-    sddm sddm-kcm
     linux-headers
     python-pywal
 )
@@ -47,7 +46,7 @@ main() {
     log_step "Verifying critical desktop packages..."
     local all_ok=true
     
-    for pkg in hyprland kitty waybar swww swaync sddm; do
+    for pkg in hyprland kitty waybar swww swaync; do
         if ! verify_package "$pkg"; then
             all_ok=false
         fi

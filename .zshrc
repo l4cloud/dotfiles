@@ -81,3 +81,5 @@ else
   export TERM=xterm-256color
 fi
 export XDG_SESSION_TYPE=wayland
+export PATH="/home/lu/.local/bin:${PATH}"
+export EDITOR=nvim
