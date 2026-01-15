@@ -19,7 +19,7 @@ DESKTOP_PACKAGES=(
     yazi p7zip poppler fd ripgrep fzf zoxide imagemagick xclip
     bluez bluez-utils blueman
     linux-headers
-    python-pywal
+    python-pywal unzip tmux
 )
 
 main() {

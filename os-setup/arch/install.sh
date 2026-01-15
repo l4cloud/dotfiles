@@ -25,6 +25,7 @@ SKIP_DESKTOP=false
 
 # Module definitions
 # Format: "priority:module_file:description:required"
+# Sorted by priority for readability
 declare -a MODULES=(
     "10:02-yay.sh:AUR Helper (yay):true"
     "20:06-devtools.sh:Development Tools:true"
@@ -163,7 +164,7 @@ main() {
 
     log_info "Modules to process: ${#sorted_modules[@]}"
 
-    # Run sequentially, abort on first failure
+    # Run modules sequentially, abort on first failure
     for module_entry in "${sorted_modules[@]}"; do
         IFS=':' read -r priority module_file description required <<< "$module_entry"
         if ! should_install_module "$required"; then
@@ -171,7 +172,6 @@ main() {
             continue
         fi
         if ! execute_module "$module_file" "$description"; then
-            FAILED_MODULE=${FAILED_MODULE:-$description}
             print_summary
             exit 1
         fi

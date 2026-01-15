@@ -57,8 +57,8 @@ main() {
     
     selected_wallpaper=$(echo "$choice" | sed 's/^img://')
     
-    # Set wallpaper on both monitors with swww
-    swww img "$selected_wallpaper" --outputs DP-1,HDMI-A-1 --transition-type any --transition-fps 360 --transition-duration .5
+    # Set wallpaper on all monitors with swww
+    swww img "$selected_wallpaper" --transition-type any --transition-fps 360 --transition-duration .5
     
     # Generate colors with pywal
     wal -i "$selected_wallpaper" -n

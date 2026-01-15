@@ -28,8 +28,13 @@
     "hide-on-action": true,
     "script-fail-notify": true,
     "scripts": {
-        "exec-on-notification": "paplay /home/lu/.config/swaync/sounds/Bones_to_Peaches.ogg &"
+        "notification-sound": {
+            "exec": "paplay /home/lu/.config/swaync/sounds/Bones_to_Peaches.ogg",
+            "run-on": "receive",
+            "app-name": ".*"
+        }
     },
+    "script-fail-notify": true,
     "widgets": [
         "mpris",
         "title",

@@ -27,22 +27,22 @@ install_pyenv() {
     fi
 }
 
-install_nvm() {
-    log_step "Installing nvm..."
-    
-    if [ -d ~/.nvm ]; then
-        log_info "nvm already installed"
-        return 0
-    fi
-    
-    if curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh 2>/dev/null | bash; then
-        log_success "nvm installed"
-        return 0
-    else
-        log_error "Failed to install nvm"
-        return 1
-    fi
-}
+# install_nvm() {
+#     log_step "Installing nvm..."
+#
+#     if [ -d ~/.nvm ]; then
+#         log_info "nvm already installed"
+#         return 0
+#     fi
+#
+#     if curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh 2>/dev/null | bash; then
+#         log_success "nvm installed"
+#         return 0
+#     else
+#         log_error "Failed to install nvm"
+#         return 1
+#     fi
+# }
 
 install_opencode() {
     log_step "Installing opencode..."
@@ -84,7 +84,7 @@ main() {
     local failed_tools=()
     
     install_pyenv || failed_tools+=("pyenv")
-    install_nvm || failed_tools+=("nvm")
+    # install_nvm || failed_tools+=("nvm")
     install_opencode || failed_tools+=("opencode")
     configure_zsh || failed_tools+=("zsh-config")
     
