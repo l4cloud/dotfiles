@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/common.sh"
 
 DESKTOP_PACKAGES=(
     hyprland kitty hypridle waybar swww swaync
-    pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
+    pipewire pipewire-pulse pipewire-alsa wireplumber
     brightnessctl playerctl power-profiles-daemon
     grim slurp hyprshot hyprlock
     thunar wofi flatpak steam

@@ -83,3 +83,4 @@ fi
 export XDG_SESSION_TYPE=wayland
 export PATH="/home/lu/.local/bin:${PATH}"
 export EDITOR=nvim
+export PATH="/home/lu/.local/bin:${PATH}"
