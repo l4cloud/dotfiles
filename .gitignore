@@ -27,3 +27,13 @@
 .config/partitionmanagerrc
 .config/nwg-displays/config
 .config/nvim/doc/tags
+
+# Additional ignored items
+.config/.mangojuice
+.config/MangoHud/
+.config/cachyos-hello.json
+.config/cachyos/
+.config/dolphinrc
+.config/octopi/
+.config/vkBasalt/
+.config/mimeapps.list
