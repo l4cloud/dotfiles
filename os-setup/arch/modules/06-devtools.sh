@@ -10,6 +10,51 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
+# LSP dependencies - languages and tools required by Neovim LSP servers
+LSP_PACKAGES=(
+    # Go (gopls)
+    go
+    # Python (pylsp)
+    python python-pip
+    # Lua (lua_ls)
+    lua
+    # Bash (bashls)
+    bash-language-server
+    # Terraform (terraformls, tflint)
+    terraform
+    # Java (jdtls)
+    jdk-openjdk
+    # Node.js - required for many LSP servers (eslint, html, emmet_ls, yamlls)
+    nodejs npm
+)
+
+install_lsp_dependencies() {
+    log_step "Installing LSP dependencies..."
+    
+    local failed_packages=()
+    
+    if ! install_packages "${LSP_PACKAGES[@]}"; then
+        log_warn "Some LSP packages failed to install"
+        
+        for pkg in "${LSP_PACKAGES[@]}"; do
+            if ! pacman -Q "$pkg" >/dev/null 2>&1; then
+                failed_packages+=("$pkg")
+            fi
+        done
+    fi
+    
+    if [ ${#failed_packages[@]} -eq 0 ]; then
+        log_success "All LSP dependencies installed"
+        return 0
+    else
+        log_warn "Some LSP packages failed to install:"
+        for pkg in "${failed_packages[@]}"; do
+            log_warn "  - $pkg"
+        done
+        return 1
+    fi
+}
+
 install_pyenv() {
     log_step "Installing pyenv..."
     
@@ -83,6 +128,7 @@ main() {
     
     local failed_tools=()
     
+    install_lsp_dependencies || failed_tools+=("lsp-dependencies")
     install_pyenv || failed_tools+=("pyenv")
     # install_nvm || failed_tools+=("nvm")
     install_opencode || failed_tools+=("opencode")
