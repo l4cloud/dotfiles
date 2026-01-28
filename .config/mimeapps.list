@@ -1,3 +1,9 @@
 
 [Default Applications]
 x-scheme-handler/discord-409416265891971072=discord-409416265891971072.desktop
+text/html=app.zen_browser.zen.desktop
+x-scheme-handler/http=app.zen_browser.zen.desktop
+x-scheme-handler/https=app.zen_browser.zen.desktop
+x-scheme-handler/about=app.zen_browser.zen.desktop
+x-scheme-handler/unknown=app.zen_browser.zen.desktop
+x-scheme-handler/nxm=com.nexusmods.app.desktop

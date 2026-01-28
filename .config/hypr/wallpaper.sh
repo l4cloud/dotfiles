@@ -93,6 +93,11 @@ main() {
     if [[ -f ~/.cache/wal/colors.sh ]]; then
         source ~/.cache/wal/colors.sh
     fi
+    
+    # Update GTK theme from pywal colors
+    if [[ -f ~/.config/hypr/pywal-gtk.sh ]]; then
+        ~/.config/hypr/pywal-gtk.sh
+    fi
 }
 main
 

@@ -61,5 +61,10 @@ echo "Using wallpaper: $DEFAULT_WALLPAPER"
 # Initialize pywal with the default wallpaper
 wal -i "$DEFAULT_WALLPAPER" -n
 
+# Update GTK theme from pywal colors
+if [[ -f ~/.config/hypr/pywal-gtk.sh ]]; then
+    ~/.config/hypr/pywal-gtk.sh
+fi
+
 # Notify user
 echo "Pywal initialized successfully! You can change wallpaper with Alt+W"
