@@ -38,3 +38,9 @@
 .config/vkBasalt/
 .config/mimeapps.list
 .config/kitty/current-theme.conf
+
+# Bolt launcher
+.config/bolt/
+
+# Firefox/Mozilla
+.mozilla/
