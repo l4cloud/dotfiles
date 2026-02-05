@@ -43,6 +43,7 @@
 .config/bolt/
 .config/bolt-launcher/
 
+
 # Firefox/Mozilla
 .mozilla/
 .config/mozilla/
