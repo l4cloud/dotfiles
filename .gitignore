@@ -41,6 +41,7 @@
 
 # Bolt launcher
 .config/bolt/
+.config/bolt-launcher/
 
 # Firefox/Mozilla
 .mozilla/
