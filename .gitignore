@@ -45,3 +45,4 @@
 
 # Firefox/Mozilla
 .mozilla/
+.config/mozilla/
