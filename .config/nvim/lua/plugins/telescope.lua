@@ -50,7 +50,7 @@ return {
 
       vim.keymap.set('n', '<leader>oo', function()
         builtin.find_files { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } }
-      end, {})
+      end, { desc = '[O]pen [O]veridden files' })
 
       vim.keymap.set('n', '<leader>o', function()
         builtin.find_files()
