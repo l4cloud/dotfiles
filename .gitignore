@@ -53,3 +53,9 @@
 # Firefox/Mozilla
 .mozilla/
 .config/mozilla/
+
+# Auto-generated / non-config
+.config/nvm
+.config/github-copilot/
+.config/kitty/current-theme.conf
+.zshrc.bak
