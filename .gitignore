@@ -15,6 +15,7 @@
 .config/pulse/
 .config/xdg-desktop-portal/
 .opencode/
+.config/opencode/
 
 # Sunshine credentials
 .config/sunshine/
@@ -38,6 +39,11 @@
 .config/vkBasalt/
 .config/mimeapps.list
 .config/kitty/current-theme.conf
+
+# Kubernetes/Cloud tools
+.config/gcloud/
+.config/helm/
+.config/k9s/
 
 # Bolt launcher
 .config/bolt/

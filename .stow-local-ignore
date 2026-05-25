@@ -23,6 +23,11 @@
 # Files created by arch desktop setup that should not be stowed
 .config/xdg-desktop-portal/hyprland-portals.conf
 
+# Kubernetes/Cloud tools
+.config/gcloud/
+.config/helm/
+.config/k9s/
+
 # Config directories to ignore
 .config/QtProject/
 .config/Thunar/
