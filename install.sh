@@ -198,7 +198,7 @@ echo -e "${BOLD}--- Mononoki Nerd Font ---${RESET}"
 
 FONT_DIR="$HOME/.local/share/fonts/NerdFonts/Mononoki"
 
-if fc-list | grep -qi "Mononoki Nerd Font" || [[ -d "$FONT_DIR" ]]; then
+if command -v fc-list &>/dev/null && fc-list | grep -qi "Mononoki Nerd Font" || [[ -d "$FONT_DIR" ]]; then
   skip "Mononoki Nerd Font"
 else
   info "Installing Mononoki Nerd Font..."
