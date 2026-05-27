@@ -1,6 +1,6 @@
 format = """
 $env_var\
-$os\
+$custom\
 $username\
 $hostname\
 $directory\
@@ -50,12 +50,19 @@ format = "[$virtualenv]($style) "
 style = "bright-black"
 
 [os]
-format = "[$symbol](blue) "
-disabled = false
+disabled = true
 
-[os.symbols]
-Fedora = "\uE7D9"
-Nobara = "\uE7D9"
+[custom.os]
+command = """
+  . /etc/os-release
+  case "$ID" in
+    fedora|nobara) echo "\uE7D9" ;;
+    *) echo "$ID" ;;
+  esac
+"""
+when = '[[ -z "$WSL_DISTRO_NAME" ]]'
+format = "[$output](blue) "
+shell = ["bash", "--noprofile", "--norc"]
 
 [env_var.WSL_DISTRO_NAME]
 format = "[\uE70F](blue) "
