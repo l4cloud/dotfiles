@@ -46,6 +46,11 @@
 .config/nwg-displays/config
 .config/nvim/doc/tags
 
+# Shell history
+\.zsh_history
+\.bash_history
+\.histfile
+
 # Defaults
 RCS
 .+,v

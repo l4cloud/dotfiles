@@ -59,3 +59,8 @@
 .config/github-copilot/
 .config/kitty/current-theme.conf
 .zshrc.bak
+
+# Shell history
+.zsh_history
+.bash_history
+.histfile

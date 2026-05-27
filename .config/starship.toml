@@ -1,4 +1,5 @@
 format = """
+$os\
 $username\
 $hostname\
 $directory\
@@ -46,3 +47,11 @@ style = "yellow"
 [python]
 format = "[$virtualenv]($style) "
 style = "bright-black"
+
+[os]
+format = "[$symbol](blue) "
+disabled = false
+
+[os.symbols]
+Fedora = "\uE7D9"
+Nobara = "\uE7D9"
