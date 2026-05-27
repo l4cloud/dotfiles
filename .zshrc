@@ -29,19 +29,49 @@ DISABLE_LS_COLORS="true"
 
 # History
 HISTFILE=~/.zsh_history
-HISTSIZE=5000
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
+HISTSIZE=10000
+SAVEHIST=10000
 
 setopt appendhistory sharehistory
 setopt hist_ignore_space hist_ignore_all_dups hist_save_no_dups hist_find_no_dups
 
+# Vi mode
+bindkey -v
+KEYTIMEOUT=1
+
 # Key bindings
 bindkey '^k' history-incremental-search-forward
 bindkey '^j' history-incremental-search-backward
+bindkey '^r' history-incremental-search-backward
 
 # fzf
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
+# fzf history picker on Alt+H
+fzf-history-widget() {
+  local selected
+  zle -I
+  {
+    selected=$(fc -ln 1 | awk '!seen[$0]++' | fzf \
+      --height 40% \
+      --reverse \
+      --no-sort \
+      --tac \
+      --scheme history \
+      --bind 'ctrl-r:toggle-sort' \
+      --preview 'echo {}' \
+      --preview-window 'down:3:wrap' \
+      --query "$BUFFER")
+  } always {
+    zle -R
+  }
+  if [[ -n "$selected" ]]; then
+    BUFFER="$selected"
+    CURSOR=${#BUFFER}
+  fi
+}
+zle -N fzf-history-widget
+bindkey '^h' fzf-history-widget
 
 # NVM
 [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
