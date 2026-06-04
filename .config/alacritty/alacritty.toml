@@ -19,3 +19,7 @@ style = "Bold Italic"
 
 [general]
 import = ["rose-pine.toml"]
+
+[window]
+opacity = 0.95
+blur = true
