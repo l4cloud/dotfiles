@@ -80,6 +80,7 @@ bindkey '^h' fzf-history-widget
 # Aliases & functions
 [[ -f ~/.aliases.zsh ]] && source ~/.aliases.zsh
 [[ -f ~/.func.zsh ]]    && source ~/.func.zsh
+[[ -f ~/.zshenv ]]    && source ~/.zshenv
 
 # Prompt
 eval "$(starship init zsh)"
