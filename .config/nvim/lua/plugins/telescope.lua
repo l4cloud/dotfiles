@@ -45,31 +45,36 @@ return {
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sr', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
       vim.keymap.set('n', '<c-f>', builtin.current_buffer_fuzzy_find, { desc = '[/] Fuzzily search in current buffer' })
 
       vim.keymap.set('n', '<leader>oo', function()
-        builtin.find_files { find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' } }
+        builtin.find_files(themes.get_ivy {
+          find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
+          layout_config = {
+            height = 0.999,
+          },
+        })
       end, { desc = '[O]pen [O]veridden files' })
 
       vim.keymap.set('n', '<leader>o', function()
-        builtin.find_files()
+        builtin.find_files(themes.get_ivy { layout_config = {
+          height = 0.999,
+        } })
       end, {})
 
       vim.keymap.set('n', '<leader>/', function()
-        builtin.current_buffer_fuzzy_find(themes.get_dropdown {})
+        builtin.current_buffer_fuzzy_find()
       end, {})
 
+      vim.keymap.set('n', '<leader><leader>', function()
+        builtin.buffers(themes.get_dropdown { width = 0.6, previewer = false })
+      end, { desc = 'Search [B]uffers' })
+
       vim.keymap.set('n', '<leader>p', function()
-        builtin.live_grep(themes.get_dropdown {
-          layout_strategy = 'center',
-          layout_config = {
-            center = {
-              preview_height = 0.6,
-              prompt_position = 'top',
-            },
-          },
-        })
+        builtin.live_grep(themes.get_ivy { layout_config = {
+          height = 0.999,
+          preview_width = 0.7,
+        } })
       end, {})
 
       vim.keymap.set('n', '<leader>sc', function()
