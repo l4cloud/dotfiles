@@ -25,6 +25,7 @@ return {
         'vimdoc',
         'json',
         'go',
+        'python',
       },
       auto_install = true,
       highlight = { enable = true },
