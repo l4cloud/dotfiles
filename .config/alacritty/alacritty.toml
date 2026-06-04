@@ -16,3 +16,6 @@ style = "Italic"
 [font.bold_italic]
 family = "Mononoki Nerd Font"
 style = "Bold Italic"
+
+[general]
+import = ["rose-pine.toml"]
