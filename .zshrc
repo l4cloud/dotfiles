@@ -84,3 +84,4 @@ bindkey '^h' fzf-history-widget
 
 # Prompt
 eval "$(starship init zsh)"
+
