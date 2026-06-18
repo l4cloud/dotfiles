@@ -1,4 +1,4 @@
-function ti() {
+function txi() {
   dir=$(basename "$PWD")
   workspace=${dir//.}
   tx new-session -d -s $workspace -n shell
@@ -11,7 +11,7 @@ function ti() {
   tx attach-session -t $workspace
 }
 
-function ty() {
+function txf() {
   local search
   if [ -d "$1" ]; then
     search="$(echo "$1" | sed 's#/$##')/"
@@ -64,7 +64,7 @@ function y() {
   rm -f -- "$tmp"
 }
 
-function yt() {
+function txy() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
   yazi "$@" --cwd-file="$tmp"
   if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
@@ -80,10 +80,22 @@ function yt() {
   rm -f -- "$tmp"
 }
 
-function fssh ()
-{
-  selected=$(awk '/^Host / { print $2 }' ~/.ssh/config | fzf)
-  ssh $(echo "$selected" | tr -d '\r')
+function chid() {
+  local ssh_dir="$HOME/.ssh"
+  local agent_output selected_key
+
+  if [[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]]; then
+    agent_output=$(ssh-agent -s)
+    eval "$agent_output"
+  fi
+
+  selected_key=$(command find "$ssh_dir" -maxdepth 1 -type f \
+    \( -name 'id_*' -o -name '*_id' \) \
+    ! -name '*.pub' ! -name '*:Zone.Identifier' \
+    -print | sort | fzf --height 40% --reverse --border --prompt='ssh key> ')
+
+  [[ -n "$selected_key" ]] || return 1
+
+  ssh-add -D >/dev/null 2>&1
+  ssh-add "$selected_key"
 }
-
-
