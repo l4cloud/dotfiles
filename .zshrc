@@ -45,7 +45,7 @@ bindkey '^j' history-incremental-search-backward
 bindkey '^r' history-incremental-search-backward
 
 # fzf
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 # fzf history picker on Alt+H
 fzf-history-widget() {
