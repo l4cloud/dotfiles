@@ -28,6 +28,7 @@ return {
             '--smart-case',
             '--hidden',
           },
+          find_command = { 'rg', '--files', '--hidden', '--glob', '!.git' },
         },
         extensions = {
           ['ui-select'] = {

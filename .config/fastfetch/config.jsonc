@@ -35,6 +35,16 @@
             "format": "{$1}{#90}{release}"
         },
         {
+            "type": "de",
+            "key": "{#90}│ {#92}DE        ",
+            "format": "{$1}{#90}{pretty-name} {version}"
+        },
+        {
+            "type": "wm",
+            "key": "{#90}│ {#92}WM        ",
+            "format": "{$1}{#90}{pretty-name} ({protocol-name})"
+        },
+        {
             "type": "localip",
             "key": "{#90}│ {#92}Local IP  ",
             "format": "{$1}{#90}{ipv4}"

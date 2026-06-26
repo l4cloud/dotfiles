@@ -16,13 +16,14 @@ fi
 source "${ZINIT_HOME}/zinit.zsh"
 
 # Plugins
-zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 
 # Completion
 autoload -Uz compinit
 compinit
+
+zinit light zsh-users/zsh-syntax-highlighting
 
 zstyle ':completion:*' menu select
 DISABLE_LS_COLORS="true"

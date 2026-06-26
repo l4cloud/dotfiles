@@ -80,6 +80,76 @@ function txy() {
   rm -f -- "$tmp"
 }
 
+function zf() {
+  local search
+  if [ -d "$1" ]; then
+    search="$(echo "$1" | sed 's#/$##')/"
+    echo "Searching directory: ${search}"
+  else
+    echo "Searching home"
+    search="$HOME"
+  fi
+
+  local git_dirs
+  if [ "$search" = "$HOME" ]; then
+    local cache_file="$HOME/.cache/git_dirs.txt"
+    if [ -f "$cache_file" ] && [ -z "$(find "$cache_file" -mtime +1)" ]; then
+      git_dirs=$(cat "$cache_file")
+    else
+      echo "Updating cache for home directory..."
+      git_dirs=$(find "$HOME" -type d -name ".git" -print | sed 's#/.git##')
+      mkdir -p "$HOME/.cache"
+      echo "$git_dirs" > "$cache_file"
+    fi
+  else
+    git_dirs=$(find "${search}" -type d -name ".git" -print | sed 's#/.git##')
+  fi
+
+  if [ -z "$git_dirs" ]; then
+    echo "No git repositories found."
+    return
+  fi
+  local dir=$(echo "$git_dirs" | fzf --height 60% --layout reverse --border --no-hscroll --exact)
+  if [ -n "$dir" ]; then
+    local name=$(basename "$dir")
+    name=${name//./}
+    cd -- "$dir" || return
+    if command zellij list-sessions -s 2>/dev/null | grep -qx "$name"; then
+      command zellij attach "$name"
+    else
+      command zellij --session "$name"
+    fi
+  else
+    echo "No directory selected."
+  fi
+}
+
+function zellij() {
+  if [[ $# -eq 0 ]]; then
+    local sessions
+    sessions=$(command zellij list-sessions -s 2>/dev/null)
+    if echo "$sessions" | grep -q .; then
+      local selected
+      selected=$(echo "$sessions" | fzf --height 40% --reverse --border --prompt="zellij session> ")
+      if [[ -n "$selected" ]]; then
+        command zellij attach "$selected"
+      fi
+    else
+      local name=$(basename "$PWD")
+      name=${name//./}
+      command zellij --session "$name"
+    fi
+  else
+    command zellij "$@"
+  fi
+}
+
+function zi() {
+  local name=$(basename "$PWD")
+  name=${name//./}
+  command zellij --session "$name"
+}
+
 function chid() {
   local ssh_dir="$HOME/.ssh"
   local agent_output selected_key

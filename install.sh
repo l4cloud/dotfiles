@@ -91,6 +91,7 @@ dnf_queue git       git
 dnf_queue zsh       zsh
 dnf_queue stow      stow
 dnf_queue tmux      tmux
+dnf_queue zellij    zellij
 dnf_queue nvim      neovim
 dnf_queue btop      btop
 dnf_queue lsd       lsd
