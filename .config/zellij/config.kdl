@@ -268,27 +268,7 @@ keybinds clear-defaults=true {
 // Plugin aliases - can be used to change the implementation of Zellij
 // changing these requires a restart to take effect
 plugins {
-    about location="zellij:about"
-    compact-bar location="zellij:compact-bar"
-    configuration location="zellij:configuration"
-    filepicker location="zellij:strider" {
-        cwd "/"
-    }
-    plugin-manager location="zellij:plugin-manager"
-    session-manager location="zellij:session-manager"
-    status-bar location="zellij:compact-bar"
-    strider location="zellij:strider"
-    tab-bar location="zellij:tab-bar"
-    welcome-screen location="zellij:session-manager" {
-        welcome_screen true
-    }
-}
-
-// Plugins to load in the background when a new session starts
-// eg. "file:/path/to/my-plugin.wasm"
-// eg. "https://example.com/my-plugin.wasm"
-load_plugins {
-    zellij:link
+    tab-bar location="zellij:tab-bar" position="top"
 }
 web_client {
     font "monospace"
@@ -340,12 +320,12 @@ default_mode "normal"
 // The name of the default layout to load on startup
 // Default: "default"
 // 
-// default_layout "compact"
- 
+default_layout "default"
+  
 // The folder in which Zellij will look for layouts
 // (Requires restart)
 // 
-// layout_dir "/tmp"
+layout_dir "/home/lu/.config/zellij/layouts"
  
 // The folder in which Zellij will look for themes
 // (Requires restart)

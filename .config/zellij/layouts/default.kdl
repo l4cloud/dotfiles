@@ -1,0 +1,11 @@
+layout {
+    tab name="code" {
+        pane command="nvim"
+    }
+    tab name="llm" {
+        pane command="opencode"
+    }
+    tab name="git" {
+        pane
+    }
+}

@@ -144,6 +144,7 @@ function zellij() {
   fi
 }
 
+unalias zi 2>/dev/null
 function zi() {
   local name=$(basename "$PWD")
   name=${name//./}

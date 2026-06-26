@@ -1,3 +1,8 @@
+# Ensure XDG_RUNTIME_DIR exists (WSL workaround for zellij etc.)
+if [ -n "$XDG_RUNTIME_DIR" ] && [ ! -d "$XDG_RUNTIME_DIR" ]; then
+  sudo mkdir -p "$XDG_RUNTIME_DIR" && sudo chown "$USER:$USER" "$XDG_RUNTIME_DIR"
+fi
+
 # Terminal
 if [[ -n "$TMUX" ]]; then
   export TERM=tmux-256color
