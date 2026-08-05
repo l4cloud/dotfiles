@@ -1,18 +1,13 @@
-format = """$username$hostname$directory$cmd_duration$python$character"""
+format = """$username$directory$cmd_duration$python$character"""
 
 right_format = """$git_branch$git_state$git_status"""
 
 add_newline = false
 
 [username]
-format = "[$user]($style)@"
+format = "[$user]($style) "
 style_user = "green"
 show_always = true
-
-[hostname]
-format = "[$hostname]($style) "
-style = "green"
-ssh_only = false
 
 [directory]
 style = "blue"
