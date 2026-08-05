@@ -1,7 +1,8 @@
+README.md
 install.sh
 wallpapers
-.opencode/node_modules
-.opencode/package.json
-.opencode/package-lock.json
 LICENSE
 .git
+node_modules
+package.json
+package-lock.json
