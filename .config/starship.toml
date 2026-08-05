@@ -1,18 +1,18 @@
-format = """
-$env_var\
-$custom\
-$username\
-$hostname\
-$directory\
-$git_branch\
-$git_state\
-$git_status\
-$cmd_duration\
-$line_break\
-$python\
-$character"""
+format = """$username$hostname$directory$cmd_duration$python$character"""
+
+right_format = """$git_branch$git_state$git_status"""
 
 add_newline = false
+
+[username]
+format = "[$user]($style)@"
+style_user = "green"
+show_always = true
+
+[hostname]
+format = "[$hostname]($style) "
+style = "green"
+ssh_only = false
 
 [directory]
 style = "blue"
@@ -50,19 +50,3 @@ style = "bright-black"
 
 [os]
 disabled = true
-
-[custom.os]
-command = """
-  . /etc/os-release
-  case "$ID" in
-    fedora|nobara) echo "\uE7D9" ;;
-    *) echo "$ID" ;;
-  esac
-"""
-when = '[[ -z "$WSL_DISTRO_NAME" ]]'
-format = "[$output](blue) "
-shell = ["bash", "--noprofile", "--norc"]
-
-[env_var.WSL_DISTRO_NAME]
-format = "[\uE70F](blue) "
-disabled = false
