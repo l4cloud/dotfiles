@@ -1,0 +1,76 @@
+# Personal
+
+/misc/*
+/os-setup/*
+/desktop-setup/*
+/.misc/*
+
+# Cache and telemetry directories
+.config/go/telemetry/
+.config/github-copilot/versions.json
+.config/nvim/lazy-lock.json
+.config/systemd/user/notification-sound.service
+
+# OpenCode app data (local/generated) - entire config directory managed by opencode
+.config/opencode/
+
+# Steam related (from arch desktop setup)
+.steampath
+
+# Config conflicts
+.config/lsfg-vk/conf.toml
+
+# Files created by arch desktop setup that should not be stowed
+.config/xdg-desktop-portal/hyprland-portals.conf
+
+# Kubernetes/Cloud tools
+.config/gcloud/
+.config/helm/
+.config/k9s/
+
+# Config directories to ignore
+.config/QtProject/
+.config/Thunar/
+.config/btop/
+.config/dconf/
+.config/discord/
+.config/pulse/
+.config/sunshine/
+.opencode/node_modules
+
+# Newly added ignores for portability
+.config/unity3d/
+.config/wslu/
+.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+.config/partitionmanagerrc
+.config/nwg-displays/config
+.config/nvim/doc/tags
+
+# Shell history
+\.zsh_history
+\.bash_history
+\.histfile
+
+# Defaults
+RCS
+.+,v
+
+CVS
+\.\#.+       # CVS conflict files / emacs lock files
+\.cvsignore
+
+\.svn
+_darcs
+\.hg
+
+\.git
+\.gitignore
+\.gitmodules
+
+.+~          # emacs backup files
+\#.*\#       # emacs autosave files
+
+^/README.*
+^/LICENSE.*
+^/COPYING
+

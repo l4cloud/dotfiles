@@ -1,0 +1,25 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        floating_panes {
+            pane {
+                x "0%"
+                y "0%"
+                width "100%"
+                height "100%"
+            }
+        }
+    }
+    tab name="code" hide_floating_panes=true {
+        pane command="nvim"
+    }
+    tab name="llm" hide_floating_panes=true {
+        pane command="opencode"
+    }
+    tab name="git" hide_floating_panes=true {
+        pane
+    }
+}

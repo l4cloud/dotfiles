@@ -1,0 +1,78 @@
+# Neovim
+.config/nvim/lazy-lock.json
+
+# Cache and telemetry directories
+.config/go/telemetry/
+.config/github-copilot/versions.json
+
+# Config directories to ignore
+.config/QtProject/
+.config/Thunar/
+.config/btop/
+.config/dconf/
+.config/discord/
+.config/lsfg-vk/
+.config/pulse/
+.config/xdg-desktop-portal/
+.opencode/node_modules
+.config/opencode/
+.config/htop/
+
+# Sunshine credentials
+.config/sunshine/
+.config/sunshine/*
+
+# Newly added ignores for portability
+.config/unity3d/
+.config/wslu/
+.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+.config/partitionmanagerrc
+.config/nwg-displays/config
+.config/nvim/doc/tags
+
+# Additional ignored items
+.config/.mangojuice
+.config/MangoHud/
+.config/cachyos-hello.json
+.config/cachyos/
+.config/dolphinrc
+.config/octopi/
+.config/vkBasalt/
+.config/mimeapps.list
+.config/kitty/current-theme.conf
+
+# Kubernetes/Cloud tools
+.config/gcloud/
+.config/helm/
+.config/k9s/
+
+# Bolt launcher
+.config/bolt/
+.config/bolt-launcher/
+
+
+# Firefox/Mozilla
+.mozilla/
+.config/mozilla/
+
+# Auto-generated / non-config
+.config/nvm
+.config/github-copilot/
+.config/kitty/current-theme.conf
+.zshrc.bak
+
+# Shell history
+.zsh_history
+.bash_history
+.histfile
+
+.config/gh
+
+#Noctalia
+.config/hypr/noctalia.lua
+.config/hypr/monitors.lua
+.config/hypr/monitors.conf
+.config/lazygit/
+
+.config/environment.d/
+.config/systemd/

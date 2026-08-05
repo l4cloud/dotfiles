@@ -1,0 +1,68 @@
+format = """
+$env_var\
+$custom\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$cmd_duration\
+$line_break\
+$python\
+$character"""
+
+add_newline = false
+
+[directory]
+style = "blue"
+
+[character]
+success_symbol = "[❯](purple)"
+error_symbol = "[❯](red)"
+
+[git_branch]
+format = "[$branch]($style)"
+style = "bright-black"
+
+[git_status]
+format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style)"
+style = "cyan"
+conflicted = "​"
+untracked = "​"
+modified = "​"
+staged = "​"
+renamed = "​"
+deleted = "​"
+stashed = "≡"
+
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "bright-black"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "yellow"
+
+[python]
+format = "[$virtualenv]($style) "
+style = "bright-black"
+
+[os]
+disabled = true
+
+[custom.os]
+command = """
+  . /etc/os-release
+  case "$ID" in
+    fedora|nobara) echo "\uE7D9" ;;
+    *) echo "$ID" ;;
+  esac
+"""
+when = '[[ -z "$WSL_DISTRO_NAME" ]]'
+format = "[$output](blue) "
+shell = ["bash", "--noprofile", "--norc"]
+
+[env_var.WSL_DISTRO_NAME]
+format = "[\uE70F](blue) "
+disabled = false
