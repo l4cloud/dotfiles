@@ -37,6 +37,8 @@
 .config/pulse/
 .config/sunshine/
 .opencode/node_modules
+.opencode/package.json
+.opencode/package-lock.json
 
 # Newly added ignores for portability
 .config/unity3d/
