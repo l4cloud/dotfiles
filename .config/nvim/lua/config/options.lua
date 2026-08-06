@@ -22,7 +22,11 @@ vim.opt.expandtab = true
 vim.bo.softtabstop = 2
 vim.opt.cmdheight = 0
 vim.opt.relativenumber = true
-vim.opt.termguicolors = true
+
+local is_wsl = vim.fn.getenv 'WSL_DISTRO_NAME' ~= vim.NIL
+if is_wsl then
+  vim.opt.termguicolors = true
+end
 
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'

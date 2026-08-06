@@ -1,1 +1,2 @@
-vim.opt.conceallevel = 2
+-- Keep Markdown formatting nice.
+vim.opt_local.conceallevel = 1
