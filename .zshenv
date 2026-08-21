@@ -17,3 +17,4 @@ export PATH="$HOME/.opencode/bin:$HOME/.local/bin:/usr/local/go/bin:$PATH"
 
 # Wayland
 export XDG_SESSION_TYPE=wayland
+export MANPAGER='nvim +Man!'
