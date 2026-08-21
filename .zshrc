@@ -26,7 +26,9 @@ zinit light zsh-users/zsh-autosuggestions
 
 # Completion
 autoload -Uz compinit
-compinit
+ZSH_COMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+mkdir -p "${ZSH_COMPDUMP:h}"
+compinit -d "$ZSH_COMPDUMP"
 
 zinit light zsh-users/zsh-syntax-highlighting
 
@@ -51,7 +53,9 @@ bindkey '^j' history-incremental-search-backward
 bindkey '^r' history-incremental-search-backward
 
 # fzf
-source <(fzf --zsh)
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
 
 # fzf history picker on Alt+H
 fzf-history-widget() {
@@ -85,11 +89,8 @@ bindkey '^h' fzf-history-widget
 
 # Aliases & functions
 [[ -f ~/.aliases ]] && source ~/.aliases
-[[ -f ~/.func.zsh ]]    && source ~/.func.zsh
-
-[[ -f ~/.zshenv ]]    && source ~/.zshenv
+[[ -f ~/.func.zsh ]] && source ~/.func.zsh
 
 # Prompt
 eval "$(starship init zsh)"
-
 
