@@ -74,6 +74,17 @@ return {
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
+          -- Show the warning/error under the cursor, or the LSP hover if there is none.
+          -- nvim has no mouse-hover tooltip, so `K` is the standard "hover" key.
+          map('K', function()
+            local line = vim.api.nvim_win_get_cursor(0)[1] - 1
+            if #vim.diagnostic.get(event.buf, { lnum = line }) > 0 then
+              vim.diagnostic.open_float { focusable = true }
+            else
+              vim.lsp.buf.hover()
+            end
+          end, 'Hover (diagnostic or LSP)')
+
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
@@ -117,8 +128,11 @@ return {
 
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
+      -- Give every language server the completion capabilities from blink.cmp
+      vim.lsp.config('*', { capabilities = capabilities })
+
       -- Enable the following language servers
-      --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
+      --  Feel free to add/remove any LSPs that you want here.
       --
       --  Add any additional override configuration in the following tables. Available keys are:
       --  - cmd (table): Override the default command used to start the server
@@ -126,55 +140,76 @@ return {
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-       local servers = {
-         -- clangd = {},
-         gopls = {},
+      --
+      -- Language servers come from mason, except on NixOS: mason ships dynamically
+      -- linked linux binaries that cannot run there (https://nix.dev/permalink/stub-ld),
+      -- so on NixOS the servers are provided by the system/home-manager profile and
+      -- enabled through the modern `vim.lsp.enable` API instead.
+      local is_nixos = vim.fn.filereadable('/etc/NIXOS') == 1
+
+      local servers = {
+        -- clangd = {},
+        gopls = {},
         pylsp = {},
         terraformls = {},
         tflint = {},
         jdtls = {},
         -- rust_analyzer = {},
         ts_ls = {},
-        lua_ls = {
-          -- cmd = {...},
-          -- filetypes = { ...},
-          -- capabilities = {},
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
-            },
-          },
-        },
+        svelte = {},
         eslint = {},
         html = {},
         emmet_ls = {},
         bashls = {},
         yamlls = {},
       }
-      require('mason').setup()
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
-      })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      require('mason-lspconfig').setup {
-        automatic_installation = true,
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the servor configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
+      -- lua_ls needs custom settings on both platforms
+      local lua_ls_opts = {
+        settings = {
+          Lua = {
+            completion = {
+              callSnippet = 'Replace',
+            },
+          },
         },
       }
+
+      -- Apply per-server options via the modern vim.lsp.config API.
+      -- (lua_ls is kept out of the `servers` map on NixOS so mason never installs it there.)
+      local function apply_server_configs(server_opts)
+        for server_name, opts in pairs(server_opts) do
+          if next(opts) then
+            vim.lsp.config(server_name, opts)
+          end
+        end
+      end
+
+      if is_nixos then
+        -- NixOS: every server binary comes from the Nix profile (see home.nix).
+        -- No mason involvement — enable everything directly.
+        apply_server_configs(servers)
+        vim.lsp.config('lua_ls', lua_ls_opts)
+        vim.lsp.enable(vim.tbl_keys(servers))
+        vim.lsp.enable('lua_ls')
+      else
+        -- Non-NixOS: mason installs the servers; automatic_enable (default) then
+        -- enables them via vim.lsp.enable once installed.
+        servers.lua_ls = lua_ls_opts
+
+        require('mason').setup()
+        local ensure_installed = vim.tbl_keys(servers or {})
+        vim.list_extend(ensure_installed, {
+          'stylua', -- Used to format Lua code
+        })
+        require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+        apply_server_configs(servers)
+
+        require('mason-lspconfig').setup {
+          automatic_enable = true,
+        }
+      end
     end,
   },
 }

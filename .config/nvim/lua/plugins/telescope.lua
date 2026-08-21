@@ -27,8 +27,10 @@ return {
             '--column',
             '--smart-case',
             '--hidden',
+            '--glob',
+            '!**/node_modules/**',
           },
-          find_command = { 'rg', '--files', '--hidden', '--glob', '!.git' },
+          find_command = { 'rg', '--files', '--hidden', '--glob', '!.git', '--glob', '!**/node_modules/**' },
         },
         extensions = {
           ['ui-select'] = {
@@ -50,7 +52,7 @@ return {
 
       vim.keymap.set('n', '<leader>oo', function()
         builtin.find_files(themes.get_ivy {
-          find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
+          find_command = { 'rg', '--files', '--iglob', '!.git', '--iglob', '!**/node_modules/**', '--hidden' },
           layout_config = {
             height = 0.999,
           },
