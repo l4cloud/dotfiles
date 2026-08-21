@@ -128,7 +128,7 @@ function z() {
   if [[ $# -eq 0 ]]; then
     local selected reload_cmd
     reload_cmd='zsh -c '\''query=$1; sessions=$(command zellij list-sessions -s 2>/dev/null); if [[ -n $query ]]; then print -r -- "$sessions" | grep -iF -- "$query"; else print -r -- "$sessions"; fi; print -r -- "[ search with zf ]"'\'' _ {q}'
-    selected=$(printf '' | fzf --phony --bind "start:reload($reload_cmd),change:reload($reload_cmd)" --height 40% --reverse --border --no-sort --prompt="zellij session> ")
+    selected=$(printf '' | fzf --phony --bind "start:reload($reload_cmd),change:reload($reload_cmd)" --height 100% --reverse --style=full --no-sort --prompt="Session> ")
     [[ -n "$selected" ]] || return
     if [[ "$selected" == "[ search with zf ]" ]]; then
       zsh -ic 'zf'
