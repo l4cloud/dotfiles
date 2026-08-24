@@ -3,7 +3,7 @@
   "autoupdate": true,
   "agent": {
     "build": {
-      "disable": true
+      "disable": false
     },
     "plan": {
       "disable": true
