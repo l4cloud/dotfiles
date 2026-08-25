@@ -7,5 +7,6 @@ node_modules
 package.json
 package-lock.json
 .opencode/node_modules
+.opencode/node_modules/
 .opencode/package-lock.json
 .opencode/package.json
