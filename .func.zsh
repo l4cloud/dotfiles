@@ -109,7 +109,7 @@ function zf() {
     echo "No git repositories found."
     return
   fi
-  local dir=$(echo "$git_dirs" | fzf --height 60% --layout reverse --border --no-hscroll --exact)
+  local dir=$(echo "$git_dirs" | fzf --height 100% --layout reverse --border --style=full --no-hscroll --exact)
   if [ -n "$dir" ]; then
     local name=$(basename "$dir")
     name=${name//./}
