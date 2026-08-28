@@ -5,13 +5,13 @@ layout {
          }
          children
      }
-    tab name="code" hide_floating_panes=true {
+    tab name="1" hide_floating_panes=true {
         pane command="nvim"
         }
-    tab name="llm" hide_floating_panes=true {
-        pane command="opencode"
+    tab name="2" hide_floating_panes=true {
+        pane
     }
-    tab name="git" hide_floating_panes=true {
+    tab name="3" hide_floating_panes=true {
         pane
     }
 }
