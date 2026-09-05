@@ -145,7 +145,7 @@ return {
       -- linked linux binaries that cannot run there (https://nix.dev/permalink/stub-ld),
       -- so on NixOS the servers are provided by the system/home-manager profile and
       -- enabled through the modern `vim.lsp.enable` API instead.
-      local is_nixos = vim.fn.filereadable('/etc/NIXOS') == 1
+      local is_nixos = vim.fn.filereadable '/etc/NIXOS' == 1
 
       local servers = {
         -- clangd = {},
@@ -191,7 +191,8 @@ return {
         apply_server_configs(servers)
         vim.lsp.config('lua_ls', lua_ls_opts)
         vim.lsp.enable(vim.tbl_keys(servers))
-        vim.lsp.enable('lua_ls')
+        vim.lsp.enable 'lua_ls'
+        vim.lsp.enable 'clangd'
       else
         -- Non-NixOS: mason installs the servers; automatic_enable (default) then
         -- enables them via vim.lsp.enable once installed.

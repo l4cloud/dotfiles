@@ -39,3 +39,26 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- Auto-show diagnostics when hovering over a line with an error
+vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+  desc = 'Show diagnostics on hover',
+  group = vim.api.nvim_create_augroup('kickstart-diagnostic-hover', { clear = true }),
+  callback = function()
+    if vim.fn.mode() ~= 'n' then
+      return
+    end
+    local bufnr = vim.api.nvim_get_current_buf()
+    local line = vim.api.nvim_win_get_cursor(0)[1] - 1
+    if #vim.diagnostic.get(bufnr, { lnum = line }) > 0 then
+      vim.diagnostic.open_float {
+        focusable = false,
+        lnum = line,
+        relative = 'win',
+        anchor = 'SE',
+        row = 0,
+        col = 0,
+      }
+    end
+  end,
+})
