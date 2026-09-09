@@ -2,7 +2,7 @@ return {
   {
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    tag = 'v0.2.2',
     dependencies = {
       'nvim-lua/plenary.nvim',
       {

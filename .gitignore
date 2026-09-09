@@ -78,3 +78,7 @@
 
 .config/environment.d/
 .config/systemd/
+
+.config/.opencode/node_modules
+.config/.opencode/package*
+
