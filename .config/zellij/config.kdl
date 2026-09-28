@@ -191,6 +191,11 @@ keybinds clear-defaults=true {
         bind "Alt j" { MoveFocus "down"; }
         bind "Alt k" { MoveFocus "up"; }
         bind "Alt l" { MoveFocusOrTab "right"; }
+        bind "Alt shift h" { Resize "increase left"; }
+        bind "Alt shift j" { Resize "increase down"; }
+        bind "Alt shift k" { Resize "Increase up"; }
+        bind "Alt shift l" { Resize "Increase right"; }
+
         bind "Alt s" {Run "bash" "-c" "~/.config/zellij/swap.sh" {
             floating true
             width "100%"

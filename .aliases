@@ -13,6 +13,7 @@ alias l="ls"
 # tmux / zellij
 alias tx="tmux"
 alias txa="tmux a"
+alias copilot="gh copilot"
 
 # tools
 alias lg="lazygit"
