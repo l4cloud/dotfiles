@@ -12,6 +12,43 @@ stow --override='.*' -t ~ .
 
 > If stow reports a conflict on a plain file (not a symlink), delete that file and re-run.
 
+### Packages
+
+Fedora packages are split into two lists and installed by `install.sh`, which prompts
+for a profile:
+
+```bash
+./install.sh
+```
+
+| Profile | Lists | Use case |
+|---------|-------|----------|
+| `minimal` | `packages.base` | WSL / headless — CLI tools only |
+| `full` | `packages.base` + `packages.desktop` | Desktop — adds GUI/Wayland/Hyprland packages |
+
+`packages.base` holds tools needed everywhere — shell/core CLI (nvim, zellij, zsh, fzf,
+nerd font), languages/toolchains, C/C++ build tools, and cloud/container CLIs.
+`packages.desktop` holds GUI-only packages (browser, Discord, LibreOffice, Hyprland meta,
+`wl-clipboard`, GTK theme). Both lists support `#` comments and blank lines.
+
+**Languages & tooling** (all in `packages.base`, from Fedora repos unless noted)
+
+| Area | Packages |
+|------|----------|
+| Go | `golang` (`gopls`/`delve` come from Mason in nvim) |
+| Python | `python3`, `uv`, `ruff` |
+| Node/TS | `pnpm` (Node itself via nvm / `nodejs22`) |
+| Java | `java-25-openjdk-devel` |
+| Rust | `rust`, `cargo` |
+| C/C++ | `clang`, `clang-tools-extra`, `cmake`, `ninja-build`, `gcc`, `gcc-c++`, `make` |
+| Cloud/containers | `kubernetes1.35-client`, `helm`, `awscli2`, `k9s` |
+| Terraform | `terraform` (HashiCorp repo), `tflint` (`go install`) |
+| Docker | `docker-ce`, `docker-buildx-plugin`, `docker-compose-plugin` |
+
+**Third-party repos** added by `install.sh`: `docker-ce-stable` (Docker) and `hashicorp`
+(Terraform). The Hyprland COPR is only enabled for the `full` profile. `tflint` is not
+packaged anywhere, so it is installed with `go install` into `~/.local/bin`.
+
 ---
 
 ## Shell
@@ -44,6 +81,7 @@ Config lives at `.config/nvim/`. Built on [lazy.nvim](https://github.com/folke/l
 | Plugin | Purpose |
 |--------|---------|
 | LSP + Mason | Language servers, diagnostics, completions |
+| lspsaga | Floating LSP UI — hover, code actions, rename, diagnostics, outline |
 | nvim-cmp | Autocompletion engine |
 | Telescope | Fuzzy finder |
 | Treesitter | Syntax highlighting & code parsing |
@@ -57,6 +95,25 @@ Config lives at `.config/nvim/`. Built on [lazy.nvim](https://github.com/folke/l
 | Rose Pine | Colorscheme |
 | Todo Comments | Highlight and search TODO/FIXME comments |
 | Neogen | Docstring generator |
+
+**LSP keymaps** (leader is `Space`)
+
+Core server actions live in `lua/plugins/lsp.lua` (`gd`, `gr`, `K`, `<leader>rn`, `<leader>ca`, …). The lspsaga UI in `lua/plugins/lsp-ui.lua` adds a `<leader>g` group:
+
+| Key | Action |
+|-----|--------|
+| `<leader>gd` | Peek definition |
+| `<leader>gD` | Peek type definition |
+| `<leader>gr` | References & implementations (finder) |
+| `<leader>gh` | Hover documentation |
+| `<leader>go` | Symbol outline |
+| `<leader>gc` | Code action (with live preview) |
+| `<leader>gn` | Rename (with project search) |
+| `<leader>gl` | Line diagnostics |
+| `<leader>gb` | Buffer diagnostics |
+| `<leader>gj` / `<leader>gk` | Next / previous diagnostic |
+| `<leader>gci` / `<leader>gco` | Incoming / outgoing call hierarchy |
+| `<leader>gt` | Toggle floating terminal |
 
 ---
 

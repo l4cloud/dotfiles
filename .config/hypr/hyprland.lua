@@ -5,11 +5,29 @@
 -------------------
 ---
 
- hl.on("hyprland.start", function () 
-  hl.exec_cmd("noctalia")
-  hl.exec_cmd("$HOME/.dotfiles/.config/hypr/scripts/watch-gtk-theme.sh >/dev/null 2>&1 &")
-  hl.exec_cmd("$HOME/.dotfiles/.config/hypr/scripts/auto-laptop-display.sh &")
- end)
+-- Check whether a command is installed (present on PATH).
+-- NOTE: os.execute() does not work inside Hyprland's Lua config (it always
+-- returns nil, "No child processes"), so probe the filesystem instead.
+local function command_exists(cmd)
+	local path = os.getenv("PATH") or "/usr/local/bin:/usr/bin:/bin"
+	for dir in path:gmatch("[^:]+") do
+		local file = io.open(dir .. "/" .. cmd, "r")
+		if file then
+			file:close()
+			return true
+		end
+	end
+	return false
+end
+
+local has_noctalia = command_exists("noctalia")
+
+hl.on("hyprland.start", function()
+	if has_noctalia then
+		hl.exec_cmd("noctalia")
+	end
+	hl.exec_cmd("$HOME/.dotfiles/.config/hypr/scripts/watch-gtk-theme.sh >/dev/null 2>&1 &")
+end)
 
 local ipc = "noctalia msg "
 
@@ -23,7 +41,6 @@ hl.env("XCURSOR_THEME", "volantes")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_THEME", "volantes")
 hl.env("HYPRCURSOR_SIZE", "24")
-
 
 -----------------------
 ----- PERMISSIONS -----
@@ -43,26 +60,25 @@ hl.env("HYPRCURSOR_SIZE", "24")
 -- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
 -- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
-
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
-    dwindle = {
-        preserve_split = true, -- You probably want this
-    },
+	dwindle = {
+		preserve_split = true, -- You probably want this
+	},
 })
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
 hl.config({
-    master = {
-        new_status = "master",
-    },
+	master = {
+		new_status = "master",
+	},
 })
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
 hl.config({
-    scrolling = {
-        fullscreen_on_one_column = true,
-    },
+	scrolling = {
+		fullscreen_on_one_column = true,
+	},
 })
 
 ----------------
@@ -70,49 +86,46 @@ hl.config({
 ----------------
 
 hl.config({
-    misc = {
-        force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
-        disable_hyprland_logo   = false, -- If true disables the random hyprland logo / anime girl background. :(
-    },
+	misc = {
+		force_default_wallpaper = -1, -- Set to 0 or 1 to disable the anime mascot wallpapers
+		disable_hyprland_logo = false, -- If true disables the random hyprland logo / anime girl background. :(
+	},
 })
-
 
 ---------------
 ---- INPUT ----
 ---------------
 
 hl.config({
-    input = {
-        kb_layout  = "gb",
-        kb_variant = "",
-        kb_model   = "",
-        kb_options = "",
-        kb_rules   = "",
+	input = {
+		kb_layout = "gb",
+		kb_variant = "",
+		kb_model = "",
+		kb_options = "",
+		kb_rules = "",
 
-        follow_mouse = 1,
+		follow_mouse = 1,
 
-        sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
+		sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
 
-        touchpad = {
-            natural_scroll = false,
-        },
-    },
+		touchpad = {
+			natural_scroll = false,
+		},
+	},
 })
 
 hl.gesture({
-    fingers = 3,
-    direction = "horizontal",
-    action = "workspace"
+	fingers = 3,
+	direction = "horizontal",
+	action = "workspace",
 })
 
 -- Example per-device config
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
 hl.device({
-    name        = "epic-mouse-v1",
-    sensitivity = -0.5,
+	name = "epic-mouse-v1",
+	sensitivity = -0.5,
 })
-
-
 
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
@@ -124,27 +137,27 @@ hl.device({
 -- Example window rules that are useful
 
 local suppressMaximizeRule = hl.window_rule({
-    -- Ignore maximize requests from all apps. You'll probably like this.
-    name  = "suppress-maximize-events",
-    match = { class = ".*" },
+	-- Ignore maximize requests from all apps. You'll probably like this.
+	name = "suppress-maximize-events",
+	match = { class = ".*" },
 
-    suppress_event = "maximize",
+	suppress_event = "maximize",
 })
 -- suppressMaximizeRule:set_enabled(false)
 
 hl.window_rule({
-    -- Fix some dragging issues with XWayland
-    name  = "fix-xwayland-drags",
-    match = {
-        class      = "^$",
-        title      = "^$",
-        xwayland   = true,
-        float      = true,
-        fullscreen = false,
-        pin        = false,
-    },
+	-- Fix some dragging issues with XWayland
+	name = "fix-xwayland-drags",
+	match = {
+		class = "^$",
+		title = "^$",
+		xwayland = true,
+		float = true,
+		fullscreen = false,
+		pin = false,
+	},
 
-    no_focus = true,
+	no_focus = true,
 })
 
 -- Layer rules also return a handle.
@@ -157,16 +170,23 @@ hl.window_rule({
 
 -- Hyprland-run windowrule
 hl.window_rule({
-    name  = "move-hyprland-run",
-    match = { class = "hyprland-run" },
+	name = "move-hyprland-run",
+	match = { class = "hyprland-run" },
 
-    move  = "20 monitor_h-120",
-    float = true,
+	move = "20 monitor_h-120",
+	float = true,
 })
 
 -- For Noctalia Color templates
-require("noctalia").apply_theme()
-require('./monitors.lua')
-require('./look-and-feel.lua')
-require('./keybindings.lua')
+if has_noctalia then
+	local ok, noctalia = pcall(require, "noctalia")
+	if ok and type(noctalia) == "table" and noctalia.apply_theme then
+		noctalia.apply_theme()
+	end
+end
+pcall(require, "./monitors.lua")
+require("./look-and-feel.lua")
+require("./keybindings.lua")
 
+-- For Noctalia Color templates
+require("noctalia").apply_theme()

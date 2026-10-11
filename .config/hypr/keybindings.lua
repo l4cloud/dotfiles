@@ -9,13 +9,32 @@ local resize_amount = 50
 
 local ipc = "noctalia msg "
 
+-- Check whether a command is installed (present on PATH).
+-- NOTE: os.execute() does not work inside Hyprland's Lua config (it always
+-- returns nil, "No child processes"), so probe the filesystem instead.
+local function command_exists(cmd)
+	local path = os.getenv("PATH") or "/usr/local/bin:/usr/bin:/bin"
+	for dir in path:gmatch("[^:]+") do
+		local file = io.open(dir .. "/" .. cmd, "r")
+		if file then
+			file:close()
+			return true
+		end
+	end
+	return false
+end
+
+local has_noctalia = command_exists("noctalia")
+
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
-hl.bind(mainMod .. "+r", hl.dsp.exec_cmd(ipc .. "panel-toggle launcher"))
-hl.bind(mainMod .. "+S", hl.dsp.exec_cmd(ipc .. "panel-toggle control-center"))
-hl.bind(mainMod .. "+comma", hl.dsp.exec_cmd(ipc .. "settings-toggle"))
-hl.bind("ALT + Tab", hl.dsp.exec_cmd(ipc .. "window-switcher"))
-hl.bind(mainMod .. "+w", hl.dsp.exec_cmd(ipc .. "panel-toggle wallpaper"))
+if has_noctalia then
+	hl.bind(mainMod .. "+r", hl.dsp.exec_cmd(ipc .. "panel-toggle launcher"))
+	hl.bind(mainMod .. "+S", hl.dsp.exec_cmd(ipc .. "panel-toggle control-center"))
+	hl.bind(mainMod .. "+comma", hl.dsp.exec_cmd(ipc .. "settings-toggle"))
+	hl.bind("ALT + Tab", hl.dsp.exec_cmd(ipc .. "window-switcher"))
+	hl.bind(mainMod .. "+w", hl.dsp.exec_cmd(ipc .. "panel-toggle wallpaper"))
+end
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))

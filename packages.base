@@ -1,0 +1,43 @@
+# Base packages — installed on every machine (WSL, headless, desktop)
+# Shell & core CLI
+nvim
+fastfetch
+zellij
+zsh
+stow
+fzf
+geistmono-nerd-fonts.noarch
+btop
+
+# Languages
+golang
+python3
+python3-pip
+uv
+ruff
+pnpm
+java-25-openjdk-devel
+rust
+cargo
+conda
+
+# C/C++ build tools
+clang
+clang-tools-extra
+cmake
+ninja-build
+gcc
+gcc-c++
+make
+
+# Cloud & containers
+terraform
+docker-ce
+docker-buildx-plugin
+docker-compose-plugin
+kubernetes1.35-client
+helm
+awscli2
+k9s
+lazyssh
+golang-github-jesseduffield-lazygit

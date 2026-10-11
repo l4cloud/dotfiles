@@ -1,13 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "autoupdate": true,
-  "agent": {
+  "update": "auto",
+  "permissions": [
+    { "action": "edit", "resource": "*", "effect": "ask" }
+  ],
+  "agents": {
     "build": {
-      "disable": false
+      "disabled": false
     },
     "plan": {
-      "disable": true
+      "disabled": true
     }
-
   }
 }
